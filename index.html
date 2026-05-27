@@ -236,84 +236,37 @@ body { font-family: 'Be Vietnam Pro', sans-serif; color: #333; }
 
 <script>
 // ===== CẤU HÌNH =====
-// Google Sheet CSV — đã publish dạng CSV
-const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZt7udp1u4N5PUsOoWG4kiJDy25xKXGneKhphg3iFAy7TX6FKtV3eATYuURWhQZFOrZSrPPzVImsAj/pub?gid=0&single=true&output=csv";
-
-// Ảnh mặc định nếu không có ảnh thực
+<script>
+// ===== CẤU HÌNH ĐƯỜNG DẪN DỮ LIỆU TĨNH GITHUB =====
+const sheetUrl = "data.json"; 
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
-
 let allProducts = [];
 
-// ===== CẤU TRÚC CỘT TRONG SHEET (từ Apps Script doPost) =====
-// Col 0 : STT (sheet.getLastRow())
-// Col 1 : Thời gian (new Date())
-// Col 2 : sonha
-// Col 3 : duongpho
-// Col 4 : phuongxa
-// Col 5 : tinhthanh
-// Col 6 : area
-// Col 7 : price
-// Col 8 : sotang
-// Col 9 : bedroom
-// Col 10: nhavesinh
-// Col 11: direction
-// Col 12: title
-// Col 13: description
-// Col 14: imageUrl_1   ← 10 cột ảnh riêng lẻ
-// Col 15: imageUrl_2
-// Col 16: imageUrl_3
-// Col 17: imageUrl_4
-// Col 18: imageUrl_5
-// Col 19: imageUrl_6
-// Col 20: imageUrl_7
-// Col 21: imageUrl_8
-// Col 22: imageUrl_9
-// Col 23: imageUrl_10
+// ===== TẠO THẺ SẢN PHẨM BẤT ĐỘNG SẢN TỪ DỮ LIỆU ĐỐI TƯỢNG JSON =====
+function createCard(product, cardId) {
+  // Trích xuất các thuộc tính trực tiếp từ object JSON tương ứng cấu trúc form đăng tin
+  const thoiGian = product.timestamp || '';
+  const soNha    = product.sonha     || '';
+  const duong    = product.duongpho  || '';
+  const phuong   = product.phuongxa  || '';
+  const tinh     = product.tinhthanh || '';
+  const dienTich = product.area      || '';
+  const gia      = product.price     || '';
+  const soTang   = product.sotang    || '';
+  const pNgu     = product.bedroom   || '';
+  const wc       = product.nhavesinh || '';
+  const huong    = product.direction || '';
+  const tieuDe   = product.title     || 'Bất Động Sản Nhà Phố';
+  const moTa     = product.description || '';
 
-// ===== PARSE CSV (xử lý ô có dấu phẩy / xuống dòng bên trong ngoặc kép) =====
-function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim() !== '');
-  const results = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let c of lines[i]) {
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += c; }
-    }
-    cols.push(cur.trim());
-    results.push(cols.map(c => c.replace(/^"|"$/g, '').trim()));
-  }
-  return results;
-}
-
-// ===== TẠO CARD VỚI CAROUSEL ẢNH =====
-function createCard(cols, cardId) {
-  // Map cột đúng theo Apps Script
-  const thoiGian = cols[1]  || '';
-  const soNha    = cols[2]  || '';
-  const duong    = cols[3]  || '';
-  const phuong   = cols[4]  || '';
-  const tinh     = cols[5]  || '';
-  const dienTich = cols[6]  || '';
-  const gia      = cols[7]  || '';
-  const soTang   = cols[8]  || '';
-  const pNgu     = cols[9]  || '';
-  const wc       = cols[10] || '';
-  const huong    = cols[11] || '';
-  const tieuDe   = cols[12] || 'Bất Động Sản Nhà Phố';
-  const moTa     = cols[13] || '';
-
-  // Lấy tối đa 10 ảnh từ col 14–23, bỏ ô trống
-  const imgs = [];
-  for (let i = 14; i <= 23; i++) {
-    const url = (cols[i] || '').trim();
-    if (url) imgs.push(url);
+  // Lấy danh sách ảnh từ mảng đối tượng lưu trữ dữ liệu hình ảnh
+  let imgs = [];
+  if (Array.isArray(product.images)) {
+    imgs = product.images.filter(url => url && url.trim() !== '');
   }
   if (imgs.length === 0) imgs.push(defaultImg);
 
-  // Badge mới (đăng trong vòng 7 ngày)
+  // Xử lý tạo badge cho tin mới cập nhật trong vòng 7 ngày gần nhất
   let badgeHtml = '';
   if (thoiGian) {
     const d = new Date(thoiGian);
@@ -326,10 +279,8 @@ function createCard(cols, cardId) {
   const moTaShort = moTa.length > 80 ? moTa.substring(0, 80) + '...' : moTa;
   const hasMultipleImgs = imgs.length > 1;
 
-  // Build ảnh HTML — nếu nhiều ảnh thì thêm nút prev/next
   const imgId = `img-${cardId}`;
-  const imgTag = `<img id="${imgId}" src="${imgs[0]}" class="card-img-top" alt="${tieuDe}"
-    onerror="this.src='${defaultImg}'" style="height:220px;object-fit:cover;width:100%;">`;
+  const imgTag = `<img id="${imgId}" src="${imgs[0]}" class="card-img-top" alt="${tieuDe}" onerror="this.src='${defaultImg}'" style="height:220px;object-fit:cover;width:100%;">`;
 
   const navHtml = hasMultipleImgs ? `
     <button class="img-nav prev" onclick="changeImg('${imgId}', -1, ${JSON.stringify(imgs).replace(/'/g,"&#39;")})">&#8249;</button>
@@ -366,10 +317,9 @@ function createCard(cols, cardId) {
     </div>`;
 }
 
-// ===== CHUYỂN ẢNH TRONG CAROUSEL =====
-// imgList được truyền dưới dạng mảng JS thật
+// ===== ĐIỀU HƯỚNG ẢNH TRÊN THẺ BẤT ĐỘNG SẢN =====
 function changeImg(imgId, dir, imgList) {
-  const el      = document.getElementById(imgId);
+  const el = document.getElementById(imgId);
   const counter = document.getElementById(imgId + '-counter');
   if (!el) return;
   const cur = parseInt(el.dataset.idx || '0');
@@ -379,7 +329,7 @@ function changeImg(imgId, dir, imgList) {
   if (counter) counter.textContent = (next + 1) + ' / ' + imgList.length;
 }
 
-// ===== LỌC SẢN PHẨM =====
+// ===== LỘC TÌM KIẾM SẢN PHẨM =====
 function applyFilter() {
   const priceFilter = document.getElementById('filterPrice').value;
   const tangFilter  = document.getElementById('filterTang').value;
@@ -412,39 +362,39 @@ function resetFilter() {
   applyFilter();
 }
 
-// ===== LOAD DỮ LIỆU =====
+// ===== TẢI DỮ LIỆU TỪ FILE JSON TĨNH =====
 async function loadProducts() {
   const container = document.getElementById('product-list');
   try {
-    const res  = await fetch(sheetUrl);
-    const text = await res.text();
-    const rows = parseCSV(text);
-
+    const res = await fetch(sheetUrl, { method: 'GET', cache: 'no-cache' });
+    if (!res.ok) throw new Error('Không thể tải file dữ liệu cấu hình.');
+    
+    const rows = await res.json();
     container.innerHTML = '';
 
-    if (rows.length === 0) {
+    if (!Array.isArray(rows) || rows.length === 0) {
       container.innerHTML = '<div class="no-data w-100"><i class="fas fa-inbox fa-3x mb-3 d-block"></i>Hiện chưa có sản phẩm nào.</div>';
       return;
     }
 
-    rows.forEach((cols, idx) => {
-      // Cần ít nhất 8 cột (đến price) mới tạo card
-      if (cols.length >= 8) {
-        container.innerHTML += createCard(cols, idx);
+    let htmlContent = '';
+    rows.forEach((product, idx) => {
+      if (product && product.price) {
+        htmlContent += createCard(product, idx);
       }
     });
 
+    container.innerHTML = htmlContent;
     allProducts = rows;
     document.getElementById('result-count').textContent = `Hiển thị ${rows.length} sản phẩm`;
 
   } catch (err) {
-    console.error(err);
-    container.innerHTML = '<div class="no-data w-100"><i class="fas fa-exclamation-circle fa-3x mb-3 d-block text-danger"></i>Không thể tải dữ liệu. Vui lòng thử lại sau.</div>';
+    console.error('Lỗi khi phân tích dữ liệu:', err);
+    container.innerHTML = '<div class="no-data w-100"><i class="fas fa-exclamation-circle fa-3x mb-3 d-block text-danger"></i>Không thể tải dữ liệu sản phẩm. Vui lòng thử lại sau.</div>';
   }
 }
 
 window.addEventListener('DOMContentLoaded', loadProducts);
 </script>
-
 </body>
 </html>
