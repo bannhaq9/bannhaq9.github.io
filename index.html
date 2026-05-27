@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanh Trà | Bất Động Sản Nhà Phố Uy Tín</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Be Vietnam Pro', sans-serif; color: #333; }
+:root { --primary-color: #c59d5f; --dark-color: #222; }
+.navbar-brand { font-weight: 700; font-size: 1.5rem; }
+.nav-link { font-weight: 500; }
+.nav-link:hover, .nav-link.active { color: var(--primary-color) !important; }
+.hero-section {
+  background: url('https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center;
+  background-size: cover;
+  position: relative;
+  padding: 150px 0;
+  color: white;
+  text-align: center;
+}
+.hero-section::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  z-index: 1;
+}
+.hero-content { position: relative; z-index: 2; }
+.hero-content .display-4 { font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+.hero-content .lead { font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+.btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; padding: 12px 30px; transition: all 0.3s ease; }
+.btn-primary:hover { background-color: #a8844f; border-color: #a8844f; transform: translateY(-2px); }
+.btn-outline-primary { color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; }
+.btn-outline-primary:hover { color: white; background-color: var(--primary-color); border-color: var(--primary-color); }
+.section-title { font-weight: 700; margin-bottom: 50px; color: var(--dark-color); }
+.property-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+.property-card:hover { transform: translateY(-10px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+.property-card .card-img-top { height: 220px; object-fit: cover; }
+.property-card .price { color: #e03c31; font-weight: 700; font-size: 1.3rem; }
+.property-card .card-body ul { padding-left: 0; list-style: none; color: #666; font-size: 0.9rem; }
+.property-card .card-body ul li { margin-bottom: 6px; }
+.property-card .card-body ul li i { color: var(--primary-color); margin-right: 8px; }
+.badge-new { background: #e03c31; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; display: inline-block; }
+.about-img { max-width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+#contact { background-color: #f8f9fa; }
+.footer { background-color: var(--dark-color); color: #ccc; }
+.footer h5 { color: white; font-weight: 600; }
+.footer a { color: #ccc; text-decoration: none; transition: color 0.3s ease; }
+.footer a:hover { color: var(--primary-color); }
+.footer .social-icons a { font-size: 1.5rem; margin-right: 15px; }
+.loading-spinner { text-align: center; padding: 40px; color: #888; }
+.no-data { text-align: center; padding: 40px; color: #888; }
+#filter-bar { background: #f8f9fa; padding: 16px 0; border-bottom: 1px solid #eee; }
+#filter-bar select { max-width: 200px; }
+
+/* Image carousel inside card */
+.card-img-wrapper { position: relative; height: 220px; overflow: hidden; background: #f0f0f0; }
+.card-img-wrapper img { width: 100%; height: 220px; object-fit: cover; display: block; }
+.img-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,0.45); color: white; border: none;
+  width: 28px; height: 28px; border-radius: 50%; font-size: 0.75rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.img-nav:hover { background: rgba(0,0,0,0.7); }
+.img-nav.prev { left: 6px; }
+.img-nav.next { right: 6px; }
+.img-counter {
+  position: absolute; bottom: 6px; right: 8px;
+  background: rgba(0,0,0,0.5); color: white;
+  font-size: 0.7rem; padding: 2px 6px; border-radius: 10px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">THANH TRÀ | BĐS NHÀ PHỐ</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#hero">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="#products">Sản Phẩm</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">Giới thiệu</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Liên hệ</a></li>
+          <li class="nav-item">
+            <a class="nav-link btn btn-danger text-white px-3 ms-lg-3" href="dang-tin.html" style="border-radius:5px;">
+              <i class="fas fa-plus-circle me-1"></i> Đăng Tin
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section id="hero" class="hero-section">
+    <div class="hero-content container">
+      <h1 class="display-4">BẤT ĐỘNG SẢN NHÀ PHỐ</h1>
+      <p class="lead my-4">UY TÍN - TẬN TÂM - CHUYÊN NGHIỆP</p>
+      <a href="tel:0854100036" class="btn btn-primary me-2 mb-2"><i class="fas fa-phone me-2"></i>Hotline: 0854.100.036</a>
+      <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-outline-primary mb-2"><i class="fa-solid fa-comment-dots me-2"></i>Chat Zalo</a>
+    </div>
+  </section>
+
+  <!-- Filter bar -->
+  <div id="filter-bar">
+    <div class="container d-flex flex-wrap gap-2 align-items-center">
+      <span class="fw-bold me-2">Lọc theo:</span>
+      <select id="filterPrice" class="form-select form-select-sm">
+        <option value="">Tất cả giá</option>
+        <option value="duoi5">Dưới 5 tỷ</option>
+        <option value="5den6">5 - 6 tỷ</option>
+        <option value="tren6">Trên 6 tỷ</option>
+      </select>
+      <select id="filterTang" class="form-select form-select-sm">
+        <option value="">Tất cả số tầng</option>
+        <option value="1">1 tầng</option>
+        <option value="2">2 tầng</option>
+        <option value="3">3 tầng</option>
+        <option value="4+">4 tầng trở lên</option>
+      </select>
+      <button class="btn btn-sm btn-primary" onclick="applyFilter()"><i class="fas fa-filter me-1"></i>Lọc</button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="resetFilter()">Xóa lọc</button>
+      <span id="result-count" class="ms-auto text-muted small"></span>
+    </div>
+  </div>
+
+  <!-- Products Section -->
+  <section id="products" class="py-5">
+    <div class="container">
+      <h2 class="text-center section-title">SẢN PHẨM MỚI NHẤT</h2>
+      <div id="product-list" class="row g-4">
+        <div class="loading-spinner w-100">
+          <div class="spinner-border text-warning mb-3" role="status"></div>
+          <p>Đang tải dữ liệu sản phẩm...</p>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <a href="dang-tin.html" class="btn btn-primary btn-lg">
+          <i class="fas fa-plus-circle me-2"></i>Đăng tin bất động sản của bạn
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-5 bg-light">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-5 text-center mb-4 mb-lg-0">
+          <img src="https://thanhtrabdsnhapho.github.io/home/assets/avata.jpg" alt="Thanh Trà Bất Động Sản" class="about-img">
+        </div>
+        <div class="col-lg-7">
+          <h2 class="section-title text-start mb-3">Thanh Trà - Chuyên viên tư vấn BĐS nhà phố</h2>
+          <p class="lead" style="color: var(--primary-color);">Tận tâm - Chuyên nghiệp - Hiệu quả</p>
+          <p>Chuyên nhà phố chính chủ tại TP. Thủ Đức - Quận 9</p>
+          <p>Phương châm làm việc của tôi là đặt lợi ích của khách hàng lên hàng đầu, cung cấp thông tin chính xác, minh bạch và hỗ trợ toàn diện về mặt pháp lý, đảm bảo mọi giao dịch diễn ra an toàn và nhanh chóng.</p>
+          <p>Hãy liên hệ với tôi để nhận được sự tư vấn chuyên sâu và tìm kiếm cơ hội đầu tư tốt nhất!</p>
+          <div class="mt-4">
+            <a href="tel:0854100036" class="btn btn-primary me-2"><i class="fas fa-phone me-2"></i>Liên hệ ngay</a>
+            <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-outline-primary"><i class="fa-solid fa-comment-dots me-2"></i>Tư vấn qua Zalo</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-5">
+    <div class="container text-center">
+      <h2 class="section-title">LIÊN HỆ VỚI CHÚNG TÔI</h2>
+      <p class="lead mb-4">Đừng ngần ngại, hãy gọi ngay cho tôi để được tư vấn miễn phí!</p>
+      <div class="contact-info">
+        <h4><i class="fas fa-user-tie me-2" style="color:var(--primary-color);"></i>Thanh Trà</h4>
+        <h3 class="my-3"><i class="fas fa-phone-alt me-2" style="color:var(--primary-color);"></i>Hotline/Zalo: <a href="tel:0854100036" class="text-decoration-none" style="color:var(--dark-color);">0854.100.036</a></h3>
+        <p><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i>Email: <a href="mailto:thanhtra1996st@gmail.com" class="text-decoration-none" style="color:var(--dark-color);">thanhtra1996st@gmail.com</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="footer pt-5 pb-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 col-md-6 mb-4">
+        <h5>THANH TRÀ | BDS NHÀ PHỐ</h5>
+        <p class="mt-3">Nền tảng tư vấn, môi giới bất động sản nhà phố chuyên nghiệp, uy tín hàng đầu tại Quận 9 - TP. Hồ Chí Minh.</p>
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <h5>THÔNG TIN LIÊN HỆ</h5>
+        <ul class="list-unstyled mt-3">
+          <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>Văn phòng: Lò Lu, Trường Thạnh, TP.Thủ Đức</li>
+          <li class="mb-2"><i class="fas fa-phone me-2"></i><a href="tel:0854100036">0854100036</a></li>
+          <li class="mb-2"><i class="fas fa-envelope me-2"></i><a href="mailto:thanhtra1996st@gmail.com">thanhtra1996st@gmail.com</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 col-md-12 mb-4">
+        <h5>KẾT NỐI VỚI TÔI</h5>
+        <div class="social-icons mt-3">
+          <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
+          <a href="https://zalo.me/0854100036" target="_blank"><i class="fa-solid fa-comment-dots"></i></a>
+        </div>
+      </div>
+    </div>
+    <hr style="border-color:#555;">
+    <div class="text-center pt-2">
+      <p>© 2025 Bản quyền thuộc về Thanh Trà.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ===== CẤU HÌNH =====
+// Google Sheet CSV — đã publish dạng CSV
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZt7udp1u4N5PUsOoWG4kiJDy25xKXGneKhphg3iFAy7TX6FKtV3eATYuURWhQZFOrZSrPPzVImsAj/pub?gid=0&single=true&output=csv";
+
+// Ảnh mặc định nếu không có ảnh thực
+const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
+
+let allProducts = [];
+
+// ===== CẤU TRÚC CỘT TRONG SHEET (từ Apps Script doPost) =====
+// Col 0 : STT (sheet.getLastRow())
+// Col 1 : Thời gian (new Date())
+// Col 2 : sonha
+// Col 3 : duongpho
+// Col 4 : phuongxa
+// Col 5 : tinhthanh
+// Col 6 : area
+// Col 7 : price
+// Col 8 : sotang
+// Col 9 : bedroom
+// Col 10: nhavesinh
+// Col 11: direction
+// Col 12: title
+// Col 13: description
+// Col 14: imageUrl_1   ← 10 cột ảnh riêng lẻ
+// Col 15: imageUrl_2
+// Col 16: imageUrl_3
+// Col 17: imageUrl_4
+// Col 18: imageUrl_5
+// Col 19: imageUrl_6
+// Col 20: imageUrl_7
+// Col 21: imageUrl_8
+// Col 22: imageUrl_9
+// Col 23: imageUrl_10
+
+// ===== PARSE CSV (xử lý ô có dấu phẩy / xuống dòng bên trong ngoặc kép) =====
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim() !== '');
+  const results = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let c of lines[i]) {
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    cols.push(cur.trim());
+    results.push(cols.map(c => c.replace(/^"|"$/g, '').trim()));
+  }
+  return results;
+}
+
+// ===== TẠO CARD VỚI CAROUSEL ẢNH =====
+function createCard(cols, cardId) {
+  // Map cột đúng theo Apps Script
+  const thoiGian = cols[1]  || '';
+  const soNha    = cols[2]  || '';
+  const duong    = cols[3]  || '';
+  const phuong   = cols[4]  || '';
+  const tinh     = cols[5]  || '';
+  const dienTich = cols[6]  || '';
+  const gia      = cols[7]  || '';
+  const soTang   = cols[8]  || '';
+  const pNgu     = cols[9]  || '';
+  const wc       = cols[10] || '';
+  const huong    = cols[11] || '';
+  const tieuDe   = cols[12] || 'Bất Động Sản Nhà Phố';
+  const moTa     = cols[13] || '';
+
+  // Lấy tối đa 10 ảnh từ col 14–23, bỏ ô trống
+  const imgs = [];
+  for (let i = 14; i <= 23; i++) {
+    const url = (cols[i] || '').trim();
+    if (url) imgs.push(url);
+  }
+  if (imgs.length === 0) imgs.push(defaultImg);
+
+  // Badge mới (đăng trong vòng 7 ngày)
+  let badgeHtml = '';
+  if (thoiGian) {
+    const d = new Date(thoiGian);
+    if (!isNaN(d.getTime())) {
+      const diff = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
+      if (diff <= 7) badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
+    }
+  }
+
+  const moTaShort = moTa.length > 80 ? moTa.substring(0, 80) + '...' : moTa;
+  const hasMultipleImgs = imgs.length > 1;
+
+  // Build ảnh HTML — nếu nhiều ảnh thì thêm nút prev/next
+  const imgId = `img-${cardId}`;
+  const imgTag = `<img id="${imgId}" src="${imgs[0]}" class="card-img-top" alt="${tieuDe}"
+    onerror="this.src='${defaultImg}'" style="height:220px;object-fit:cover;width:100%;">`;
+
+  const navHtml = hasMultipleImgs ? `
+    <button class="img-nav prev" onclick="changeImg('${imgId}', -1, ${JSON.stringify(imgs).replace(/'/g,"&#39;")})">&#8249;</button>
+    <button class="img-nav next" onclick="changeImg('${imgId}', 1,  ${JSON.stringify(imgs).replace(/'/g,"&#39;")})">&#8250;</button>
+    <span class="img-counter" id="${imgId}-counter">1 / ${imgs.length}</span>` : '';
+
+  return `
+    <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-price="${gia}" data-tang="${soTang}">
+      <div class="card property-card w-100">
+        <div class="card-img-wrapper">
+          ${imgTag}
+          ${navHtml}
+        </div>
+        <div class="card-body d-flex flex-column">
+          ${badgeHtml}
+          <h5 class="card-title fw-bold" style="font-size:0.95rem; color:#222;">${tieuDe}</h5>
+          <ul class="my-2 flex-grow-1">
+            <li><i class="fas fa-map-marker-alt"></i><strong>Địa chỉ:</strong> ${soNha} ${duong}, ${phuong}, ${tinh}</li>
+            <li><i class="fas fa-ruler-combined"></i><strong>Diện tích:</strong> ${dienTich} m²</li>
+            <li><i class="fas fa-layer-group"></i><strong>Số tầng:</strong> ${soTang || 'N/A'}</li>
+            <li><i class="fas fa-bed"></i><strong>Phòng ngủ:</strong> ${pNgu || 'N/A'}</li>
+            <li><i class="fas fa-bath"></i><strong>Nhà vệ sinh:</strong> ${wc || 'N/A'}</li>
+            <li><i class="fas fa-compass"></i><strong>Hướng:</strong> ${huong || 'N/A'}</li>
+            ${moTaShort ? `<li><i class="fas fa-info-circle"></i>${moTaShort}</li>` : ''}
+          </ul>
+          <div class="mt-auto">
+            <p class="price mb-2">Giá: ${gia} Tỷ</p>
+            <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-primary w-100">
+              <i class="fas fa-comment-dots me-1"></i>Liên hệ Zalo ngay
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== CHUYỂN ẢNH TRONG CAROUSEL =====
+// imgList được truyền dưới dạng mảng JS thật
+function changeImg(imgId, dir, imgList) {
+  const el      = document.getElementById(imgId);
+  const counter = document.getElementById(imgId + '-counter');
+  if (!el) return;
+  const cur = parseInt(el.dataset.idx || '0');
+  const next = (cur + dir + imgList.length) % imgList.length;
+  el.src = imgList[next];
+  el.dataset.idx = next;
+  if (counter) counter.textContent = (next + 1) + ' / ' + imgList.length;
+}
+
+// ===== LỌC SẢN PHẨM =====
+function applyFilter() {
+  const priceFilter = document.getElementById('filterPrice').value;
+  const tangFilter  = document.getElementById('filterTang').value;
+  const cards = document.querySelectorAll('#product-list > [data-price]');
+  let count = 0;
+
+  cards.forEach(card => {
+    const gia  = parseFloat((card.dataset.price || '0').replace(/[^0-9.]/g, '')) || 0;
+    const tang = parseInt(card.dataset.tang) || 0;
+    let show = true;
+
+    if (priceFilter === 'duoi5' && gia >= 5) show = false;
+    if (priceFilter === '5den6' && (gia < 5 || gia > 6)) show = false;
+    if (priceFilter === 'tren6' && gia <= 6) show = false;
+    if (tangFilter === '1' && tang !== 1) show = false;
+    if (tangFilter === '2' && tang !== 2) show = false;
+    if (tangFilter === '3' && tang !== 3) show = false;
+    if (tangFilter === '4+' && tang < 4) show = false;
+
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+
+  document.getElementById('result-count').textContent = `Hiển thị ${count} sản phẩm`;
+}
+
+function resetFilter() {
+  document.getElementById('filterPrice').value = '';
+  document.getElementById('filterTang').value  = '';
+  applyFilter();
+}
+
+// ===== LOAD DỮ LIỆU =====
+async function loadProducts() {
+  const container = document.getElementById('product-list');
+  try {
+    const res  = await fetch(sheetUrl);
+    const text = await res.text();
+    const rows = parseCSV(text);
+
+    container.innerHTML = '';
+
+    if (rows.length === 0) {
+      container.innerHTML = '<div class="no-data w-100"><i class="fas fa-inbox fa-3x mb-3 d-block"></i>Hiện chưa có sản phẩm nào.</div>';
+      return;
+    }
+
+    rows.forEach((cols, idx) => {
+      // Cần ít nhất 8 cột (đến price) mới tạo card
+      if (cols.length >= 8) {
+        container.innerHTML += createCard(cols, idx);
+      }
+    });
+
+    allProducts = rows;
+    document.getElementById('result-count').textContent = `Hiển thị ${rows.length} sản phẩm`;
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = '<div class="no-data w-100"><i class="fas fa-exclamation-circle fa-3x mb-3 d-block text-danger"></i>Không thể tải dữ liệu. Vui lòng thử lại sau.</div>';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+
+</body>
+</html>
