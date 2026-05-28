@@ -1,5 +1,28 @@
 [
   {
+    "id": "prod_1779952613163",
+    "sonha": "",
+    "duongpho": "Đường 970",
+    "phuongxa": "Phú Hữu",
+    "tinhthanh": "Thủ Đức",
+    "area": "52",
+    "price": "6.5",
+    "sotang": "4",
+    "bedroom": "4",
+    "nhavesinh": "3",
+    "direction": "Không Xác Định",
+    "tieu_de": "NHÀ ĐẸP HOÀN THIỆN 90% TẶNG NỘI THẤT TẠI PHÚ HỮU",
+    "mo_ta": "Nhà trong quá trình hoàn thiện 90% - Khách mua giữ chỗ trước xong bàn giao nhà tặng full nội thất. Nhà đường 8m xe tải tránh - Khu phân lô TT Phú Hữu - 1 trệt 3 lầu.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779952607321_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779952608454_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779952609659_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779952610752_3.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779952611769_4.jpeg"
+    ],
+    "created_at": "2026-05-28T07:16:53.163Z"
+  },
+  {
     "id": "prod_1779950391360",
     "sonha": "70A",
     "duongpho": "494",
