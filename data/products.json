@@ -1,5 +1,28 @@
 [
   {
+    "id": "prod_1779953814203",
+    "sonha": "",
+    "duongpho": "Số 1",
+    "phuongxa": "Long Trường",
+    "tinhthanh": "TP.HCM",
+    "area": "52",
+    "price": "5.7",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "3",
+    "direction": "Nam",
+    "tieu_de": "NHÀ ĐẸP MỚI KENG - 3 TẦNG HOÀN CÔNG GẦN NGUYỄN DUY TRINH",
+    "mo_ta": "Nhà mới keng, full nội thất cao cấp, hiện đại, chưa qua sử dụng, dọn vào ở ngay. Diện tích: 52m2. Kết cấu: 3 Tầng hoàn công. Gồm 3 Phòng ngủ, 3 WC, 1 phòng thờ. Hẻm nhựa 8m có vỉa hè 2 bên. Khu Vip Long Trường, an ninh, dân trí...",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953808321_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953809418_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953810533_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953811709_3.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953812896_4.jpeg"
+    ],
+    "created_at": "2026-05-28T07:36:54.203Z"
+  },
+  {
     "id": "prod_1779953079310",
     "sonha": "",
     "duongpho": "Võ Văn Hát",
