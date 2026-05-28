@@ -1,5 +1,27 @@
 [
   {
+    "id": "prod_1779953079310",
+    "sonha": "",
+    "duongpho": "Võ Văn Hát",
+    "phuongxa": "Long Trường",
+    "tinhthanh": "Thủ Đức",
+    "area": "",
+    "price": "5.8",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "2",
+    "direction": "Không Xác Định",
+    "tieu_de": "NHÀ MỚI 1 TRỆT 2 LẦU HẺM XE HƠI ĐƯỜNG VÕ VĂN HÁT CHỈ 5,8 TỶ",
+    "mo_ta": "Nhà mới 1 trệt 2 lầu thiết kế hiện đại với tầng trệt gồm sân để xe, phòng khách, bếp, WC sau nhà và giếng trời. Tầng 2 có 2 phòng ngủ, 1 WC và ban công. Tầng 3 bao gồm 1 phòng ngủ, phòng thờ và sân thượng. Hẻm xe hơi, khu dân cư văn minh, đối diện trường Đại học Marketing.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953073591_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953075065_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953076348_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779953077600_3.jpeg"
+    ],
+    "created_at": "2026-05-28T07:24:39.310Z"
+  },
+  {
     "id": "prod_1779952613163",
     "sonha": "",
     "duongpho": "Đường 970",
