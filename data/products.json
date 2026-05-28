@@ -1,5 +1,30 @@
 [
   {
+    "id": "prod_1779960039903",
+    "sonha": "",
+    "duongpho": "Tam Đa",
+    "phuongxa": "Long Trường",
+    "tinhthanh": "Thủ Đức",
+    "area": "51",
+    "price": "5.6",
+    "sotang": "3",
+    "bedroom": "4",
+    "nhavesinh": "3",
+    "direction": "Tây Nam",
+    "tieu_de": "NHÀ 1 TRỆT 2 LẦU SÂN THƯỢNG TRÊN ĐƯỜNG NHỰA XE TẢI NÉ NHAU",
+    "mo_ta": "Nhà 1 trệt 2 lầu với sân thượng, diện tích đất 50.4m², diện tích sàn 110m², bao gồm 4 phòng ngủ và 3 WC. Vị trí đắc địa, đường nhựa trước nhà xe tải né nhau thoải mái, chỉ cách mặt tiền đường Tam Đa 30m. Tiện ích xung quanh phong phú, cách chợ Long Trường chỉ 500m, dễ dàng di chuyển đến Khu Công nghệ cao Samsung và các trường đại học lớn. Pháp lý rõ ràng, sổ hồng riêng chính chủ, sẵn sàng giao dịch.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779960030841_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779960032164_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779960033444_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779960034726_3.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779960035961_4.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779960037235_5.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779960038333_6.jpeg"
+    ],
+    "created_at": "2026-05-28T09:20:39.903Z"
+  },
+  {
     "id": "prod_1779957264323",
     "sonha": "",
     "duongpho": "Trường Lưu",
