@@ -1,5 +1,28 @@
 [
   {
+    "id": "prod_1779964636094",
+    "sonha": "",
+    "duongpho": "Lê Văn Việt",
+    "phuongxa": "Long Bình",
+    "tinhthanh": "Quận 9",
+    "area": "69",
+    "price": "6.2",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "3",
+    "direction": "Không Xác Định",
+    "tieu_de": "NHÀ ĐẸP 3 TẦNG GẦN MẶT TIỀN LÊ VĂN VIỆT - GIÁ TỐT",
+    "mo_ta": "Nhà có diện tích 69m2, ngang 4m vuông vức, nằm trong hẻm trước nhà 5m, gần mặt tiền Lê Văn Việt và Nguyễn Văn Tăng. Kết cấu nhà 3 tầng với 3 phòng ngủ và 3 WC, có sân để xe, phòng thờ, sân phơi rộng và sân thượng. Nhà mới, hiện đang cho thuê 10 triệu/tháng. Tiện ích xung quanh phong phú với siêu thị, ngân hàng, trường học các cấp, Bách Hoá Xanh, Điện Máy. Giao thông thuận tiện di chuyển ra XLHN, Bến xe Miền Đông mới, Ga Metro Suối Tiên, Vinhome Grand Park. Sổ hoàn công chuẩn, dễ dàng công chứng nhanh.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964630482_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964631564_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964632590_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964633680_3.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964634693_4.jpeg"
+    ],
+    "created_at": "2026-05-28T10:37:16.094Z"
+  },
+  {
     "id": "prod_1779964549170",
     "sonha": "",
     "duongpho": "Nguyễn Xiển",
