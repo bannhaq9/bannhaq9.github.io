@@ -412,12 +412,16 @@
 </div>
 
 <script>
-// ========== ĐƯỜNG DẪN ĐÃ ĐỒNG BỘ CỦA BẠN ==========
 const scriptURL = 'https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec'; 
 const MAX_IMAGES = 10;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 let selectedFiles = [];
+let isEditMode = false;
+let editProductId = "";
+let editPassword = "";
+let existingImages = []; // Danh sách ảnh đã lưu từ trước
+
 const form = document.getElementById('postForm');
 const btn = document.getElementById('submitBtn');
 const imageInput = document.getElementById('imageInput');
@@ -437,28 +441,115 @@ function showToast(msg, type = '') {
   setTimeout(() => toast.remove(), 3500);
 }
 
+// ========== KHỞI TẠO VÀ TẢI DỮ LIỆU CHỈNH SỬA (NẾU CÓ) ==========
+window.addEventListener('DOMContentLoaded', async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  const pwd = urlParams.get('pwd');
+  
+  if (id && pwd) {
+    isEditMode = true;
+    editProductId = id;
+    editPassword = pwd;
+    
+    document.querySelector('.page-title').textContent = "✏️ Chỉnh sửa tin đăng bất động sản";
+    document.querySelector('.page-subtitle').textContent = "Cập nhật lại các thông số và lưu trực tiếp lên GitHub";
+    btn.innerHTML = "🚀 CẬP NHẬT TIN ĐĂNG NGAY";
+    
+    showToast("⏳ Đang tải nội dung tin đăng cũ...", "success");
+    
+    try {
+      // Đọc file data/products.json trực tiếp từ github pages để bóc tách thông số
+      const res = await fetch("data/products.json", { cache: 'no-cache' });
+      if (!res.ok) throw new Error("Không thể tải file dữ liệu!");
+      const products = await res.json();
+      const p = products.find(item => item.id === id);
+      
+      if (p) {
+        // Đổ thông tin vào form
+        if (p.sonha)     document.querySelector('[name=sonha]').value     = p.sonha;
+        if (p.duongpho)  document.querySelector('[name=duongpho]').value  = p.duongpho;
+        if (p.phuongxa)  document.querySelector('[name=phuongxa]').value  = p.phuongxa;
+        if (p.tinhthanh) document.querySelector('[name=tinhthanh]').value = p.tinhthanh;
+        if (p.area)      document.querySelector('[name=area]').value      = p.area;
+        if (p.price)     document.querySelector('[name=price]').value     = p.price;
+        if (p.tieu_de)   document.getElementById('titleInput').value      = p.tieu_de;
+        if (p.mo_ta)     document.getElementById('descInput').value       = p.mo_ta;
+        
+        if (p.sotang) {
+          const el = document.querySelector('[name=sotang]');
+          for (let o of el.options) if (o.value == p.sotang) { el.value = p.sotang; break; }
+        }
+        if (p.bedroom) {
+          const el = document.querySelector('[name=bedroom]');
+          for (let o of el.options) if (o.value == p.bedroom) { el.value = p.bedroom; break; }
+        }
+        if (p.nhavesinh) {
+          const el = document.querySelector('[name=nhavesinh]');
+          for (let o of el.options) if (o.value == p.nhavesinh) { el.value = p.nhavesinh; break; }
+        }
+        if (p.direction) {
+          const el = document.querySelector('[name=direction]');
+          for (let o of el.options) if (o.value === p.direction) { el.value = p.direction; break; }
+        }
+        
+        // Hiển thị các hình ảnh cũ có sẵn
+        if (Array.isArray(p.images)) {
+          existingImages = p.images;
+        }
+        renderPreviews();
+      } else {
+        showToast("❌ Không tìm thấy thông tin sản phẩm này!", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Không thể nạp dữ liệu cũ để chỉnh sửa!", "error");
+    }
+  }
+});
+
 // ========== HIỂN THỊ HÌNH ẢNH CHỌN TRƯỚC ==========
 function renderPreviews() {
   previewContainer.innerHTML = '';
+  
+  // 1. Render các ảnh cũ có sẵn
+  existingImages.forEach((url, idx) => {
+    const item = document.createElement('div');
+    item.className = 'preview-item';
+    item.innerHTML = `
+      <img src="${url}" alt="Ảnh cũ ${idx+1}">
+      <button type="button" class="remove-btn" onclick="removeExistingImage(${idx})">✕</button>
+    `;
+    previewContainer.appendChild(item);
+  });
+  
+  // 2. Render các ảnh mới chọn thêm
   selectedFiles.forEach((file, idx) => {
     const reader = new FileReader();
     reader.onload = e => {
       const item = document.createElement('div');
       item.className = 'preview-item';
       item.innerHTML = `
-        <img src="${e.target.result}" alt="Ảnh ${idx+1}">
+        <img src="${e.target.result}" alt="Ảnh mới ${idx+1}">
         <button type="button" class="remove-btn" onclick="removeImage(${idx})">✕</button>
       `;
       previewContainer.appendChild(item);
     };
     reader.readAsDataURL(file);
   });
-  imageCount.style.display = selectedFiles.length > 0 ? 'block' : 'none';
-  countNum.textContent = selectedFiles.length;
+  
+  const totalCount = existingImages.length + selectedFiles.length;
+  imageCount.style.display = totalCount > 0 ? 'block' : 'none';
+  countNum.textContent = totalCount;
 }
 
 function removeImage(idx) {
   selectedFiles.splice(idx, 1);
+  renderPreviews();
+}
+
+function removeExistingImage(idx) {
+  existingImages.splice(idx, 1);
   renderPreviews();
 }
 
@@ -471,9 +562,9 @@ function addFiles(newFiles) {
     setTimeout(() => fileWarning.style.display = 'none', 4000);
   }
   const combined = [...selectedFiles, ...validFiles];
-  if (combined.length > MAX_IMAGES) {
-    showToast('Chỉ được chọn tối đa ' + MAX_IMAGES + ' ảnh!', 'error');
-    selectedFiles = combined.slice(0, MAX_IMAGES);
+  if (combined.length + existingImages.length > MAX_IMAGES) {
+    showToast('Tổng số ảnh cũ và mới không được quá ' + MAX_IMAGES + ' ảnh!', 'error');
+    selectedFiles = combined.slice(0, MAX_IMAGES - existingImages.length);
   } else {
     selectedFiles = combined;
   }
@@ -504,11 +595,11 @@ function toBase64(file) {
   });
 }
 
-// ========== GỬI DỮ LIỆU ĐĂNG BÀI ĐẾN GOOGLE APPS SCRIPT (GITHUB PROXY) ==========
+// ========== GỬI DỮ LIỆU ĐĂNG BÀI/CHỈNH SỬA ĐẾN GOOGLE APPS SCRIPT (GITHUB PROXY) ==========
 form.addEventListener('submit', async e => {
   e.preventDefault();
   btn.disabled = true;
-  btn.innerHTML = '⏳ Đang xử lý dữ liệu và đẩy lên GitHub...';
+  btn.innerHTML = '⏳ Đang xử lý dữ liệu và cập nhật lên GitHub...';
 
   const formData = new FormData(form);
   const data = {};
@@ -533,6 +624,14 @@ form.addEventListener('submit', async e => {
 
   data.images = JSON.stringify(images);
 
+  // Kích hoạt Payload xử lý Sửa tin gửi sang GAS trung chuyển
+  if (isEditMode) {
+    data.action = 'edit';
+    data.id = editProductId;
+    data.password = editPassword;
+    data.existingImages = JSON.stringify(existingImages);
+  }
+
   fetch(scriptURL, {
     method: 'POST',
     body: JSON.stringify(data),
@@ -541,25 +640,34 @@ form.addEventListener('submit', async e => {
   .then(res => res.json())
   .then(result => {
     if(result.status === 'ok') {
-      showToast('✅ Đăng tin lên GitHub thành công!', 'success');
-      form.reset();
-      selectedFiles = [];
-      previewContainer.innerHTML = '';
-      imageCount.style.display = 'none';
-      uploadProgress.style.display = 'none';
-      progressBar.style.width = '0%';
-      progressText.textContent = '0%';
+      showToast(isEditMode ? '✅ Đã lưu cập nhật thành công!' : '✅ Đăng tin lên GitHub thành công!', 'success');
+      
+      if (isEditMode) {
+        // Tự động chuyển về trang chủ sau 2 giây chỉnh sửa
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 2000);
+      } else {
+        form.reset();
+        selectedFiles = [];
+        existingImages = [];
+        previewContainer.innerHTML = '';
+        imageCount.style.display = 'none';
+        uploadProgress.style.display = 'none';
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+      }
     } else {
       showToast('❌ Lỗi từ hệ thống: ' + result.message, 'error');
     }
     btn.disabled = false;
-    btn.innerHTML = '🚀 ĐĂNG TIN NGAY';
+    btn.innerHTML = isEditMode ? '🚀 CẬP NHẬT TIN ĐĂNG NGAY' : '🚀 ĐĂNG TIN NGAY';
   })
   .catch((err) => {
     console.error(err);
     showToast('❌ Lỗi kết nối hoặc cấu hình Script! Vui lòng kiểm tra lại.', 'error');
     btn.disabled = false;
-    btn.innerHTML = '🚀 ĐĂNG TIN NGAY';
+    btn.innerHTML = isEditMode ? '🚀 CẬP NHẬT TIN ĐĂNG NGAY' : '🚀 ĐĂNG TIN NGAY';
     uploadProgress.style.display = 'none';
   });
 });
