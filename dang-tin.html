@@ -1,3 +1,4 @@
+html:Trang Đăng Tin dang-tin.html:dang-tin.html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -184,7 +185,8 @@
   </form>
 </div>
 <script>
-const scriptURL = 'https://script.google.com/macros/s/AKfycbx2xkY0FXk1VMAmmfE3igrQji5KIcOCvoHf_IQ8HqMAxKfRYN4-NWOPHKB8Drk8OvWX/exec'; 
+// URL Google Apps Script của bạn
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec'; 
 const MAX_IMAGES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 let selectedFiles = [];
@@ -196,6 +198,7 @@ const uploadZone = document.getElementById('uploadZone');
 const imageCount = document.getElementById('imageCount');
 const countNum = document.getElementById('countNum');
 const fileWarning = document.getElementById('fileWarning');
+
 function showToast(msg, type = '') {
   const wrap = document.getElementById('toastWrap');
   const toast = document.createElement('div');
@@ -204,6 +207,7 @@ function showToast(msg, type = '') {
   wrap.appendChild(toast);
   setTimeout(() => toast.remove(), 3500);
 }
+
 function renderPreviews() {
   previewContainer.innerHTML = '';
   selectedFiles.forEach((file, idx) => {
@@ -222,10 +226,12 @@ function renderPreviews() {
   imageCount.style.display = selectedFiles.length > 0 ? 'block' : 'none';
   countNum.textContent = selectedFiles.length;
 }
+
 function removeImage(idx) {
   selectedFiles.splice(idx, 1);
   renderPreviews();
 }
+
 function addFiles(newFiles) {
   const validFiles = newFiles.filter(f => f.size <= MAX_FILE_SIZE);
   const oversized = newFiles.length - validFiles.length;
@@ -242,10 +248,12 @@ function addFiles(newFiles) {
   }
   renderPreviews();
 }
+
 imageInput.addEventListener('change', function () {
   addFiles(Array.from(this.files));
   this.value = '';
 });
+
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
 uploadZone.addEventListener('drop', e => {
@@ -254,6 +262,7 @@ uploadZone.addEventListener('drop', e => {
   const droppedFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
   addFiles(droppedFiles);
 });
+
 function toBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -262,17 +271,21 @@ function toBase64(file) {
     reader.readAsDataURL(file);
   });
 }
+
 form.addEventListener('submit', async e => {
   e.preventDefault();
   btn.disabled = true;
   btn.innerHTML = '⏳ Đang xử lý...';
+  
   const formData = new FormData(form);
   const data = {};
   formData.forEach((v, k) => data[k] = v);
+  
   const images = [];
   const progressBar = document.getElementById('progressBar');
   const progressText = document.getElementById('progressText');
   const uploadProgress = document.getElementById('uploadProgress');
+  
   if (selectedFiles.length > 0) {
     uploadProgress.style.display = 'block';
     for (let i = 0; i < selectedFiles.length; i++) {
@@ -284,10 +297,13 @@ form.addEventListener('submit', async e => {
       progressText.textContent = pct + '%';
     }
   }
+  
   data.images = JSON.stringify(images);
+  
   fetch(scriptURL, {
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'text/plain' } // Ép kiểu text/plain tránh lỗi CORS Preflight
   })
   .then(res => res.json())
   .then(result => {
@@ -314,6 +330,7 @@ form.addEventListener('submit', async e => {
     uploadProgress.style.display = 'none';
   });
 });
+
 async function analyzeWithAI() {
   const btnAI  = document.getElementById('btnAI');
   const aiNote = document.getElementById('aiNote');
@@ -324,16 +341,21 @@ async function analyzeWithAI() {
     aiNote.style.display = 'block';
     return;
   }
+  
   btnAI.disabled = true;
   btnAI.innerHTML = '⏳ Đang phân tích...';
   aiNote.style.display = 'none';
+  
   try {
     const res = await fetch(scriptURL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'analyze', text: rawText })
+      body: JSON.stringify({ action: 'analyze', text: rawText }),
+      headers: { 'Content-Type': 'text/plain' } // Ép kiểu text/plain tránh lỗi CORS Preflight
     });
+    
     const result = await res.json();
     if (result.status !== 'ok') throw new Error(result.message || 'Lỗi không xác định từ AI');
+    
     const p = result.data;
     if (p.sonha)     document.querySelector('[name=sonha]').value     = p.sonha;
     if (p.duongpho)  document.querySelector('[name=duongpho]').value  = p.duongpho;
@@ -343,6 +365,7 @@ async function analyzeWithAI() {
     if (p.price)     document.querySelector('[name=price]').value     = p.price;
     if (p.tieu_de)   document.getElementById('titleInput').value      = p.tieu_de;
     if (p.mo_ta)     document.getElementById('descInput').value       = p.mo_ta;
+    
     if (p.sotang) {
       const el = document.querySelector('[name=sotang]');
       for (let o of el.options) if (o.value == p.sotang) { el.value = p.sotang; break; }
@@ -359,6 +382,7 @@ async function analyzeWithAI() {
       const el = document.querySelector('[name=direction]');
       for (let o of el.options) if (o.value === p.direction) { el.value = p.direction; break; }
     }
+    
     aiNote.className = 'ai-note success';
     aiNote.textContent = '✅ AI đã điền xong! Kiểm tra và chỉnh sửa lại nếu cần.';
     aiNote.style.display = 'block';
