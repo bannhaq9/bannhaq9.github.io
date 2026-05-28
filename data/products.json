@@ -1,5 +1,30 @@
 [
   {
+    "id": "prod_1779964549170",
+    "sonha": "",
+    "duongpho": "Nguyễn Xiển",
+    "phuongxa": "Long Phước",
+    "tinhthanh": "TP HCM",
+    "area": "48",
+    "price": "6",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "3",
+    "direction": "Tây Bắc",
+    "tieu_de": "NHÀ MỚI 3 TẦNG NGUYỄN XIỂN – FULL NỘI THẤT CAO CẤP",
+    "mo_ta": "Nhà mới hoàn công với diện tích 50.7m2, thiết kế hiện đại và tối ưu không gian. Kết cấu 1 trệt 2 lầu, sổ hồng riêng, pháp lý rõ ràng. Chủ nhà là dân thiết kế, tặng full nội thất cao cấp, chỉ cần xách vali vào ở. Vị trí hẻm sạch đẹp, khu dân cư yên tĩnh, gần chợ, trường học, tiện ích đầy đủ, kết nối nhanh ra trục Nguyễn Xiển.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964538891_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964540306_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964541603_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964543045_3.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964544638_4.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964545909_5.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964547393_6.jpeg"
+    ],
+    "created_at": "2026-05-28T10:35:49.170Z"
+  },
+  {
     "id": "prod_1779964346718",
     "sonha": "",
     "duongpho": "Lã Xuân Oai",
