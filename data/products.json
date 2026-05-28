@@ -1,5 +1,28 @@
 [
   {
+    "id": "prod_1779964346718",
+    "sonha": "",
+    "duongpho": "Lã Xuân Oai",
+    "phuongxa": "Long Trường",
+    "tinhthanh": "TP. Hồ Chí Minh",
+    "area": "50",
+    "price": "6.6",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "4",
+    "direction": "Không Xác Định",
+    "tieu_de": "NHÀ MỚI XÂY TẠI LÃ XUÂN OAI, GIÁ HẤP DẪN",
+    "mo_ta": "Nhà xây mới đang hoàn thiện, chủ bàn giao hoàn công đủ. Nhà 3 tầng 3 phòng ngủ, 4 WC đầy đủ công năng.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964340592_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964341830_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964343175_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964344276_3.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964345315_4.jpeg"
+    ],
+    "created_at": "2026-05-28T10:32:26.718Z"
+  },
+  {
     "id": "prod_1779960039903",
     "sonha": "",
     "duongpho": "Tam Đa",
