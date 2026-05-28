@@ -689,6 +689,11 @@ function deleteProduct(id) {
 
 
 
+// ===== CHUYỂN SANG TRANG CHI TIẾT SẢN PHẨM =====
+function goToDetail(id) {
+  window.location.href = 'chi-tiet.html?id=' + encodeURIComponent(id);
+}
+
 // ===== CHIA SẺ TIN ĐĂNG LÊN FACEBOOK =====
 
 function shareToFacebook(tieuDe, gia, diaChi, dienTich) {
@@ -869,7 +874,7 @@ function createCard(product, cardId) {
 
     <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-price="${gia}" data-tang="${soTang}">
 
-      <div class="card property-card w-100 d-flex flex-column">
+      <div class="card property-card w-100 d-flex flex-column" style="cursor:pointer;" onclick="goToDetail('${product.id}')">
 
         <div class="card-img-wrapper" data-images='${imagesAttr}'>
 
