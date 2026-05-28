@@ -224,7 +224,7 @@
 // ===== CẤU HÌNH ĐƯỜNG DẪN DỮ LIỆU TĨNH GITHUB =====
 const sheetUrl = "data/products.json"; 
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
-const scriptURL = "https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec"; // Đường dẫn GAS proxy
+const scriptURL = "https://script.google.com/macros/s/AKfycbwMHChxlCNW1H8LPkMNzm1VDOmx6fpOspAoyhbSqd0Rix9dryUl0esAuLTJpk5v8nch/exec"; // Đường dẫn GAS proxy đã thống nhất
 let allProducts = [];
 let adminMode = false;
 let adminPassword = "";
@@ -305,7 +305,8 @@ function deleteProduct(id) {
     try {
       const res = await fetch(scriptURL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'delete', id: id, password: adminPassword })
+        body: JSON.stringify({ action: 'delete', id: id, password: adminPassword }),
+        headers: { 'Content-Type': 'text/plain' }
       });
       const result = await res.json();
       if (result.status === 'ok') {
