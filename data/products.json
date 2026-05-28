@@ -1,5 +1,30 @@
 [
   {
+    "id": "prod_1779964715978",
+    "sonha": "",
+    "duongpho": "Nguyễn Xiển",
+    "phuongxa": "Long Phước",
+    "tinhthanh": "Quận 9",
+    "area": "50",
+    "price": "5.2",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "3",
+    "direction": "Không Xác Định",
+    "tieu_de": "NHÀ 3 TẦNG FULL NỘI THẤT GẦN VIN TẠI QUẬN 9",
+    "mo_ta": "Diện tích 50m2, ngang 4.1m, dài 12.2m. Nhà 3 tầng, 3 phòng ngủ, 3 WC, phòng khách, bếp, sân để xe rộng rãi. Đường xe tải thông bàn cờ, cạnh Vin, tiện ích vô đối. Sổ tại gia, công chứng ngay.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964708170_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964709186_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964710311_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964711379_3.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964712490_4.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964713628_5.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964714718_6.jpeg"
+    ],
+    "created_at": "2026-05-28T10:38:35.978Z"
+  },
+  {
     "id": "prod_1779964636094",
     "sonha": "",
     "duongpho": "Lê Văn Việt",
