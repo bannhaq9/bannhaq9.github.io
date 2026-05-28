@@ -1,5 +1,25 @@
 [
   {
+    "id": "prod_1779965039009",
+    "sonha": "",
+    "duongpho": "Đường 147",
+    "phuongxa": "Phước Long B",
+    "tinhthanh": "Thủ Đức",
+    "area": "78",
+    "price": "7.2",
+    "sotang": "1",
+    "bedroom": "3",
+    "nhavesinh": "1",
+    "direction": "Không Xác Định",
+    "tieu_de": "BÁN ĐẤT MẶT TIỀN KINH DOANH GẦN CHỢ HOA CAU",
+    "mo_ta": "Bán đất mặt tiền kinh doanh tặng dãy trọ ngay chợ Hoa Cau - gần CĐ Công Thương - Phước Long B - Diện tích 78m2 - Xây dựng cao tầng - Chỉ 7.2 tỷ. Hiện trạng dãy trọ 3 phòng diện tích 4x18.5 74m2. Khu vực xây dựng 5-6 tầng. Đường thông thoáng, gần chợ vài bước chân, cách 300m ra Trường CĐ Công Thương tiện duy chuyển các hướng.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779965036736_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779965037801_1.jpeg"
+    ],
+    "created_at": "2026-05-28T10:43:59.009Z"
+  },
+  {
     "id": "prod_1779964918028",
     "sonha": "",
     "duongpho": "Số 6",
