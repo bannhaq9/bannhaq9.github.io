@@ -300,12 +300,28 @@ function toggleAdminMode() {
       adminPassword = pass; adminMode = true;
       document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock-open me-1"></i> Admin ON';
       document.getElementById('adminToggle').className = 'nav-link btn btn-success text-white px-3';
+
+      // ✅ THÊM: Hiện nút Đăng Tin cạnh Admin ON
+      let postBtn = document.getElementById('adminPostBtn');
+      if (!postBtn) {
+        postBtn = document.createElement('li');
+        postBtn.id = 'adminPostBtn';
+        postBtn.className = 'nav-item ms-lg-2 mt-2 mt-lg-0';
+        postBtn.innerHTML = '<a class="nav-link btn btn-danger text-white px-3" href="dang-tin.html" style="border-radius:5px; background-color:var(--primary-color); border:none;"><i class="fas fa-plus-circle me-1"></i> Đăng Tin</a>';
+        document.getElementById('adminToggle').closest('li').insertAdjacentElement('afterend', postBtn);
+      }
+
       loadProducts();
     }
   } else {
     adminMode = false; adminPassword = "";
     document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock me-1"></i> Admin';
     document.getElementById('adminToggle').className = 'nav-link btn btn-outline-secondary px-3';
+
+    // ✅ THÊM: Ẩn nút Đăng Tin khi tắt admin
+    const postBtn = document.getElementById('adminPostBtn');
+    if (postBtn) postBtn.remove();
+
     loadProducts();
   }
 }
