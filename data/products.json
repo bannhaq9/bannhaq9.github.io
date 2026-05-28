@@ -1,5 +1,26 @@
 [
   {
+    "id": "prod_1779964918028",
+    "sonha": "",
+    "duongpho": "Số 6",
+    "phuongxa": "Long Trường",
+    "tinhthanh": "Tp. Thủ Đức",
+    "area": "53",
+    "price": "5.5",
+    "sotang": "2",
+    "bedroom": "2",
+    "nhavesinh": "2",
+    "direction": "Không Xác Định",
+    "tieu_de": "NHÀ ĐẸP 2 PHÒNG NGỦ TẠI LONG TRƯỜNG, THỦ ĐỨC",
+    "mo_ta": "Kết cấu nhà 1 trệt 1 lầu, 2PN, 2 WC nhà đẹp về ở ngay.Vị trí ngay hẻm xe hơi đường Số 6, cách Nguyễn Duy Trinh 1 phút xe máy, gần chợ Long Trường UBND phường Long Trường, gần trục cao tốc, khu Công Nghệ Cao, bệnh viện Quận 9.Hẻm ôtô nhà cách mặt tiền 30m, nhà ngang 4 x 13.9 rất thoáng và rộng.Vị trí đẹp khu dân trí an ninh, hẻm sạch sẽ thoáng.Pháp lý sổ hồng chính chủ công chứng ngay.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964913318_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964914849_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779964916329_2.jpeg"
+    ],
+    "created_at": "2026-05-28T10:41:58.028Z"
+  },
+  {
     "id": "prod_1779964855525",
     "sonha": "",
     "duongpho": "đường số 494",
