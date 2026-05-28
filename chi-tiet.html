@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chi Tiết Sản Phẩm | Thanh Tra BĐS</title>
 
-<!-- Open Graph (cập nhật động bằng JS sau khi tải dữ liệu) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Thanh Tra BĐS">
 <meta id="og-title"       property="og:title"       content="Chi Tiết BĐS - Thanh Tra BĐS">
@@ -41,35 +40,133 @@
   /* MAIN LAYOUT */
   .detail-wrap { padding: 30px 0 60px; }
 
-  /* GALLERY */
-  .gallery-main {
+  /* ===== GALLERY SLIDER ===== */
+  .gallery-slider-wrap {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #111;
+    user-select: none;
+  }
+
+  /* Track cuộn ngang */
+  .gallery-track {
+    display: flex;
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    cursor: grab;
+  }
+  .gallery-track.dragging {
+    transition: none;
+    cursor: grabbing;
+  }
+  .gallery-slide {
+    flex: 0 0 100%;
+    width: 100%;
+  }
+  .gallery-slide img {
     width: 100%;
     aspect-ratio: 4/3;
     object-fit: cover;
-    border-radius: 10px;
-    background: #eee;
     display: block;
-    cursor: zoom-in;
-    transition: opacity 0.2s;
+    pointer-events: none;
   }
+
+  /* Nút mũi tên trái/phải */
+  .gallery-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.45);
+    color: white;
+    border: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s, transform 0.15s;
+    backdrop-filter: blur(4px);
+  }
+  .gallery-btn:hover {
+    background: var(--primary-color);
+    transform: translateY(-50%) scale(1.1);
+  }
+  .gallery-btn-prev { left: 10px; }
+  .gallery-btn-next { right: 10px; }
+
+  /* Chỉ số ảnh góc trên phải */
+  .gallery-counter-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    font-weight: 500;
+  }
+
+  /* Dots chỉ báo */
+  .gallery-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0 4px;
+  }
+  .gallery-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ccc;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    border: none;
+    padding: 0;
+  }
+  .gallery-dot.active {
+    background: var(--primary-color);
+    transform: scale(1.3);
+  }
+
+  /* Thumbnail strip */
   .gallery-thumb-row {
     display: flex;
     gap: 8px;
     margin-top: 10px;
-    flex-wrap: wrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd transparent;
   }
+  .gallery-thumb-row::-webkit-scrollbar { height: 4px; }
+  .gallery-thumb-row::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
   .gallery-thumb {
+    flex: 0 0 72px;
     width: 72px;
     height: 54px;
     object-fit: cover;
     border-radius: 6px;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: border-color 0.2s, opacity 0.2s;
-    opacity: 0.7;
+    transition: border-color 0.2s, opacity 0.2s, transform 0.15s;
+    opacity: 0.65;
   }
   .gallery-thumb.active,
-  .gallery-thumb:hover { border-color: var(--primary-color); opacity: 1; }
+  .gallery-thumb:hover {
+    border-color: var(--primary-color);
+    opacity: 1;
+    transform: scale(1.06);
+  }
 
   /* LIGHTBOX */
   .lightbox-overlay {
@@ -165,10 +262,7 @@
   .mota-box p { color: #555; line-height: 1.8; font-size: 0.95rem; white-space: pre-line; margin: 0; }
 
   /* STICKY CONTACT SIDEBAR */
-  .contact-sidebar {
-    position: sticky;
-    top: 86px;
-  }
+  .contact-sidebar { position: sticky; top: 86px; }
   .contact-card {
     background: white;
     border-radius: 10px;
@@ -187,40 +281,15 @@
   .contact-card .agent-name { font-weight: 700; font-size: 1rem; color: #222; margin-bottom: 2px; }
   .contact-card .agent-role { font-size: 0.83rem; color: #888; }
 
-  .btn-zalo {
-    background-color: #0068ff;
-    border-color: #0068ff;
-    color: white !important;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
+  .btn-zalo { background-color: #0068ff; border-color: #0068ff; color: white !important; font-weight: 600; transition: all 0.3s ease; }
   .btn-zalo:hover { background-color: #0055cc; border-color: #0055cc; transform: translateY(-1px); }
-
-  .btn-call {
-    background-color: #27ae60;
-    border-color: #27ae60;
-    color: white !important;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
+  .btn-call { background-color: #27ae60; border-color: #27ae60; color: white !important; font-weight: 600; transition: all 0.3s ease; }
   .btn-call:hover { background-color: #219150; border-color: #219150; transform: translateY(-1px); }
-
-  .btn-facebook-share {
-    background-color: #1877f2;
-    border-color: #1877f2;
-    color: white !important;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
+  .btn-facebook-share { background-color: #1877f2; border-color: #1877f2; color: white !important; font-weight: 600; transition: all 0.3s ease; }
   .btn-facebook-share:hover { background-color: #1558b0; border-color: #1558b0; transform: translateY(-1px); }
 
   /* LOADING & ERROR */
-  .page-loading {
-    min-height: 60vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    color: #888;
-  }
+  .page-loading { min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; }
 
   /* FOOTER */
   .footer { background-color: var(--dark-color); color: #ccc; }
@@ -233,6 +302,7 @@
     .contact-sidebar { position: static; }
     .info-card h1 { font-size: 1.15rem; }
     .info-card .price-tag { font-size: 1.5rem; }
+    .gallery-btn { width: 34px; height: 34px; font-size: 1rem; }
   }
 </style>
 </head>
@@ -278,12 +348,10 @@
 <!-- MAIN CONTENT -->
 <div class="detail-wrap">
   <div class="container" id="page-content">
-    <!-- Loading state -->
     <div class="page-loading" id="loading-state">
       <div class="spinner-border text-danger mb-3" role="status"></div>
       <p>Đang tải thông tin sản phẩm...</p>
     </div>
-    <!-- Error state -->
     <div class="page-loading d-none" id="error-state">
       <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
       <p class="fw-bold">Không tìm thấy sản phẩm</p>
@@ -292,7 +360,6 @@
         <i class="fas fa-arrow-left me-2"></i>Quay về trang chủ
       </a>
     </div>
-    <!-- Detail content (injected by JS) -->
     <div id="detail-content" class="d-none"></div>
   </div>
 </div>
@@ -344,51 +411,32 @@
 const sheetUrl   = "data/products.json";
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
 
+// ===== LIGHTBOX =====
 let lightboxImgs = [];
 let lightboxIdx  = 0;
 
-// ===== LẤY ID SẢN PHẨM TỪ URL =====
-function getQueryParam(key) {
-  return new URLSearchParams(window.location.search).get(key);
-}
-
-// ===== MỞ LIGHTBOX XEM ẢNH TO =====
-function openLightbox(imgs, startIdx) {
-  lightboxImgs = imgs;
-  lightboxIdx  = startIdx;
-  document.getElementById('lightbox-img').src = imgs[startIdx];
+function openLightbox(idx) {
+  lightboxImgs = window.galleryImgs || [];
+  lightboxIdx  = idx;
+  document.getElementById('lightbox-img').src = lightboxImgs[idx];
   updateLightboxCounter();
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
-
 function lightboxNav(dir) {
   lightboxIdx = (lightboxIdx + dir + lightboxImgs.length) % lightboxImgs.length;
   const img = document.getElementById('lightbox-img');
   img.style.opacity = '0.5';
-  setTimeout(() => {
-    img.src = lightboxImgs[lightboxIdx];
-    img.style.opacity = '1';
-    updateLightboxCounter();
-  }, 120);
+  setTimeout(() => { img.src = lightboxImgs[lightboxIdx]; img.style.opacity = '1'; updateLightboxCounter(); }, 120);
 }
-
 function updateLightboxCounter() {
-  document.getElementById('lightbox-counter').textContent =
-    (lightboxIdx + 1) + ' / ' + lightboxImgs.length;
+  document.getElementById('lightbox-counter').textContent = (lightboxIdx + 1) + ' / ' + lightboxImgs.length;
 }
-
-// Đóng lightbox khi nhấn ngoài ảnh
-document.getElementById('lightbox').addEventListener('click', function(e) {
-  if (e.target === this) closeLightbox();
-});
-
-// Phím mũi tên để điều hướng ảnh
+document.getElementById('lightbox').addEventListener('click', function(e) { if (e.target === this) closeLightbox(); });
 document.addEventListener('keydown', function(e) {
   if (!document.getElementById('lightbox').classList.contains('open')) return;
   if (e.key === 'ArrowRight') lightboxNav(1);
@@ -396,28 +444,129 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape')     closeLightbox();
 });
 
-// ===== ĐỔI ẢNH THUMBNAIL =====
-function switchThumb(idx, imgs) {
-  document.getElementById('gallery-main-img').src = imgs[idx];
-  document.querySelectorAll('.gallery-thumb').forEach((el, i) => {
-    el.classList.toggle('active', i === idx);
-  });
+// ===== GALLERY SLIDER CLASS =====
+class GallerySlider {
+  constructor(wrap, imgs) {
+    this.imgs = imgs;
+    this.current = 0;
+    this.wrap = wrap;
+    this.track = wrap.querySelector('.gallery-track');
+    this.counter = wrap.querySelector('.gallery-counter-badge');
+    this.thumbRow = wrap.parentElement.querySelector('.gallery-thumb-row');
+    this.dots = [];
+
+    // Build dots
+    const dotsWrap = wrap.parentElement.querySelector('.gallery-dots');
+    if (dotsWrap && imgs.length > 1) {
+      imgs.forEach((_, i) => {
+        const d = document.createElement('button');
+        d.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => this.goTo(i);
+        dotsWrap.appendChild(d);
+        this.dots.push(d);
+      });
+    }
+
+    // Nút mũi tên
+    wrap.querySelector('.gallery-btn-prev').addEventListener('click', () => this.goTo(this.current - 1));
+    wrap.querySelector('.gallery-btn-next').addEventListener('click', () => this.goTo(this.current + 1));
+
+    // Thumbnails
+    if (this.thumbRow) {
+      this.thumbRow.querySelectorAll('.gallery-thumb').forEach((th, i) => {
+        th.addEventListener('click', () => this.goTo(i));
+      });
+    }
+
+    // Click ảnh → mở lightbox
+    wrap.querySelectorAll('.gallery-slide img').forEach((img, i) => {
+      img.addEventListener('click', () => openLightbox(i));
+    });
+
+    // Drag/swipe chuột
+    this._initDrag();
+    // Touch swipe
+    this._initTouch();
+
+    this._update();
+  }
+
+  goTo(idx) {
+    const n = this.imgs.length;
+    this.current = ((idx % n) + n) % n;
+    this._update();
+  }
+
+  _update() {
+    this.track.style.transform = `translateX(-${this.current * 100}%)`;
+
+    // Counter badge
+    if (this.counter) this.counter.textContent = (this.current + 1) + ' / ' + this.imgs.length;
+
+    // Dots
+    this.dots.forEach((d, i) => d.classList.toggle('active', i === this.current));
+
+    // Thumbnails
+    if (this.thumbRow) {
+      const thumbs = this.thumbRow.querySelectorAll('.gallery-thumb');
+      thumbs.forEach((th, i) => th.classList.toggle('active', i === this.current));
+      // Cuộn thumbnail strip về vị trí active
+      const activeTh = thumbs[this.current];
+      if (activeTh) {
+        const row = this.thumbRow;
+        const scrollLeft = activeTh.offsetLeft - row.offsetWidth / 2 + activeTh.offsetWidth / 2;
+        row.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+      }
+    }
+  }
+
+  _initDrag() {
+    let startX = 0, isDragging = false, moved = 0;
+    this.track.addEventListener('mousedown', (e) => {
+      startX = e.clientX; isDragging = true; moved = 0;
+      this.track.classList.add('dragging');
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      moved = e.clientX - startX;
+      const offset = -this.current * 100;
+      this.track.style.transform = `translateX(calc(${offset}% + ${moved}px))`;
+    });
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      this.track.classList.remove('dragging');
+      if (Math.abs(moved) > 60) this.goTo(this.current + (moved < 0 ? 1 : -1));
+      else this._update();
+    });
+  }
+
+  _initTouch() {
+    let startX = 0, moved = 0;
+    this.wrap.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX; moved = 0;
+    }, { passive: true });
+    this.wrap.addEventListener('touchmove', (e) => {
+      moved = e.touches[0].clientX - startX;
+      const offset = -this.current * 100;
+      this.track.style.transition = 'none';
+      this.track.style.transform = `translateX(calc(${offset}% + ${moved}px))`;
+    }, { passive: true });
+    this.wrap.addEventListener('touchend', () => {
+      this.track.style.transition = '';
+      if (Math.abs(moved) > 50) this.goTo(this.current + (moved < 0 ? 1 : -1));
+      else this._update();
+    });
+  }
 }
 
-// ===== CHIA SẺ LÊN FACEBOOK =====
+// ===== CHIA SẺ FACEBOOK =====
 function shareDetail(tieuDe, gia, diaChi, dienTich) {
   const pageUrl = encodeURIComponent(window.location.href);
   const quote   = encodeURIComponent(
-    '🏠 ' + tieuDe + '\n' +
-    '📍 ' + diaChi + '\n' +
-    '📐 Diện tích: ' + dienTich + ' m²\n' +
-    '💰 Giá: ' + gia + ' Tỷ\n\n' +
-    '👉 Liên hệ Hotline/Zalo: 0854.100.036'
+    '🏠 ' + tieuDe + '\n📍 ' + diaChi + '\n📐 Diện tích: ' + dienTich + ' m²\n💰 Giá: ' + gia + ' Tỷ\n\n👉 Liên hệ Hotline/Zalo: 0854.100.036'
   );
-  window.open(
-    'https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote,
-    '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes'
-  );
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
 }
 
 // ===== RENDER TRANG CHI TIẾT =====
@@ -438,121 +587,95 @@ function renderDetail(product) {
 
   const diaChi = [soNha, duong, phuong, tinh].filter(Boolean).join(', ');
 
-  // Ảnh
   let imgs = [];
-  if (Array.isArray(product.images)) {
-    imgs = product.images.filter(u => u && u.trim() !== '');
-  }
+  if (Array.isArray(product.images)) imgs = product.images.filter(u => u && u.trim() !== '');
   if (imgs.length === 0) imgs.push(defaultImg);
 
-  // Badge mới
+  window.galleryImgs = imgs;
+
   let badgeHtml = '';
   if (thoiGian) {
     const d = new Date(thoiGian);
-    if (!isNaN(d.getTime())) {
-      const diff = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
-      if (diff <= 7) badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
-    }
+    if (!isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 <= 7)
+      badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
   }
 
-  // Ngày đăng
   let ngayDang = '';
   if (thoiGian) {
     const d = new Date(thoiGian);
-    if (!isNaN(d.getTime())) {
-      ngayDang = d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
-    }
+    if (!isNaN(d.getTime())) ngayDang = d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
   }
 
-  // Gallery thumbnails HTML
-  const thumbsHtml = imgs.map((url, i) =>
-    `<img src="${url}" class="gallery-thumb ${i === 0 ? 'active' : ''}"
-      alt="Ảnh ${i+1}" title="Ảnh ${i+1}"
-      onerror="this.src='${defaultImg}'"
-      onclick="switchThumb(${i}, galleryImgs)">`
+  // Build slides HTML
+  const slidesHtml = imgs.map((url, i) =>
+    `<div class="gallery-slide">
+       <img src="${url}" alt="Ảnh ${i+1}" title="Nhấp để xem ảnh lớn" onerror="this.src='${defaultImg}'">
+     </div>`
   ).join('');
 
-  // Cập nhật title trang và breadcrumb
+  // Build thumbnails HTML (chỉ hiện khi > 1 ảnh)
+  const thumbsHtml = imgs.length > 1 ? `
+    <div class="gallery-thumb-row">
+      ${imgs.map((url, i) =>
+        `<img src="${url}" class="gallery-thumb ${i===0?'active':''}" alt="Ảnh ${i+1}" onerror="this.src='${defaultImg}'">`
+      ).join('')}
+    </div>` : '';
+
   document.title = tieuDe + ' | Thanh Tra BĐS';
   document.getElementById('breadcrumb-title').textContent = tieuDe;
-
-  // Cập nhật Open Graph cho việc chia sẻ
   document.getElementById('og-title').setAttribute('content', tieuDe + ' - Thanh Tra BĐS');
-  document.getElementById('og-description').setAttribute('content',
-    `📍 ${diaChi} | 📐 ${dienTich} m² | 💰 ${gia} Tỷ | Hotline: 0854.100.036`);
+  document.getElementById('og-description').setAttribute('content', `📍 ${diaChi} | 📐 ${dienTich} m² | 💰 ${gia} Tỷ | Hotline: 0854.100.036`);
   if (imgs[0]) document.getElementById('og-image').setAttribute('content', imgs[0]);
+
+  const showArrows = imgs.length > 1;
 
   const html = `
     <div class="row g-4">
-
-      <!-- CỘT TRÁI: ẢNH + MÔ TẢ -->
+      <!-- CỘT TRÁI -->
       <div class="col-lg-8">
-
-        <!-- GALLERY -->
         <div class="info-card p-3 mb-3">
-          <img
-            id="gallery-main-img"
-            class="gallery-main"
-            src="${imgs[0]}"
-            alt="${tieuDe}"
-            onerror="this.src='${defaultImg}'"
-            onclick="openLightbox(galleryImgs, getCurrentThumbIdx())"
-            title="Nhấp để xem ảnh lớn"
-          >
-          ${imgs.length > 1 ? `<div class="gallery-thumb-row">${thumbsHtml}</div>` : ''}
-          ${imgs.length > 1 ? `<p class="text-muted mt-2 mb-0" style="font-size:0.82rem;"><i class="fas fa-images me-1"></i>${imgs.length} ảnh — nhấp vào ảnh chính để xem cỡ lớn</p>` : ''}
+
+          <!-- SLIDER WRAP -->
+          <div class="gallery-slider-wrap" id="gallery-slider-wrap">
+            ${showArrows ? `<button class="gallery-btn gallery-btn-prev" title="Ảnh trước"><i class="fas fa-chevron-left"></i></button>` : ''}
+            ${showArrows ? `<button class="gallery-btn gallery-btn-next" title="Ảnh tiếp"><i class="fas fa-chevron-right"></i></button>` : ''}
+            ${imgs.length > 1 ? `<span class="gallery-counter-badge">1 / ${imgs.length}</span>` : ''}
+            <div class="gallery-track">${slidesHtml}</div>
+          </div>
+
+          <!-- DOTS -->
+          ${imgs.length > 1 ? `<div class="gallery-dots" id="gallery-dots"></div>` : ''}
+
+          <!-- THUMBNAILS -->
+          ${thumbsHtml}
+
+          ${imgs.length > 1 ? `<p class="text-muted mt-2 mb-0" style="font-size:0.82rem;"><i class="fas fa-hand-pointer me-1"></i>Vuốt hoặc nhấn mũi tên để xem tất cả ${imgs.length} ảnh</p>` : ''}
         </div>
 
-        <!-- MÔ TẢ CHI TIẾT -->
         ${moTa ? `
         <div class="mota-box">
           <h5><i class="fas fa-align-left me-2" style="color:var(--primary-color);"></i>Mô tả chi tiết</h5>
           <p>${moTa.replace(/\n/g, '<br>')}</p>
         </div>` : ''}
 
-        <!-- THÔNG TIN PHÁP LÝ / CHI TIẾT -->
         <div class="mota-box">
           <h5><i class="fas fa-clipboard-list me-2" style="color:var(--primary-color);"></i>Thông số kỹ thuật</h5>
           <table class="spec-table">
-            <tr>
-              <td><i class="fas fa-ruler-combined"></i> Diện tích</td>
-              <td>${dienTich ? dienTich + ' m²' : 'N/A'}</td>
-            </tr>
-            <tr>
-              <td><i class="fas fa-layer-group"></i> Số tầng</td>
-              <td>${soTang || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td><i class="fas fa-bed"></i> Phòng ngủ</td>
-              <td>${pNgu || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td><i class="fas fa-bath"></i> Nhà vệ sinh</td>
-              <td>${wc || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td><i class="fas fa-compass"></i> Hướng nhà</td>
-              <td>${huong || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td><i class="fas fa-map-marker-alt"></i> Địa chỉ đầy đủ</td>
-              <td>${diaChi || 'N/A'}</td>
-            </tr>
+            <tr><td><i class="fas fa-ruler-combined"></i> Diện tích</td><td>${dienTich ? dienTich + ' m²' : 'N/A'}</td></tr>
+            <tr><td><i class="fas fa-layer-group"></i> Số tầng</td><td>${soTang || 'N/A'}</td></tr>
+            <tr><td><i class="fas fa-bed"></i> Phòng ngủ</td><td>${pNgu || 'N/A'}</td></tr>
+            <tr><td><i class="fas fa-bath"></i> Nhà vệ sinh</td><td>${wc || 'N/A'}</td></tr>
+            <tr><td><i class="fas fa-compass"></i> Hướng nhà</td><td>${huong || 'N/A'}</td></tr>
+            <tr><td><i class="fas fa-map-marker-alt"></i> Địa chỉ đầy đủ</td><td>${diaChi || 'N/A'}</td></tr>
             ${ngayDang ? `<tr><td><i class="fas fa-calendar-alt"></i> Ngày đăng</td><td>${ngayDang}</td></tr>` : ''}
-            <tr>
-              <td><i class="fas fa-tag"></i> Mã tin</td>
-              <td style="font-family:monospace;font-size:0.85rem;color:#888;">${product.id || 'N/A'}</td>
-            </tr>
+            <tr><td><i class="fas fa-tag"></i> Mã tin</td><td style="font-family:monospace;font-size:0.85rem;color:#888;">${product.id || 'N/A'}</td></tr>
           </table>
         </div>
-
       </div>
 
-      <!-- CỘT PHẢI: GIÁ + LIÊN HỆ -->
+      <!-- CỘT PHẢI -->
       <div class="col-lg-4">
         <div class="contact-sidebar">
-
-          <!-- GIÁ + TIÊU ĐỀ -->
           <div class="info-card">
             ${badgeHtml}
             <h1>${tieuDe}</h1>
@@ -568,7 +691,6 @@ function renderDetail(product) {
             </div>
           </div>
 
-          <!-- LIÊN HỆ MÔI GIỚI -->
           <div class="contact-card">
             <div class="d-flex align-items-center mb-16" style="margin-bottom:16px;">
               <div class="agent-avatar">TT</div>
@@ -578,29 +700,20 @@ function renderDetail(product) {
               </div>
             </div>
             <div class="d-grid gap-2">
-              <a href="tel:0854100036" class="btn btn-call py-2">
-                <i class="fas fa-phone-alt me-2"></i>Gọi ngay: 0854.100.036
-              </a>
-              <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-zalo py-2">
-                <i class="fa-solid fa-comment-dots me-2"></i>Nhắn Zalo ngay
-              </a>
-              <button
-                class="btn btn-facebook-share py-2"
-                onclick="shareDetail('${tieuDe.replace(/'/g,"\\'")}', '${gia}', '${diaChi.replace(/'/g,"\\'")}', '${dienTich}')"
-              >
+              <a href="tel:0854100036" class="btn btn-call py-2"><i class="fas fa-phone-alt me-2"></i>Gọi ngay: 0854.100.036</a>
+              <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-zalo py-2"><i class="fa-solid fa-comment-dots me-2"></i>Nhắn Zalo ngay</a>
+              <button class="btn btn-facebook-share py-2"
+                onclick="shareDetail('${tieuDe.replace(/'/g,"\\'")}', '${gia}', '${diaChi.replace(/'/g,"\\'")}', '${dienTich}')">
                 <i class="fab fa-facebook-f me-2"></i>Chia sẻ lên Facebook
               </button>
             </div>
           </div>
 
-          <!-- NÚT QUAY LẠI -->
           <a href="index.html#products" class="btn btn-outline-secondary w-100 py-2">
             <i class="fas fa-arrow-left me-2"></i>Xem thêm sản phẩm khác
           </a>
-
         </div>
       </div>
-
     </div>
   `;
 
@@ -608,43 +721,37 @@ function renderDetail(product) {
   document.getElementById('detail-content').classList.remove('d-none');
   document.getElementById('loading-state').classList.add('d-none');
 
-  // Gán mảng ảnh vào biến global để lightbox & thumb có thể dùng
-  window.galleryImgs = imgs;
-}
-
-// ===== LẤY INDEX THUMBNAIL ĐANG ACTIVE =====
-function getCurrentThumbIdx() {
-  const thumbs = document.querySelectorAll('.gallery-thumb');
-  for (let i = 0; i < thumbs.length; i++) {
-    if (thumbs[i].classList.contains('active')) return i;
+  // Khởi tạo slider sau khi HTML đã render vào DOM
+  if (imgs.length > 0) {
+    const sliderWrap = document.getElementById('gallery-slider-wrap');
+    if (sliderWrap) new GallerySlider(sliderWrap, imgs);
   }
-  return 0;
 }
 
-// ===== TẢI DỮ LIỆU VÀ TÌM SẢN PHẨM THEO ID =====
+// ===== LẤY QUERY PARAM =====
+function getQueryParam(key) {
+  return new URLSearchParams(window.location.search).get(key);
+}
+
+// ===== TẢI DỮ LIỆU =====
 async function loadDetail() {
   const id = getQueryParam('id');
-
   if (!id) {
     document.getElementById('loading-state').classList.add('d-none');
     document.getElementById('error-state').classList.remove('d-none');
     return;
   }
-
   try {
     const res = await fetch(sheetUrl, { method: 'GET', cache: 'no-cache' });
     if (!res.ok) throw new Error('Không tải được dữ liệu.');
     const rows = await res.json();
-
     const product = rows.find(p => String(p.id) === String(id));
     if (!product) {
       document.getElementById('loading-state').classList.add('d-none');
       document.getElementById('error-state').classList.remove('d-none');
       return;
     }
-
     renderDetail(product);
-
   } catch (err) {
     console.error(err);
     document.getElementById('loading-state').classList.add('d-none');
@@ -653,7 +760,6 @@ async function loadDetail() {
 }
 
 window.addEventListener('DOMContentLoaded', loadDetail);
-
 </script>
 </body>
 </html>
