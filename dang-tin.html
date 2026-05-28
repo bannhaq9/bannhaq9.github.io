@@ -146,7 +146,7 @@
     <div class="section-title">✏️ Nội dung tin đăng</div>
     <div class="mb-3">
       <label class="form-label">📋 Paste nội dung bài đăng vào đây <span style="color:var(--muted);font-weight:400;">(copy từ Zalo, Facebook, tin nhắn...)</span></label>
-      <textarea id="rawInput" class="form-control" rows="6" placeholder="Dán nội dung bài đăng vào đây&#10;VD:&#10;Bán căn hộ Masteri Q9 đường D1, phường Long Bình...&#10;- Giá: 5.1 tỷ&#10;- Diện tích: 74m²&#10;- 2PN - 2WC&#10;..."></textarea>
+      <textarea id="rawInput" name="rawText" class="form-control" rows="6" placeholder="Dán nội dung bài đăng vào đây&#10;VD:&#10;Bán căn hộ Masteri Q9 đường D1, phường Long Bình...&#10;- Giá: 5.1 tỷ&#10;- Diện tích: 74m²&#10;- 2PN - 2WC&#10;..."></textarea>
     </div>
     <div class="ai-box mb-3">
       <div class="ai-box-header">
@@ -159,13 +159,13 @@
       <p class="ai-note" id="aiNote" style="display:none;"></p>
     </div>
     <div class="mb-3">
-  <label class="form-label">Tiêu đề bài viết</label>
-  <input type="text" name="tieu_de" id="titleInput" class="form-control" placeholder="AI sẽ tự điền sau khi phân tích" required>
-</div>
-<div class="mb-3">
-  <label class="form-label">Nội dung mô tả chi tiết</label>
-  <textarea name="mo_ta" id="descInput" class="form-control" rows="5" placeholder="AI sẽ tự viết mô tả hấp dẫn..."></textarea>
-</div>
+      <label class="form-label">Tiêu đề bài viết</label>
+      <input type="text" name="tieu_de" id="titleInput" class="form-control" placeholder="AI sẽ tự điền sau khi phân tích" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nội dung mô tả chi tiết</label>
+      <textarea name="mo_ta" id="descInput" class="form-control" rows="5" placeholder="AI sẽ tự viết mô tả hấp dẫn..."></textarea>
+    </div>
     <div class="section-title">🖼️ Hình ảnh (Tối đa 10 ảnh)</div>
     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
       <div class="upload-icon">📷</div>
@@ -177,14 +177,14 @@
     <p class="image-count" id="imageCount" style="display:none;">Đã chọn <span id="countNum">0</span>/10 ảnh</p>
     <p class="file-warning" id="fileWarning">⚠️ Một số ảnh vượt quá 5MB đã bị bỏ qua.</p>
     <div id="uploadProgress">
-  <p style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Đang tải ảnh lên GitHub... <span id="progressText">0%</span></p>
-  <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
-</div>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:5px;">Đang tải ảnh lên GitHub... <span id="progressText">0%</span></p>
+      <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    </div>
     <button type="submit" class="btn-post" id="submitBtn">🚀 ĐĂNG TIN NGAY</button>
   </form>
 </div>
 <script>
-const scriptURL = 'https://script.google.com/macros/library/d/1CMNNeTyAb6FptLLeFwh6ECAfht8QnFXZfvv74tow7bIgxzgpi6_YWIbe/2';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec'; 
 const MAX_IMAGES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 let selectedFiles = [];
@@ -213,7 +213,7 @@ function renderPreviews() {
       item.className = 'preview-item';
       item.innerHTML = `
         <img src="${e.target.result}" alt="Ảnh ${idx+1}">
-        <button class="remove-btn" onclick="removeImage(${idx})">✕</button>
+        <button type="button" class="remove-btn" onclick="removeImage(${idx})">✕</button>
       `;
       previewContainer.appendChild(item);
     };
@@ -287,24 +287,28 @@ form.addEventListener('submit', async e => {
   data.images = JSON.stringify(images);
   fetch(scriptURL, {
     method: 'POST',
-    body: JSON.stringify(data),
-    headers: { 'Content-Type': 'text/plain' }
+    body: JSON.stringify(data)
   })
-  .then(res => res.text())
-  .then(() => {
-    showToast('✅ Đăng tin thành công!', 'success');
+  .then(res => res.json())
+  .then(result => {
+    if(result.status === 'ok') {
+      showToast('✅ Đăng tin lên GitHub thành công!', 'success');
+      form.reset();
+      selectedFiles = [];
+      previewContainer.innerHTML = '';
+      imageCount.style.display = 'none';
+      uploadProgress.style.display = 'none';
+      progressBar.style.width = '0%';
+      progressText.textContent = '0%';
+    } else {
+      showToast('❌ Lỗi từ hệ thống: ' + result.message, 'error');
+    }
     btn.disabled = false;
     btn.innerHTML = '🚀 ĐĂNG TIN NGAY';
-    form.reset();
-    selectedFiles = [];
-    previewContainer.innerHTML = '';
-    imageCount.style.display = 'none';
-    uploadProgress.style.display = 'none';
-    progressBar.style.width = '0%';
-    progressText.textContent = '0%';
   })
-  .catch(() => {
-    showToast('❌ Lỗi kết nối! Vui lòng thử lại.', 'error');
+  .catch((err) => {
+    console.error(err);
+    showToast('❌ Lỗi kết nối hoặc cấu hình Script! Vui lòng kiểm tra lại.', 'error');
     btn.disabled = false;
     btn.innerHTML = '🚀 ĐĂNG TIN NGAY';
     uploadProgress.style.display = 'none';
@@ -326,11 +330,10 @@ async function analyzeWithAI() {
   try {
     const res = await fetch(scriptURL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'analyze', text: rawText })
     });
     const result = await res.json();
-    if (result.status !== 'ok') throw new Error(result.message || 'Lỗi không xác định');
+    if (result.status !== 'ok') throw new Error(result.message || 'Lỗi không xác định từ AI');
     const p = result.data;
     if (p.sonha)     document.querySelector('[name=sonha]').value     = p.sonha;
     if (p.duongpho)  document.querySelector('[name=duongpho]').value  = p.duongpho;
