@@ -1,3 +1,4 @@
+```html:Trang Chủ index.html:index.html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -145,7 +146,7 @@ body { font-family: 'Be Vietnam Pro', sans-serif; color: #333; }
   </section>
   <section id="contact" class="py-5">
     <div class="container text-center">
-      <h2 class="section-title">LIÊN HỆ VỚI CHÚNG TÔI</h2>
+      <h2 class="section-title">LIÊN HỆ WITH US</h2>
       <p class="lead mb-4">Đừng ngần ngại, hãy gọi ngay cho tôi để được tư vấn miễn phí!</p>
       <div class="contact-info">
         <h4><i class="fas fa-user-tie me-2" style="color:var(--primary-color);"></i>Thanh Trà</h4>
@@ -187,11 +188,14 @@ body { font-family: 'Be Vietnam Pro', sans-serif; color: #333; }
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const sheetUrl = "data.json"; 
+// ===== ĐƯỜNG DẪN TỚI FILE DỮ LIỆU JSON TRÊN GITHUB =====
+const sheetUrl = "data/products.json"; 
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
 let allProducts = [];
+
 function createCard(product, cardId) {
-  const thoiGian = product.timestamp || '';
+  // Đồng bộ cả timestamp cũ và created_at mới
+  const thoiGian = product.created_at || product.timestamp || '';
   const soNha    = product.sonha     || '';
   const duong    = product.duongpho  || '';
   const phuong   = product.phuongxa  || '';
@@ -204,11 +208,13 @@ function createCard(product, cardId) {
   const huong    = product.direction || '';
   const tieuDe   = product.tieu_de   || 'Bất Động Sản Nhà Phố';
   const moTa     = product.mo_ta     || '';
+  
   let imgs = [];
   if (Array.isArray(product.images)) {
     imgs = product.images.filter(url => url && url.trim() !== '');
   }
   if (imgs.length === 0) imgs.push(defaultImg);
+  
   let badgeHtml = '';
   if (thoiGian) {
     const d = new Date(thoiGian);
@@ -217,6 +223,7 @@ function createCard(product, cardId) {
       if (diff <= 7) badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
     }
   }
+  
   const moTaShort = moTa.length > 80 ? moTa.substring(0, 80) + '...' : moTa;
   const hasMultipleImgs = imgs.length > 1;
   const imgId = `img-${cardId}`;
@@ -225,6 +232,7 @@ function createCard(product, cardId) {
     <button class="img-nav prev" onclick="changeImg('${imgId}', -1, ${JSON.stringify(imgs).replace(/'/g,"&#39;")})">&#8249;</button>
     <button class="img-nav next" onclick="changeImg('${imgId}', 1,  ${JSON.stringify(imgs).replace(/'/g,"&#39;")})">&#8250;</button>
     <span class="img-counter" id="${imgId}-counter">1 / ${imgs.length}</span>` : '';
+    
   return `
     <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-price="${gia}" data-tang="${soTang}">
       <div class="card property-card w-100">
@@ -254,6 +262,7 @@ function createCard(product, cardId) {
       </div>
     </div>`;
 }
+
 function changeImg(imgId, dir, imgList) {
   const el = document.getElementById(imgId);
   const counter = document.getElementById(imgId + '-counter');
@@ -264,6 +273,7 @@ function changeImg(imgId, dir, imgList) {
   el.dataset.idx = next;
   if (counter) counter.textContent = (next + 1) + ' / ' + imgList.length;
 }
+
 function applyFilter() {
   const priceFilter = document.getElementById('filterPrice').value;
   const tangFilter  = document.getElementById('filterTang').value;
@@ -285,11 +295,13 @@ function applyFilter() {
   });
   document.getElementById('result-count').textContent = `Hiển thị ${count} sản phẩm`;
 }
+
 function resetFilter() {
   document.getElementById('filterPrice').value = '';
   document.getElementById('filterTang').value  = '';
   applyFilter();
 }
+
 async function loadProducts() {
   const container = document.getElementById('product-list');
   try {
@@ -319,3 +331,4 @@ window.addEventListener('DOMContentLoaded', loadProducts);
 </script>
 </body>
 </html>
+```
