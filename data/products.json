@@ -134,25 +134,6 @@
     ],
     "created_at": "2026-05-28T06:39:51.360Z"
   },
-  {
-    "id": "prod_1779947360050",
-    "sonha": "",
-    "duongpho": "Võ Văn Hát",
-    "phuongxa": "Long Trường",
-    "tinhthanh": "Thủ Đức",
-    "area": "50",
-    "price": "5",
-    "sotang": "1",
-    "bedroom": "1",
-    "nhavesinh": "1",
-    "direction": "Tây",
-    "tieu_de": "NHÀ 4 TẦNG MỚI COONG – HẺM XE HƠI – SÁT TRỤC LÊ VĂN VIỆT – 6.55 TỶ",
-    "mo_ta": "aaaaaaaaaaaaaaaaaaaa",
-    "images": [
-      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779947355196_0.jpeg",
-      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779947356290_1.jpeg",
-      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779947358220_2.jpeg"
-    ],
-    "created_at": "2026-05-28T05:49:20.050Z"
+  
   }
 ]
