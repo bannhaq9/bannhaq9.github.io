@@ -102,11 +102,17 @@
         <ul class="navbar-nav ms-auto align-items-center">
           <li class="nav-item"><a class="nav-link active" href="#hero">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" href="#products">Sản Phẩm</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">Giới thiệu</a></li>
           <li class="nav-item"><a class="nav-link" href="#contact">Liên hệ</a></li>
           <li class="nav-item">
             <a class="nav-link btn btn-danger text-white px-3 ms-lg-3 mt-2 mt-lg-0" href="dang-tin.html" style="border-radius:5px; background-color: var(--primary-color); border:none;">
               <i class="fas fa-plus-circle me-1"></i> Đăng Tin
             </a>
+          </li>
+          <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+            <button class="nav-link btn btn-outline-secondary px-3" id="adminToggle" onclick="toggleAdminMode()" style="border-radius:5px;">
+              <i class="fas fa-lock me-1"></i> Admin
+            </button>
           </li>
         </ul>
       </div>
@@ -218,7 +224,102 @@
 // ===== CẤU HÌNH ĐƯỜNG DẪN DỮ LIỆU TĨNH GITHUB =====
 const sheetUrl = "data/products.json"; 
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
+const scriptURL = "https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec"; // Đường dẫn GAS proxy
 let allProducts = [];
+let adminMode = false;
+let adminPassword = "";
+
+// ===== BẬT/TẮT CHẾ ĐỘ QUẢN TRỊ =====
+function toggleAdminMode() {
+  if (!adminMode) {
+    const pass = prompt("Nhập mật khẩu quản trị để sửa hoặc xóa tin đăng:");
+    if (pass !== null) {
+      adminPassword = pass;
+      adminMode = true;
+      document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock-open me-1"></i> Admin ON';
+      document.getElementById('adminToggle').className = 'nav-link btn btn-success text-white px-3';
+      loadProducts(); // Load lại sản phẩm để hiện nút quản trị
+    }
+  } else {
+    adminMode = false;
+    adminPassword = "";
+    document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock me-1"></i> Admin';
+    document.getElementById('adminToggle').className = 'nav-link btn btn-outline-secondary px-3';
+    loadProducts(); // Load lại sản phẩm để ẩn nút quản trị
+  }
+}
+
+// ===== HỘP THOẠI XÁC NHẬN CUSTOM (HÌNH THỨC THAY THẾ CONFIRM) =====
+function showCustomConfirm(message, onConfirm) {
+  const modal = document.createElement('div');
+  modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;";
+  modal.innerHTML = `
+    <div style="background:white;padding:24px;border-radius:12px;max-width:400px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;animation:fadeIn 0.2s ease;">
+      <h5 style="font-weight:700;margin-bottom:12px;color:#222;">Xác nhận xóa tin</h5>
+      <p style="color:#555;font-size:0.95rem;margin-bottom:24px;line-height:1.5;">${message}</p>
+      <div class="d-flex gap-2">
+        <button id="modalCancel" class="btn btn-outline-secondary w-100">Hủy bỏ</button>
+        <button id="modalConfirm" class="btn btn-danger w-100" style="background-color:#e03c31; border-color:#e03c31;">Đồng ý xóa</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('#modalCancel').onclick = () => modal.remove();
+  modal.querySelector('#modalConfirm').onclick = () => {
+    modal.remove();
+    onConfirm();
+  };
+}
+
+// ===== HỘP THOẠI THÔNG BÁO CUSTOM (HÌNH THỨC THAY THẾ ALERT) =====
+function showCustomAlert(title, message, type = 'success') {
+  const modal = document.createElement('div');
+  modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;";
+  const color = type === 'success' ? '#27ae60' : '#e03c31';
+  modal.innerHTML = `
+    <div style="background:white;padding:24px;border-radius:12px;max-width:400px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;animation:fadeIn 0.2s ease;">
+      <h5 style="font-weight:700;margin-bottom:12px;color:${color};">${title}</h5>
+      <p style="color:#555;font-size:0.95rem;margin-bottom:20px;line-height:1.5;">${message}</p>
+      <button id="modalClose" class="btn btn-primary w-100" style="background-color:${color};border-color:${color};">Đóng</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('#modalClose').onclick = () => modal.remove();
+}
+
+// ===== CHUYỂN HƯỚNG SANG TRANG SỬA TIN =====
+function editProduct(id) {
+  window.location.href = `dang-tin.html?id=${id}&pwd=${encodeURIComponent(adminPassword)}`;
+}
+
+// ===== YÊU CẦU XÓA TIN ĐĂNG ĐẾN GOOGLE APPS SCRIPT =====
+function deleteProduct(id) {
+  showCustomConfirm("Bạn có chắc chắn muốn xóa tin đăng bất động sản này khỏi website? Thao tác này sẽ cập nhật trực tiếp lên kho chứa GitHub và không thể hoàn tác.", async () => {
+    const container = document.getElementById('product-list');
+    container.innerHTML = `
+      <div class="loading-spinner w-100">
+        <div class="spinner-border text-danger mb-3" role="status"></div>
+        <p>Đang tiến hành xóa dữ liệu trên GitHub...</p>
+      </div>`;
+      
+    try {
+      const res = await fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'delete', id: id, password: adminPassword })
+      });
+      const result = await res.json();
+      if (result.status === 'ok') {
+        showCustomAlert("Thành công", result.message, "success");
+      } else {
+        showCustomAlert("Thất bại", result.message, "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showCustomAlert("Lỗi", "Không thể kết nối đến hệ thống máy chủ trung gian!", "error");
+    }
+    loadProducts(); // Reload trang chủ
+  });
+}
 
 // ===== TẠO CARD SẢN PHẨM BẤT ĐỘNG SẢN TỪ DỮ LIỆU JSON =====
 function createCard(product, cardId) {
@@ -270,6 +371,21 @@ function createCard(product, cardId) {
   // Tránh lỗi cú pháp nháy đơn khi chứa mảng ảnh dạng JSON string
   const imagesAttr = JSON.stringify(imgs).replace(/'/g, "&apos;");
 
+  // Nút hành động Admin
+  let adminActionsHtml = '';
+  if (adminMode) {
+    adminActionsHtml = `
+      <div class="d-flex gap-2 mt-3 pt-3 border-top">
+        <button class="btn btn-sm btn-warning w-100 text-dark fw-bold" onclick="event.stopPropagation(); editProduct('${product.id}')">
+          <i class="fas fa-edit me-1"></i> Sửa Tin
+        </button>
+        <button class="btn btn-sm btn-danger w-100 fw-bold" onclick="event.stopPropagation(); deleteProduct('${product.id}')">
+          <i class="fas fa-trash-alt me-1"></i> Xóa Tin
+        </button>
+      </div>
+    `;
+  }
+
   return `
     <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-price="${gia}" data-tang="${soTang}">
       <div class="card property-card w-100 d-flex flex-column">
@@ -294,9 +410,10 @@ function createCard(product, cardId) {
           </ul>
           <div class="mt-auto pt-3 border-top">
             <p class="price mb-2 text-danger fw-bold fs-5">Giá: ${gia} Tỷ</p>
-            <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-primary w-100 py-2">
+            <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-primary w-100 py-2" style="background-color: var(--primary-color); border:none;">
               <i class="fas fa-comment-dots me-1"></i>Liên hệ Zalo ngay
             </a>
+            ${adminActionsHtml}
           </div>
         </div>
       </div>
