@@ -1,5 +1,27 @@
 [
   {
+    "id": "prod_1779955865356",
+    "sonha": "",
+    "duongpho": "Đường số 2",
+    "phuongxa": "Long Trường",
+    "tinhthanh": "TP. Thủ Đức",
+    "area": "73",
+    "price": "6.5",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "3",
+    "direction": "Không Xác Định",
+    "tieu_de": "NHÀ MỚI 3 TẦNG SIÊU ĐẸP GẦN NGUYỄN DUY TRINH",
+    "mo_ta": "Nhà mới xây siêu đẹp, thiết kế hiện đại, tinh tế, sẵn sàng dọn vào ở ngay mà không cần sửa chữa. Nằm tại vị trí đắc địa, đường trước nhà rộng thoáng, xe tải né nhau thoải mái. Kết nối giao thông cực kỳ thuận tiện, chỉ cách trục đường Nguyễn Duy Trinh 200m. Sổ hồng riêng chính chủ, pháp lý minh bạch, sẵn sàng công chứng sang tên nhanh chóng.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779955858827_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779955860331_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779955861803_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1779955863450_3.jpeg"
+    ],
+    "created_at": "2026-05-28T08:11:05.356Z"
+  },
+  {
     "id": "prod_1779955065356",
     "sonha": "",
     "duongpho": "Trường Lưu",
