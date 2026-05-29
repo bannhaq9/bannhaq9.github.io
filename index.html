@@ -113,9 +113,28 @@
  .btn-facebook:hover { background-color: #1558b0; transform: translateY(-1px); }
  .admin-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
  .admin-actions .btn { font-size: 0.78rem; padding: 5px 4px; }
- #filter-bar { background: #f8f9fa; padding: 20px 0; border-bottom: 1px solid #eee; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.03); }
- #filter-bar label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 4px; }
- #filter-bar .form-control, #filter-bar .form-select { font-size: 0.88rem; padding: 7px 10px; border-radius: 6px; }
+ 
+ /* CSS ĐƯỢC THAY ĐỔI ĐỂ PHÙ HỢP CHỨC NĂNG THU GỌN BỘ LỌC */
+ #filter-bar { background: #f8f9fa; padding: 15px 0; border-bottom: 1px solid #eee; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.03); }
+ .search-trigger-box {
+ background: #fff;
+ border: 1px solid #ced4da;
+ border-radius: 6px;
+ padding: 10px 16px;
+ cursor: pointer;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ transition: all 0.2s ease;
+ box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+ }
+ .search-trigger-box:hover { border-color: #a1a1a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+ .search-trigger-box span { color: #6c757d; font-size: 0.95rem; }
+ .search-trigger-box i { color: #007bff; font-size: 1.1rem; }
+ .filter-inner-card { background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 20px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+ .filter-inner-card label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+ .filter-inner-card .form-control, .filter-inner-card .form-select { font-size: 0.88rem; padding: 7px 10px; border-radius: 6px; }
+ 
  #contact { background-color: #f8f9fa; }
  .footer { background-color: var(--dark-color); color: #ccc; }
  .footer h5 { color: white; font-weight: 600; }
@@ -163,8 +182,18 @@
  </div>
  </section>
  
+ <!-- THANH TÌM KIẾM THU GỌN VÀ KHU VỰC BỘ LỌC XỔ XUỐNG -->
  <div id="filter-bar">
  <div class="container">
+ <!-- Thanh hiển thị mặc định thu gọn theo mẫu image_0e789f.png -->
+ <div class="search-trigger-box" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+ <span id="search-placeholder-text">Tìm kiếm thông tin...</span>
+ <i class="fas fa-search"></i>
+ </div>
+ 
+ <!-- Khối nội dung bộ lọc chi tiết xổ xuống khi click theo mẫu image_0e78db.png -->
+ <div class="collapse" id="collapseFilter">
+ <div class="filter-inner-card">
  <div class="row g-2">
  <div class="col-6 col-md-3">
  <label>Tỉnh/Thành phố</label>
@@ -248,6 +277,8 @@
  </div>
  </div>
  </div>
+ </div>
+ </div>
  <section id="products" class="py-5">
  <div class="container">
  <h2 class="text-center section-title">SẢN PHẨM MỚI NHẤT</h2>
@@ -261,7 +292,7 @@
  </section>
  <section id="contact" class="py-5">
  <div class="container text-center">
- <h2 class="section-title">LIÊN HỆ VỚI CHÚNG TÔI</h2>
+ <h2 class="section-title">LIÊN HỆ WITH US</h2>
  <p class="lead mb-4">Hãy kết nối trực tiếp để nhận thông tin tư vấn nhà phố chính xác và nhanh chóng nhất!</p>
  <div class="contact-info">
  <h4><i class="fas fa-home me-2" style="color:var(--primary-color);"></i>Thanh Trà BĐS Nhà Phố</h4>
@@ -307,6 +338,21 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux
 let allProducts = [];
 let adminMode = false;
 let adminPassword = "";
+
+// Lắng nghe sự kiện để cập nhật chữ trên placeholder khi đóng/mở bộ lọc
+document.addEventListener('DOMContentLoaded', function() {
+ const myCollapse = document.getElementById('collapseFilter');
+ const placeholderText = document.getElementById('search-placeholder-text');
+ if(myCollapse && placeholderText) {
+ myCollapse.addEventListener('show.bs.collapse', function () {
+ placeholderText.textContent = "Thu gọn khung tìm kiếm...";
+ });
+ myCollapse.addEventListener('hide.bs.collapse', function () {
+ placeholderText.textContent = "Tìm kiếm thông tin...";
+ });
+ }
+});
+
 function toggleAdminMode() {
  if (!adminMode) {
  const pass = prompt("Nhập mật khẩu quản trị:");
@@ -501,11 +547,10 @@ function renderProducts(productsList) {
  document.getElementById('result-count').textContent = `Hiển thị ${productsList.length} sản phẩm`;
 }
 
-// ===== LOGIC LỌC ĐA TIÊU CHÍ NÂNG CẤP =====
 function applyFilter() {
  const quanFilter = document.getElementById('filterQuanHuyen').value.toLowerCase();
  const phuongFilter = document.getElementById('filterPhuongXa').value.toLowerCase();
- const tieuChiFilter = document.getElementById('filterTieuChi').value.toLowerCase(); // Hướng nhà
+ const tieuChiFilter = document.getElementById('filterTieuChi').value.toLowerCase(); 
  const dtTu = parseFloat(document.getElementById('filterDienTichTu').value) || 0;
  const dtDen = parseFloat(document.getElementById('filterDienTichDen').value) || Infinity;
  const tangTu = parseInt(document.getElementById('filterTangTu').value) || 0;
@@ -518,7 +563,6 @@ function applyFilter() {
  const filtered = allProducts.filter(product => {
  if (!product || !product.price) return false;
  
- // Chuẩn hóa dữ liệu từ JSON gốc để so sánh
  const gia = parseFloat((product.price + '').replace(/[^0-9.]/g, '')) || 0;
  const tang = parseInt(product.sotang) || 0;
  const dt = parseFloat(product.area) || 0;
@@ -528,24 +572,13 @@ function applyFilter() {
  const huong = (product.direction || '').toLowerCase();
  const tieuDe = (product.tieu_de || '').toLowerCase();
 
- // 1. Lọc theo vị trí hành chính & hướng
  if (quanFilter && !quan.includes(quanFilter)) return false;
  if (phuongFilter && !phuong.includes(phuongFilter)) return false;
  if (tieuChiFilter && !huong.includes(tieuChiFilter)) return false;
-
- // 2. Lọc theo khoảng diện tích
  if (dt < dtTu || dt > dtDen) return false;
-
- // 3. Lọc theo khoảng số tầng
  if (tang < tangTu || tang > tangDen) return false;
-
- // 4. Lọc theo khoảng giá
  if (gia < giaTu || gia > giaDen) return false;
-
- // 5. Lọc theo tên đường phố
  if (duongFilter && !duong.includes(duongFilter)) return false;
-
- // 6. Lọc nâng cao theo từ khóa tìm kiếm (Tìm trong tiêu đề hoặc tên đường)
  if (keyword && !(tieuDe.includes(keyword) || duong.includes(keyword))) return false;
 
  return true;
