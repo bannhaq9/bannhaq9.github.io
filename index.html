@@ -428,10 +428,33 @@ async function goToDetail(id) {
  } catch (e) { console.error("Lỗi đếm view: ", e); }
  window.location.href = 'chi-tiet.html?id=' + encodeURIComponent(id); 
 }
-function shareToFacebook(tieuDe, gia, diaChi, dienTich) {
- const pageUrl = encodeURIComponent(window.location.href);
- const quote = encodeURIComponent('🏠 ' + decodeURIComponent(tieuDe) + '\n📍 Khu vực: ' + decodeURIComponent(diaChi) + '\n📐 Diện tích: ' + decodeURIComponent(dienTich) + ' m²\n💰 Giá: ' + decodeURIComponent(gia) + ' Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!');
- window.open('https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+// ĐOẠN NÀY PHẢI ĐẶT TRONG THẺ <script> CỦA FILE HTML GIAO DIỆN
+function shareToFacebook(id, tieuDe, gia, diaChi, dienTich) {
+  // Decode dữ liệu nhận vào để hiển thị nội dung cho chuẩn
+  const title = decodeURIComponent(tieuDe);
+  const price = decodeURIComponent(gia);
+  const address = decodeURIComponent(diaChi);
+  const area = decodeURIComponent(dienTich);
+  
+  // Tạo văn bản định dạng sẵn để khách dán (Paste)
+  const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area} m²\n💰 Giá: ${price} Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!`;
+  
+  // Tạo chính xác link chi tiết của riêng sản phẩm này
+  const originUrl = window.location.origin + window.location.pathname;
+  const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
+  const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
+  const encodedProductUrl = encodeURIComponent(productUrl);
+  
+  // Thực hiện copy văn bản vào bộ nhớ tạm
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    alert("Đã tự động sao chép thông tin nhà phố! Bạn chỉ cần Dán (Paste) vào bài viết Facebook.");
+    
+    // Mở cửa sổ chia sẻ chính xác link của sản phẩm đó
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+  }).catch(err => {
+    // Phương án dự phòng nếu trình duyệt chặn sao chép
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+  });
 }
 function createCard(product, cardId) {
  const thoiGian = product.created_at || product.timestamp || '';
