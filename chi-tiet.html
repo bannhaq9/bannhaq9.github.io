@@ -725,12 +725,9 @@ function renderDetail(product) {
   }
 }
 
-// ===== LẤY QUERY PARAM =====
-function getQueryParam(key) {
-  return new URLSearchParams(window.location.search).get(key);
-}
+// Thay đường dẫn URL Apps Script Web App đã Deploy của bạn vào đây
+const appsScriptApiUrl = "https://script.google.com/macros/s/XXXXX/exec"; 
 
-// ===== TẢI DỮ LIỆU =====
 async function loadDetail() {
   const id = getQueryParam('id');
   if (!id) {
@@ -739,15 +736,26 @@ async function loadDetail() {
     return;
   }
   try {
+    // 1. Tải dữ liệu từ file JSON cục bộ để hiển thị nhanh cho khách hàng
     const res = await fetch(sheetUrl, { method: 'GET', cache: 'no-cache' });
     if (!res.ok) throw new Error('Không tải được dữ liệu.');
     const rows = await res.json();
     const product = rows.find(p => String(p.id) === String(id));
+    
     if (!product) {
       document.getElementById('loading-state').classList.add('d-none');
       document.getElementById('error-state').classList.remove('d-none');
       return;
     }
+    
+    // 2. Gọi ngầm sang Google Sheet để tăng số lượt xem lên 1
+    fetch(`${appsScriptApiUrl}?action=incrementView&id=${id}`, { method: 'GET', mode: 'no-cors' })
+      .catch(err => console.log("Ghi nhận lượt xem ngầm thất bại:", err));
+    
+    // Do dùng no-cors không đọc được kết quả trả về ngay lập tức để tránh block, 
+    // chúng ta cộng ảo luôn +1 vào giao diện hiển thị cho đẹp mắt
+    product.views = (Number(product.views) || 0) + 1;
+
     renderDetail(product);
   } catch (err) {
     console.error(err);
@@ -755,7 +763,6 @@ async function loadDetail() {
     document.getElementById('error-state').classList.remove('d-none');
   }
 }
-
 window.addEventListener('DOMContentLoaded', loadDetail);
 </script>
 </body>
