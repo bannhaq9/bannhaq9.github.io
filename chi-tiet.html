@@ -188,7 +188,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const sheetUrl   = "data/products.json";
+// Sử dụng API Web App để kéo dữ liệu trực tiếp và chính xác nhất
+const appsScriptApiUrl = "https://script.google.com/macros/s/AKfycbz2X-Y_TFbNQC7O2jXqIknNVymNp5K6zBdxUvzLyRCuvGtfNKiV_RyE04ZDXJcfF8qX/exec"; 
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
 
 let lightboxImgs = [];
@@ -329,12 +330,27 @@ class GallerySlider {
   }
 }
 
-function shareDetail(tieuDe, gia, diaChi, dienTich) {
-  const pageUrl = encodeURIComponent(window.location.href);
-  const quote   = encodeURIComponent(
-    '🏠 ' + tieuDe + '\n📍 ' + diaChi + '\n📐 Diện tích: ' + dienTich + ' m²\n💰 Giá: ' + gia + ' Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!'
-  );
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+// Cập nhật hàm xử lý chia sẻ tối ưu copy nội dung và mở link chuẩn xác
+function shareDetail(tieuDe, gia, diaChi, dienTich, id) {
+  const title = decodeURIComponent(tieuDe);
+  const price = decodeURIComponent(gia);
+  const address = decodeURIComponent(diaChi);
+  const area = decodeURIComponent(dienTich);
+  
+  // Chuỗi văn bản mẫu copy đồng bộ cấu trúc tin đăng
+  const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area} m²\n💰 Giá: ${price} Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!`;
+  
+  // Tạo link chuẩn chính xác của trang chi tiết
+  const originUrl = window.location.origin + window.location.pathname;
+  const productUrl = `${originUrl}?id=${id}`;
+  const encodedProductUrl = encodeURIComponent(productUrl);
+  
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    alert("Đã tự động sao chép thông tin nhà phố! Bạn chỉ cần Dán (Paste) vào bài viết Facebook.");
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+  }).catch(err => {
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+  });
 }
 
 function renderDetail(product) {
@@ -459,7 +475,7 @@ function renderDetail(product) {
               <a href="tel:0854100036" class="btn btn-call py-2"><i class="fas fa-phone-alt me-2"></i>Gọi ngay: 0854.100.036</a>
               <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-zalo py-2"><i class="fa-solid fa-comment-dots me-2"></i>Nhắn Zalo ngay</a>
               <button class="btn btn-facebook-share py-2"
-                onclick="shareDetail('${tieuDe.replace(/'/g,"\\'")}', '${gia}', '${diaChi.replace(/'/g,"\\'")}', '${dienTich}')">
+                onclick="shareDetail('${encodeURIComponent(tieuDe)}', '${encodeURIComponent(gia)}', '${encodeURIComponent(diaChi)}', '${encodeURIComponent(dienTich)}', '${product.id}')">
                 <i class="fab fa-facebook-f me-2"></i>Chia sẻ lên Facebook
               </button>
             </div>
@@ -481,9 +497,6 @@ function renderDetail(product) {
   }
 }
 
-// Đường dẫn URL Apps Script Web App của bạn
-const appsScriptApiUrl = "https://script.google.com/macros/s/AKfycbz2X-Y_TFbNQC7O2jXqIknNVymNp5K6zBdxUvzLyRCuvGtfNKiV_RyE04ZDXJcfF8qX/exec"; 
-
 async function loadDetail() {
   const id = getQueryParam('id');
   if (!id) {
@@ -492,8 +505,8 @@ async function loadDetail() {
     return;
   }
   try {
-    // 1. Tải dữ liệu từ tệp JSON cục bộ để hiển thị ngay cho khách hàng
-    const res = await fetch(sheetUrl, { method: 'GET', cache: 'no-cache' });
+    // Gọi dữ liệu trực tiếp từ API Web App (giải quyết triệt để lỗi không tìm thấy sản phẩm do lệch cache file cục bộ)
+    const res = await fetch(appsScriptApiUrl, { method: 'GET', cache: 'no-cache' });
     if (!res.ok) throw new Error('Không tải được dữ liệu.');
     const rows = await res.json();
     const product = rows.find(p => String(p.id) === String(id));
@@ -504,10 +517,9 @@ async function loadDetail() {
       return;
     }
     
-    // Kiểm tra xem trình duyệt này đã xem sản phẩm này trong phiên làm việc hiện tại hay chưa
+    // Ghi nhận lượt xem sản phẩm
     const storageKey = `viewed_prod_${id}`;
     if (!sessionStorage.getItem(storageKey)) {
-      // 2. Gửi lệnh POST đồng bộ sang Google Apps Script để tăng lượt xem trên file GitHub
       fetch(appsScriptApiUrl, {
         method: 'POST',
         mode: 'no-cors',
@@ -515,7 +527,6 @@ async function loadDetail() {
         body: JSON.stringify({ action: 'view', id: id })
       }).catch(err => console.log("Ghi nhận lượt xem thất bại:", err));
 
-      // Cộng ảo trực tiếp trên giao diện hiển thị cho khách hàng cảm thấy mượt mà
       product.views = (Number(product.views) || 0) + 1;
       sessionStorage.setItem(storageKey, 'true');
     } else {
