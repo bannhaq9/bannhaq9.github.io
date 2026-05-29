@@ -113,8 +113,6 @@
  .btn-facebook:hover { background-color: #1558b0; transform: translateY(-1px); }
  .admin-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
  .admin-actions .btn { font-size: 0.78rem; padding: 5px 4px; }
- 
- /* CSS ĐƯỢC THAY ĐỔI ĐỂ PHÙ HỢP CHỨC NĂNG THU GỌN BỘ LỌC */
  #filter-bar { background: #f8f9fa; padding: 15px 0; border-bottom: 1px solid #eee; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.03); }
  .search-trigger-box {
  background: #fff;
@@ -134,7 +132,10 @@
  .filter-inner-card { background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 20px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
  .filter-inner-card label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 4px; }
  .filter-inner-card .form-control, .filter-inner-card .form-select { font-size: 0.88rem; padding: 7px 10px; border-radius: 6px; }
- 
+ .page-link { color: var(--primary-color); border-color: #dee2e6; cursor: pointer; }
+ .page-link:hover { color: #white; background-color: #f8f9fa; border-color: #dee2e6; }
+ .page-item.active .page-link { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; color: white !important; }
+ .page-item.disabled .page-link { color: #6c757d; background-color: #fff; border-color: #dee2e6; }
  #contact { background-color: #f8f9fa; }
  .footer { background-color: var(--dark-color); color: #ccc; }
  .footer h5 { color: white; font-weight: 600; }
@@ -181,17 +182,12 @@
  <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-outline-primary mb-2" style="color:white;border-color:white;"><i class="fa-solid fa-comment-dots me-2"></i>Chat Zalo</a>
  </div>
  </section>
- 
- <!-- THANH TÌM KIẾM THU GỌN VÀ KHU VỰC BỘ LỌC XỔ XUỐNG -->
  <div id="filter-bar">
  <div class="container">
- <!-- Thanh hiển thị mặc định thu gọn theo mẫu image_0e789f.png -->
  <div class="search-trigger-box" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
  <span id="search-placeholder-text">Tìm kiếm thông tin...</span>
  <i class="fas fa-search"></i>
  </div>
- 
- <!-- Khối nội dung bộ lọc chi tiết xổ xuống khi click theo mẫu image_0e78db.png -->
  <div class="collapse" id="collapseFilter">
  <div class="filter-inner-card">
  <div class="row g-2">
@@ -281,13 +277,16 @@
  </div>
  <section id="products" class="py-5">
  <div class="container">
- <h2 class="text-center section-title">SẢN PHẨM MỚI NHẤT</h2>
+ <h2 class="text-center section-title">SẢA PHẨM MỚI NHẤT</h2>
  <div id="product-list" class="row g-3">
  <div class="loading-spinner w-100">
  <div class="spinner-border text-danger mb-3" role="status"></div>
  <p>Đang tải dữ liệu sản phẩm...</p>
  </div>
  </div>
+ <nav aria-label="Page navigation" class="mt-5">
+ <ul id="pagination-wrapper" class="pagination justify-content-center"></ul>
+ </nav>
  </div>
  </section>
  <section id="contact" class="py-5">
@@ -336,10 +335,12 @@ const sheetUrl = "data/products.json";
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec";
 let allProducts = [];
+let currentFilteredProducts = []; // Biến lưu trữ danh sách đã qua bộ lọc
+let currentPage = 1;
+const POSTS_PER_PAGE = 30;
 let adminMode = false;
 let adminPassword = "";
 
-// Lắng nghe sự kiện để cập nhật chữ trên placeholder khi đóng/mở bộ lọc
 document.addEventListener('DOMContentLoaded', function() {
  const myCollapse = document.getElementById('collapseFilter');
  const placeholderText = document.getElementById('search-placeholder-text');
@@ -368,7 +369,7 @@ function toggleAdminMode() {
  postBtn.innerHTML = '<a class="nav-link btn btn-danger text-white px-3" href="dang-tin.html" style="border-radius:5px; background-color:var(--primary-color); border:none;"><i class="fas fa-plus-circle me-1"></i> Đăng Tin</a>';
  document.getElementById('adminToggle').closest('li').insertAdjacentElement('afterend', postBtn);
  }
- renderProducts(allProducts);
+ renderProducts(currentFilteredProducts);
  }
  } else {
  adminMode = false; adminPassword = "";
@@ -376,7 +377,7 @@ function toggleAdminMode() {
  document.getElementById('adminToggle').className = 'nav-link btn btn-outline-secondary px-3';
  const postBtn = document.getElementById('adminPostBtn');
  if (postBtn) postBtn.remove();
- renderProducts(allProducts);
+ renderProducts(currentFilteredProducts);
  }
 }
 function showCustomConfirm(message, onConfirm) {
@@ -429,33 +430,21 @@ async function goToDetail(id) {
  window.location.href = 'chi-tiet.html?id=' + encodeURIComponent(id); 
 }
 function shareToFacebook(id, tieuDe, gia, diaChi, dienTich) {
-  // Giải mã dữ liệu đầu vào để hiển thị nội dung tiếng Việt chuẩn xác
-  const title = decodeURIComponent(tieuDe);
-  const price = decodeURIComponent(gia);
-  const address = decodeURIComponent(diaChi);
-  const area = decodeURIComponent(dienTich);
-  
-  // Sắp xếp lại chuỗi văn bản mẫu copy hoàn toàn chính xác theo cấu trúc tin đăng
-  const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area}\n💰 Giá: ${price} Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!`;
-  
-  // Xác định chuẩn xác đường dẫn tuyệt đối của website
-  const originUrl = window.location.origin + window.location.pathname;
-  const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
-  
-  // Tạo link chi tiết chuẩn của sản phẩm để Facebook nhận diện
-  const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
-  const encodedProductUrl = encodeURIComponent(productUrl);
-  
-  // Lưu nội dung mô tả vào bộ nhớ đệm tự động
-  navigator.clipboard.writeText(textToCopy).then(() => {
-    alert("Đã tự động sao chép thông tin nhà phố! Bạn chỉ cần Dán (Paste) vào bài viết Facebook.");
-    
-    // Khởi chạy cửa sổ chia sẻ liên kết của Facebook
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
-  }).catch(err => {
-    // Phương án dự phòng an toàn nếu trình duyệt không cho phép truy cập sao chép nhanh
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
-  });
+ const title = decodeURIComponent(tieuDe);
+ const price = decodeURIComponent(gia);
+ const address = decodeURIComponent(diaChi);
+ const area = decodeURIComponent(dienTich);
+ const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area}\n💰 Giá: ${price} Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!`;
+ const originUrl = window.location.origin + window.location.pathname;
+ const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
+ const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
+ const encodedProductUrl = encodeURIComponent(productUrl);
+ navigator.clipboard.writeText(textToCopy).then(() => {
+ alert("Đã tự động sao chép thông tin nhà phố! Bạn chỉ cần Dán (Paste) vào bài viết Facebook.");
+ window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+ }).catch(err => {
+ window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+ });
 }
 function createCard(product, cardId) {
  const thoiGian = product.created_at || product.timestamp || '';
@@ -557,18 +546,58 @@ function changeImg(imgId, dir) {
  el.dataset.idx = cur;
  if (counter) counter.textContent = (cur + 1) + ' / ' + imgList.length;
 }
+
+// HÀM RENDER CHÍNH THỨC CÓ TÍCH HỢP CHỨC NĂNG PHÂN TRANG KHÔNG DÙNG KHOẢNG TRỐNG DÒNG
 function renderProducts(productsList) {
  const container = document.getElementById('product-list');
  container.innerHTML = '';
  if (!Array.isArray(productsList) || productsList.length === 0) {
  container.innerHTML = '<div class="no-data w-100"><i class="fas fa-inbox fa-3x mb-3 d-block"></i>Không tìm thấy sản phẩm nào phù hợp.</div>';
  document.getElementById('result-count').textContent = `Hiển thị 0 sản phẩm`;
+ renderPagination(0);
  return;
  }
+ const totalItems = productsList.length;
+ const totalPages = Math.ceil(totalItems / POSTS_PER_PAGE);
+ if (currentPage > totalPages) currentPage = totalPages || 1;
+ const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+ const endIndex = Math.min(startIndex + POSTS_PER_PAGE, totalItems);
+ const pagedItems = productsList.slice(startIndex, endIndex);
  let html = '';
- productsList.forEach((p, i) => { if (p && p.price) html += createCard(p, i); });
+ pagedItems.forEach((p, i) => { if (p && p.price) html += createCard(p, startIndex + i); });
  container.innerHTML = html;
- document.getElementById('result-count').textContent = `Hiển thị ${productsList.length} sản phẩm`;
+ document.getElementById('result-count').textContent = `Hiển thị ${startIndex + 1}-${endIndex} trong tổng số ${totalItems} sản phẩm`;
+ renderPagination(totalPages);
+}
+
+// HÀM TẠO GIAO DIỆN THANH PHÂN TRANG (PAGINATION) PHÍA DƯỚI
+function renderPagination(totalPages) {
+ const paginationWrapper = document.getElementById('pagination-wrapper');
+ paginationWrapper.innerHTML = '';
+ if (totalPages <= 1) return;
+ let paginationHtml = '';
+ paginationHtml += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+ <a class="page-link" onclick="changePage(${currentPage - 1})" aria-label="Previous">
+ <span aria-hidden="true">&laquo;</span>
+ </a>
+ </li>`;
+ for (let i = 1; i <= totalPages; i++) {
+ paginationHtml += `<li class="page-item ${currentPage === i ? 'active' : ''}">
+ <a class="page-link" onclick="changePage(${i})">${i}</a>
+ </li>`;
+ }
+ paginationHtml += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+ <a class="page-link" onclick="changePage(${currentPage + 1})" aria-label="Next">
+ <span aria-hidden="true">&raquo;</span>
+ </a>
+ </li>`;
+ paginationWrapper.innerHTML = paginationHtml;
+}
+
+function changePage(page) {
+ currentPage = page;
+ renderProducts(currentFilteredProducts);
+ document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
 }
 
 function applyFilter() {
@@ -583,10 +612,8 @@ function applyFilter() {
  const giaTu = parseFloat(document.getElementById('filterGiaTu').value) || 0;
  const giaDen = parseFloat(document.getElementById('filterGiaDen').value) || Infinity;
  const keyword = document.getElementById('filterKeyword').value.toLowerCase().trim();
-
- const filtered = allProducts.filter(product => {
+ currentFilteredProducts = allProducts.filter(product => {
  if (!product || !product.price) return false;
- 
  const gia = parseFloat((product.price + '').replace(/[^0-9.]/g, '')) || 0;
  const tang = parseInt(product.sotang) || 0;
  const dt = parseFloat(product.area) || 0;
@@ -595,7 +622,6 @@ function applyFilter() {
  const duong = (product.duongpho || '').toLowerCase();
  const huong = (product.direction || '').toLowerCase();
  const tieuDe = (product.tieu_de || '').toLowerCase();
-
  if (quanFilter && !quan.includes(quanFilter)) return false;
  if (phuongFilter && !phuong.includes(phuongFilter)) return false;
  if (tieuChiFilter && !huong.includes(tieuChiFilter)) return false;
@@ -604,11 +630,10 @@ function applyFilter() {
  if (gia < giaTu || gia > giaDen) return false;
  if (duongFilter && !duong.includes(duongFilter)) return false;
  if (keyword && !(tieuDe.includes(keyword) || duong.includes(keyword))) return false;
-
  return true;
  });
-
- renderProducts(filtered);
+ currentPage = 1; // Khởi động lại về trang 1 khi lọc mới
+ renderProducts(currentFilteredProducts);
 }
 
 function resetFilter() {
@@ -623,7 +648,9 @@ function resetFilter() {
  document.getElementById('filterGiaTu').value = '';
  document.getElementById('filterGiaDen').value = '';
  document.getElementById('filterKeyword').value = '';
- renderProducts(allProducts);
+ currentPage = 1;
+ currentFilteredProducts = [...allProducts];
+ renderProducts(currentFilteredProducts);
 }
 
 async function loadProducts() {
@@ -633,7 +660,9 @@ async function loadProducts() {
  if (!res.ok) throw new Error('Không tải được dữ liệu.');
  const rows = await res.json();
  allProducts = rows;
- renderProducts(allProducts);
+ currentFilteredProducts = [...allProducts]; // Đồng bộ mảng lọc mặc định
+ currentPage = 1;
+ renderProducts(currentFilteredProducts);
  } catch (err) {
  console.error(err);
  container.innerHTML = '<div class="no-data w-100"><i class="fas fa-exclamation-circle fa-3x mb-3 d-block text-danger"></i>Không thể tải dữ liệu sản phẩm.</div>';
