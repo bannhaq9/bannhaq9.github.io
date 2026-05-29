@@ -428,31 +428,32 @@ async function goToDetail(id) {
  } catch (e) { console.error("Lỗi đếm view: ", e); }
  window.location.href = 'chi-tiet.html?id=' + encodeURIComponent(id); 
 }
-// ĐOẠN NÀY PHẢI ĐẶT TRONG THẺ <script> CỦA FILE HTML GIAO DIỆN
 function shareToFacebook(id, tieuDe, gia, diaChi, dienTich) {
-  // Decode dữ liệu nhận vào để hiển thị nội dung cho chuẩn
+  // Giải mã dữ liệu đầu vào để hiển thị nội dung tiếng Việt chuẩn xác
   const title = decodeURIComponent(tieuDe);
   const price = decodeURIComponent(gia);
   const address = decodeURIComponent(diaChi);
   const area = decodeURIComponent(dienTich);
   
-  // Tạo văn bản định dạng sẵn để khách dán (Paste)
-  const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area} m²\n💰 Giá: ${price} Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!`;
+  // Sắp xếp lại chuỗi văn bản mẫu copy hoàn toàn chính xác theo cấu trúc tin đăng
+  const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area}\n💰 Giá: ${price} Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!`;
   
-  // Tạo chính xác link chi tiết của riêng sản phẩm này
+  // Xác định chuẩn xác đường dẫn tuyệt đối của website
   const originUrl = window.location.origin + window.location.pathname;
   const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
+  
+  // Tạo link chi tiết chuẩn của sản phẩm để Facebook nhận diện
   const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
   const encodedProductUrl = encodeURIComponent(productUrl);
   
-  // Thực hiện copy văn bản vào bộ nhớ tạm
+  // Lưu nội dung mô tả vào bộ nhớ đệm tự động
   navigator.clipboard.writeText(textToCopy).then(() => {
     alert("Đã tự động sao chép thông tin nhà phố! Bạn chỉ cần Dán (Paste) vào bài viết Facebook.");
     
-    // Mở cửa sổ chia sẻ chính xác link của sản phẩm đó
+    // Khởi chạy cửa sổ chia sẻ liên kết của Facebook
     window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
   }).catch(err => {
-    // Phương án dự phòng nếu trình duyệt chặn sao chép
+    // Phương án dự phòng an toàn nếu trình duyệt không cho phép truy cập sao chép nhanh
     window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
   });
 }
@@ -530,11 +531,12 @@ function createCard(product, cardId) {
  onclick="event.stopPropagation()">
  <i class="fas fa-comment-dots me-1"></i>Zalo
  </a>
- <button
+ // Tìm đến nút bấm Chia sẻ Facebook bên trong hàm createCard và thay bằng đoạn này:
+<button
  class="btn btn-facebook"
- onclick="event.stopPropagation();shareToFacebook('${encodeURIComponent(tieuDe)}','${encodeURIComponent(gia)}','${encodeURIComponent(diaChiHienThi)}','${encodeURIComponent(dienTich)}')">
+ onclick="event.stopPropagation();shareToFacebook('${product.id}','${encodeURIComponent(tieuDe)}','${encodeURIComponent(gia)}','${encodeURIComponent(diaChiHienThi)}','${encodeURIComponent(dienTich)}')">
  <i class="fab fa-facebook-f me-1"></i>Chia sẻ
- </button>
+</button>
  </div>
  ${adminActionsHtml}
  </div>
