@@ -4,549 +4,584 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thanh Trà BĐS | Bất Động Sản Nhà Phố Uy Tín</title>
-
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Thanh Trà BĐS">
 <meta property="og:title" content="Thanh Trà BĐS - Nhà Phố Uy Tín TP. Thủ Đức - TP. HCM">
 <meta property="og:description" content="Nền tảng tư vấn, môi giới bất động sản nhà phố chuyên nghiệp, uy tín hàng đầu tại TP. Thủ Đức.">
 <meta property="og:image" content="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2">
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
-  body { font-family: 'Be Vietnam Pro', sans-serif; color: #333; }
-  :root { --primary-color: #e03c31; --dark-color: #222; }
-
-  .navbar-brand { font-weight: 700; font-size: 1.5rem; color: var(--primary-color) !important; }
-  .nav-link { font-weight: 500; }
-  .nav-link:hover, .nav-link.active { color: var(--primary-color) !important; }
-
-  /* HERO */
-  .hero-section {
-    background: url('https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center;
-    background-size: cover;
-    position: relative;
-    padding: 80px 0 70px;
-    color: white;
-    text-align: center;
-  }
-  .hero-section::after {
-    content: '';
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.58);
-    z-index: 1;
-  }
-  .hero-content { position: relative; z-index: 2; }
-  .hero-content .display-5 { font-weight: 700; font-size: 1.9rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-  .hero-content .lead { font-weight: 500; letter-spacing: 2px; font-size: 0.9rem; text-transform: uppercase; }
-
-  .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; padding: 10px 24px; transition: all 0.3s ease; }
-  .btn-primary:hover { background-color: #c43229; border-color: #c43229; transform: translateY(-2px); }
-  .btn-outline-primary { color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; }
-  .btn-outline-primary:hover { color: white; background-color: var(--primary-color); border-color: var(--primary-color); }
-
-  .section-title { font-weight: 700; margin-bottom: 36px; color: var(--dark-color); }
-
-  /* CARD */
-  .property-card {
-    border: 1px solid #eee;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%;
-    background: #fff;
-  }
-  .property-card:hover { transform: translateY(-6px); box-shadow: 0 8px 24px rgba(0,0,0,0.11); }
-  .property-card .price { color: #e03c31; font-weight: 700; font-size: 1.2rem; }
-  .badge-new { background: #e03c31; color: white; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; display: inline-block; }
-  .badge-view { background: #6c757d; color: white; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; display: inline-block; margin-left: 4px; }
-
-  /* CARD IMAGE */
-  .card-img-wrapper { position: relative; height: 200px; overflow: hidden; background: #f0f0f0; }
-  .card-img-wrapper img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s ease; }
-  .property-card:hover .card-img-wrapper img { transform: scale(1.03); }
-  .img-nav {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(0,0,0,0.55); color: white; border: none;
-    width: 30px; height: 30px; border-radius: 50%; font-size: 1rem;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s; z-index: 5;
-  }
-  .img-nav:hover { background: var(--primary-color); transform: translateY(-50%) scale(1.1); }
-  .img-nav.prev { left: 7px; }
-  .img-nav.next { right: 7px; }
-  .img-counter {
-    position: absolute; bottom: 7px; right: 9px;
-    background: rgba(0,0,0,0.65); color: white;
-    font-size: 0.72rem; padding: 2px 7px; border-radius: 10px;
-    font-weight: 500; z-index: 4;
-  }
-
-  /* SPECS GRID */
-  .specs-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 10px;
-    margin: 8px 0 10px;
-  }
-  .spec-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.83rem;
-    color: #555;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .spec-item i { font-size: 0.78rem; flex-shrink: 0; width: 14px; text-align: center; }
-  .spec-item span { overflow: hidden; text-overflow: ellipsis; }
-
-  /* CARD ACTIONS */
-  .card-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 7px;
-    margin-top: 10px;
-  }
-  .card-actions .btn {
-    font-size: 0.8rem;
-    padding: 7px 4px;
-    white-space: nowrap;
-  }
-
-  .btn-zalo-card { background-color: var(--primary-color); border-color: var(--primary-color); color: white !important; font-weight: 600; transition: all 0.25s; }
-  .btn-zalo-card:hover { background-color: #c43229; transform: translateY(-1px); }
-
-  .btn-facebook {
-    background-color: #1877f2; border-color: #1877f2; color: white !important;
-    font-weight: 600; transition: all 0.25s;
-  }
-  .btn-facebook:hover { background-color: #1558b0; transform: translateY(-1px); }
-
-  /* ADMIN ACTIONS */
-  .admin-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
-  .admin-actions .btn { font-size: 0.78rem; padding: 5px 4px; }
-
-  /* FILTER BAR */
-  #filter-bar { background: #f8f9fa; padding: 12px 0; border-bottom: 1px solid #eee; }
-  #filter-bar select { max-width: 180px; font-size: 0.88rem; }
-
-  /* CONTACT */
-  #contact { background-color: #f8f9fa; }
-
-  /* FOOTER */
-  .footer { background-color: var(--dark-color); color: #ccc; }
-  .footer h5 { color: white; font-weight: 600; }
-  .footer a { color: #ccc; text-decoration: none; transition: color 0.3s ease; }
-  .footer a:hover { color: var(--primary-color); }
-  .footer .social-icons a { font-size: 1.5rem; margin-right: 15px; }
-
-  .loading-spinner { text-align: center; padding: 40px; color: #888; }
-  .no-data { text-align: center; padding: 40px; color: #888; }
-
-  @media (max-width: 576px) {
-    .hero-content .display-5 { font-size: 1.4rem; }
-    .specs-grid { grid-template-columns: 1fr 1fr; }
-  }
+ body { font-family: 'Be Vietnam Pro', sans-serif; color: #333; }
+ :root { --primary-color: #e03c31; --dark-color: #222; }
+ .navbar-brand { font-weight: 700; font-size: 1.5rem; color: var(--primary-color) !important; }
+ .nav-link { font-weight: 500; }
+ .nav-link:hover, .nav-link.active { color: var(--primary-color) !important; }
+ .hero-section {
+ background: url('https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center;
+ background-size: cover;
+ position: relative;
+ padding: 80px 0 70px;
+ color: white;
+ text-align: center;
+ }
+ .hero-section::after {
+ content: '';
+ position: absolute; top: 0; left: 0;
+ width: 100%; height: 100%;
+ background: rgba(0,0,0,0.58);
+ z-index: 1;
+ }
+ .hero-content { position: relative; z-index: 2; }
+ .hero-content .display-5 { font-weight: 700; font-size: 1.9rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+ .hero-content .lead { font-weight: 500; letter-spacing: 2px; font-size: 0.9rem; text-transform: uppercase; }
+ .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; padding: 10px 24px; transition: all 0.3s ease; }
+ .btn-primary:hover { background-color: #c43229; border-color: #c43229; transform: translateY(-2px); }
+ .btn-outline-primary { color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; }
+ .btn-outline-primary:hover { color: white; background-color: var(--primary-color); border-color: var(--primary-color); }
+ .section-title { font-weight: 700; margin-bottom: 36px; color: var(--dark-color); }
+ .property-card {
+ border: 1px solid #eee;
+ border-radius: 10px;
+ overflow: hidden;
+ box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+ transition: transform 0.3s ease, box-shadow 0.3s ease;
+ height: 100%;
+ background: #fff;
+ }
+ .property-card:hover { transform: translateY(-6px); box-shadow: 0 8px 24px rgba(0,0,0,0.11); }
+ .property-card .price { color: #e03c31; font-weight: 700; font-size: 1.2rem; }
+ .badge-new { background: #e03c31; color: white; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; display: inline-block; }
+ .badge-view { background: #6c757d; color: white; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; display: inline-block; margin-left: 4px; }
+ .card-img-wrapper { position: relative; height: 200px; overflow: hidden; background: #f0f0f0; }
+ .card-img-wrapper img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s ease; }
+ .property-card:hover .card-img-wrapper img { transform: scale(1.03); }
+ .img-nav {
+ position: absolute; top: 50%; transform: translateY(-50%);
+ background: rgba(0,0,0,0.55); color: white; border: none;
+ width: 30px; height: 30px; border-radius: 50%; font-size: 1rem;
+ cursor: pointer; display: flex; align-items: center; justify-content: center;
+ transition: all 0.2s; z-index: 5;
+ }
+ .img-nav:hover { background: var(--primary-color); transform: translateY(-50%) scale(1.1); }
+ .img-nav.prev { left: 7px; }
+ .img-nav.next { right: 7px; }
+ .img-counter {
+ position: absolute; bottom: 7px; right: 9px;
+ background: rgba(0,0,0,0.65); color: white;
+ font-size: 0.72rem; padding: 2px 7px; border-radius: 10px;
+ font-weight: 500; z-index: 4;
+ }
+ .specs-grid {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 6px 10px;
+ margin: 8px 0 10px;
+ }
+ .spec-item {
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ font-size: 0.83rem;
+ color: #555;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ }
+ .spec-item i { font-size: 0.78rem; flex-shrink: 0; width: 14px; text-align: center; }
+ .spec-item span { overflow: hidden; text-overflow: ellipsis; }
+ .card-actions {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 7px;
+ margin-top: 10px;
+ }
+ .card-actions .btn {
+ font-size: 0.8rem;
+ padding: 7px 4px;
+ white-space: nowrap;
+ }
+ .btn-zalo-card { background-color: var(--primary-color); border-color: var(--primary-color); color: white !important; font-weight: 600; transition: all 0.25s; }
+ .btn-zalo-card:hover { background-color: #c43229; transform: translateY(-1px); }
+ .btn-facebook {
+ background-color: #1877f2; border-color: #1877f2; color: white !important;
+ font-weight: 600; transition: all 0.25s;
+ }
+ .btn-facebook:hover { background-color: #1558b0; transform: translateY(-1px); }
+ .admin-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
+ .admin-actions .btn { font-size: 0.78rem; padding: 5px 4px; }
+ #filter-bar { background: #f8f9fa; padding: 20px 0; border-bottom: 1px solid #eee; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.03); }
+ #filter-bar label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+ #filter-bar .form-control, #filter-bar .form-select { font-size: 0.88rem; padding: 7px 10px; border-radius: 6px; }
+ #contact { background-color: #f8f9fa; }
+ .footer { background-color: var(--dark-color); color: #ccc; }
+ .footer h5 { color: white; font-weight: 600; }
+ .footer a { color: #ccc; text-decoration: none; transition: color 0.3s ease; }
+ .footer a:hover { color: var(--primary-color); }
+ .footer .social-icons a { font-size: 1.5rem; margin-right: 15px; }
+ .loading-spinner { text-align: center; padding: 40px; color: #888; }
+ .no-data { text-align: center; padding: 40px; color: #888; }
+ @media (max-width: 576px) {
+ .hero-content .display-5 { font-size: 1.4rem; }
+ .specs-grid { grid-template-columns: 1fr 1fr; }
+ }
 </style>
 </head>
 <body>
-
 <header>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="#">THANH TRÀ BĐS</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item"><a class="nav-link active" href="#hero">Trang chủ</a></li>
-          <li class="nav-item"><a class="nav-link" href="#products">Sản Phẩm</a></li>
-          <li class="nav-item"><a class="nav-link" href="#contact">Liên hệ</a></li>
-          
-          <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-            <button class="nav-link btn btn-outline-secondary px-3" id="adminToggle" onclick="toggleAdminMode()" style="border-radius:5px;">
-              <i class="fas fa-lock me-1"></i> Admin
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+ <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+ <div class="container">
+ <a class="navbar-brand" href="#">THANH TRÀ BĐS</a>
+ <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+ <span class="navbar-toggler-icon"></span>
+ </button>
+ <div class="collapse navbar-collapse" id="navbarNav">
+ <ul class="navbar-nav ms-auto align-items-center">
+ <li class="nav-item"><a class="nav-link active" href="#hero">Trang chủ</a></li>
+ <li class="nav-item"><a class="nav-link" href="#products">Sản Phẩm</a></li>
+ <li class="nav-item"><a class="nav-link" href="#contact">Liên hệ</a></li>
+ <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+ <button class="nav-link btn btn-outline-secondary px-3" id="adminToggle" onclick="toggleAdminMode()" style="border-radius:5px;">
+ <i class="fas fa-lock me-1"></i> Admin
+ </button>
+ </li>
+ </ul>
+ </div>
+ </div>
+ </nav>
 </header>
-
 <main>
-  <!-- HERO -->
-  <section id="hero" class="hero-section" style="margin-top:56px;">
-    <div class="hero-content container">
-      <h1 class="display-5">BẤT ĐỘNG SẢN NHÀ PHỐ</h1>
-      <p class="lead my-3">UY TÍN - TẬN TÂM - CHUYÊN NGHIỆP</p>
-      <a href="tel:0854100036" class="btn btn-primary me-2 mb-2"><i class="fas fa-phone me-2"></i>Hotline: 0854.100.036</a>
-      <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-outline-primary mb-2" style="color:white;border-color:white;"><i class="fa-solid fa-comment-dots me-2"></i>Chat Zalo</a>
-    </div>
-  </section>
-
-  <!-- FILTER BAR -->
-  <div id="filter-bar">
-    <div class="container d-flex flex-wrap gap-2 align-items-center">
-      <span class="fw-bold me-1" style="font-size:0.9rem;">Lọc theo:</span>
-      <select id="filterPrice" class="form-select form-select-sm">
-        <option value="">Tất cả giá</option>
-        <option value="duoi5">Dưới 5 tỷ</option>
-        <option value="5den6">5 - 6 tỷ</option>
-        <option value="tren6">Trên 6 tỷ</option>
-      </select>
-      <select id="filterTang" class="form-select form-select-sm">
-        <option value="">Tất cả số tầng</option>
-        <option value="1">1 tầng</option>
-        <option value="2">2 tầng</option>
-        <option value="3">3 tầng</option>
-        <option value="4+">4 tầng trở lên</option>
-      </select>
-      <button class="btn btn-sm btn-primary" onclick="applyFilter()" style="background-color:var(--primary-color);border-color:var(--primary-color);"><i class="fas fa-filter me-1"></i>Lọc</button>
-      <button class="btn btn-sm btn-outline-secondary" onclick="resetFilter()">Xóa lọc</button>
-      <span id="result-count" class="ms-auto text-muted small"></span>
-    </div>
-  </div>
-
-  <!-- PRODUCTS -->
-  <section id="products" class="py-5">
-    <div class="container">
-      <h2 class="text-center section-title">SẢN PHẨM MỚI NHẤT</h2>
-      <div id="product-list" class="row g-3">
-        <div class="loading-spinner w-100">
-          <div class="spinner-border text-danger mb-3" role="status"></div>
-          <p>Đang tải dữ liệu sản phẩm...</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACT -->
-  <section id="contact" class="py-5">
-    <div class="container text-center">
-      <h2 class="section-title">LIÊN HỆ VỚI CHÚNG TÔI</h2>
-      <p class="lead mb-4">Hãy kết nối trực tiếp để nhận thông tin tư vấn nhà phố chính xác và nhanh chóng nhất!</p>
-      <div class="contact-info">
-        <h4><i class="fas fa-home me-2" style="color:var(--primary-color);"></i>Thanh Trà BĐS Nhà Phố</h4>
-        <h3 class="my-3"><i class="fas fa-phone-alt me-2" style="color:var(--primary-color);"></i>Hotline/Zalo: <a href="tel:0854100036" class="text-decoration-none" style="color:var(--dark-color);">0854.100.036</a></h3>
-        <p><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i>Email: <a href="mailto:thanhtra1996st@gmail.com" class="text-decoration-none" style="color:var(--dark-color);">thanhtra1996st@gmail.com</a></p>
-      </div>
-    </div>
-  </section>
+ <section id="hero" class="hero-section" style="margin-top:56px;">
+ <div class="hero-content container">
+ <h1 class="display-5">BẤT ĐỘNG SẢN NHÀ PHỐ</h1>
+ <p class="lead my-3">UY TÍN - TẬN TÂM - CHUYÊN NGHIỆP</p>
+ <a href="tel:0854100036" class="btn btn-primary me-2 mb-2"><i class="fas fa-phone me-2"></i>Hotline: 0854.100.036</a>
+ <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-outline-primary mb-2" style="color:white;border-color:white;"><i class="fa-solid fa-comment-dots me-2"></i>Chat Zalo</a>
+ </div>
+ </section>
+ 
+ <div id="filter-bar">
+ <div class="container">
+ <div class="row g-2">
+ <div class="col-6 col-md-3">
+ <label>Tỉnh/Thành phố</label>
+ <select id="filterTinhThanh" class="form-select form-select-sm" disabled>
+ <option value="Tp. Hồ Chí Minh">Tp. Hồ Chí Minh</option>
+ </select>
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Quận/huyện</label>
+ <select id="filterQuanHuyen" class="form-select form-select-sm">
+ <option value="TP. Thủ Đức">TP. Thủ Đức</option>
+ <option value="">--Tất cả quận/huyện--</option>
+ </select>
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Phường/xã</label>
+ <select id="filterPhuongXa" class="form-select form-select-sm">
+ <option value="">--Phường/xã--</option>
+ <option value="Long Thạnh Mỹ">Long Thạnh Mỹ</option>
+ <option value="Trường Thạnh">Trường Thạnh</option>
+ <option value="Long Phước">Long Phước</option>
+ <option value="Long Trường">Long Trường</option>
+ <option value="Tăng Nhơn Phú A">Tăng Nhơn Phú A</option>
+ <option value="Tăng Nhơn Phú B">Tăng Nhơn Phú B</option>
+ </select>
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Chọn tiêu chí</label>
+ <select id="filterTieuChi" class="form-select form-select-sm">
+ <option value="">--Chọn hướng--</option>
+ <option value="Đông">Đông</option>
+ <option value="Tây">Tây</option>
+ <option value="Nam">Nam</option>
+ <option value="Bắc">Bắc</option>
+ <option value="Đông Nam">Đông Nam</option>
+ <option value="Đông Bắc">Đông Bắc</option>
+ <option value="Tây Nam">Tây Nam</option>
+ <option value="Tây Bắc">Tây Bắc</option>
+ </select>
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Từ diện tích (m²)</label>
+ <input type="number" id="filterDienTichTu" class="form-control form-control-sm" placeholder="Từ m²">
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Đến diện tích (m²)</label>
+ <input type="number" id="filterDienTichDen" class="form-control form-control-sm" placeholder="Đến m²">
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Từ số tầng</label>
+ <input type="number" id="filterTangTu" class="form-control form-control-sm" placeholder="Từ tầng">
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Đến số tầng</label>
+ <input type="number" id="filterTangDen" class="form-control form-control-sm" placeholder="Đến tầng">
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Đường phố, Tòa, Phân khu</label>
+ <input type="text" id="filterDuongPho" class="form-control form-control-sm" placeholder="Nhập tên đường...">
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Từ giá (Tỷ)</label>
+ <input type="number" step="0.1" id="filterGiaTu" class="form-control form-control-sm" placeholder="Từ Tỷ">
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Đến giá (Tỷ)</label>
+ <input type="number" step="0.1" id="filterGiaDen" class="form-control form-control-sm" placeholder="Đến Tỷ">
+ </div>
+ <div class="col-6 col-md-3">
+ <label>Nhập từ khóa tìm kiếm</label>
+ <div class="input-group input-group-sm">
+ <input type="text" id="filterKeyword" class="form-control" placeholder="Tìm kiếm nhanh...">
+ <button class="btn btn-primary" onclick="applyFilter()"><i class="fas fa-search"></i></button>
+ </div>
+ </div>
+ <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+ <span id="result-count" class="me-auto align-self-center text-muted small fw-bold"></span>
+ <button class="btn btn-sm btn-outline-secondary px-3" onclick="resetFilter()">Xóa lọc</button>
+ <button class="btn btn-sm btn-primary px-4" onclick="applyFilter()" style="background-color:var(--primary-color);border-color:var(--primary-color);"><i class="fas fa-filter me-1"></i>Lọc thông tin</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ <section id="products" class="py-5">
+ <div class="container">
+ <h2 class="text-center section-title">SẢN PHẨM MỚI NHẤT</h2>
+ <div id="product-list" class="row g-3">
+ <div class="loading-spinner w-100">
+ <div class="spinner-border text-danger mb-3" role="status"></div>
+ <p>Đang tải dữ liệu sản phẩm...</p>
+ </div>
+ </div>
+ </div>
+ </section>
+ <section id="contact" class="py-5">
+ <div class="container text-center">
+ <h2 class="section-title">LIÊN HỆ VỚI CHÚNG TÔI</h2>
+ <p class="lead mb-4">Hãy kết nối trực tiếp để nhận thông tin tư vấn nhà phố chính xác và nhanh chóng nhất!</p>
+ <div class="contact-info">
+ <h4><i class="fas fa-home me-2" style="color:var(--primary-color);"></i>Thanh Trà BĐS Nhà Phố</h4>
+ <h3 class="my-3"><i class="fas fa-phone-alt me-2" style="color:var(--primary-color);"></i>Hotline/Zalo: <a href="tel:0854100036" class="text-decoration-none" style="color:var(--dark-color);">0854.100.036</a></h3>
+ <p><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i>Email: <a href="mailto:thanhtra1996st@gmail.com" class="text-decoration-none" style="color:var(--dark-color);">thanhtra1996st@gmail.com</a></p>
+ </div>
+ </div>
+ </section>
 </main>
-
 <footer class="footer pt-5 pb-4">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-4 col-md-6 mb-4">
-        <h5>THANH TRÀ BĐS</h5>
-        <p class="mt-3">Nền tảng tư vấn, môi giới bất động sản nhà phố chuyên nghiệp, uy tín hàng đầu tại TP. Thủ Đức - TP. Hồ Chí Minh.</p>
-      </div>
-      <div class="col-lg-4 col-md-6 mb-4">
-        <h5>THÔNG TIN LIÊN HỆ</h5>
-        <ul class="list-unstyled mt-3">
-          <li class="mb-2"><i class="fas fa-map-marker-alt me-2" style="color:var(--primary-color);"></i>Văn phòng: Lò Lu, Trường Thạnh, TP.Thủ Đức</li>
-          <li class="mb-2"><i class="fas fa-phone me-2" style="color:var(--primary-color);"></i><a href="tel:0854100036">0854.100.036</a></li>
-          <li class="mb-2"><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i><a href="mailto:thanhtra1996st@gmail.com">thanhtra1996st@gmail.com</a></li>
-        </ul>
-      </div>
-      <div class="col-lg-4 col-md-12 mb-4">
-        <h5>KẾT NỐI VỚI CHÚNG TÔI</h5>
-        <div class="social-icons mt-3">
-          <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
-          <a href="https://zalo.me/0854100036" target="_blank"><i class="fa-solid fa-comment-dots"></i></a>
-        </div>
-      </div>
-    </div>
-    <hr style="border-color:#555;">
-    <div class="text-center pt-2"><p>© 2026 Bản quyền thuộc về Thanh Trà BĐS Nhà Phố.</p></div>
-  </div>
+ <div class="container">
+ <div class="row">
+ <div class="col-lg-4 col-md-6 mb-4">
+ <h5>THANH TRÀ BĐS</h5>
+ <p class="mt-3">Nền tảng tư vấn, môi giới bất động sản nhà phố chuyên nghiệp, uy tín hàng đầu tại TP. Thủ Đức - TP. Hồ Chí Minh.</p>
+ </div>
+ <div class="col-lg-4 col-md-6 mb-4">
+ <h5>THÔNG TIN LIÊN HỆ</h5>
+ <ul class="list-unstyled mt-3">
+ <li class="mb-2"><i class="fas fa-map-marker-alt me-2" style="color:var(--primary-color);"></i>Văn phòng: Lò Lu, Trường Thạnh, TP.Thủ Đức</li>
+ <li class="mb-2"><i class="fas fa-phone me-2" style="color:var(--primary-color);"></i><a href="tel:0854100036">0854.100.036</a></li>
+ <li class="mb-2"><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i><a href="mailto:thanhtra1996st@gmail.com">thanhtra1996st@gmail.com</a></li>
+ </ul>
+ </div>
+ <div class="col-lg-4 col-md-12 mb-4">
+ <h5>KẾT NỐI VỚI CHÚNG TÔI</h5>
+ <div class="social-icons mt-3">
+ <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+ <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
+ <a href="https://zalo.me/0854100036" target="_blank"><i class="fa-solid fa-comment-dots"></i></a>
+ </div>
+ </div>
+ </div>
+ <hr style="border-color:#555;">
+ <div class="text-center pt-2"><p>© 2026 Bản quyền thuộc về Thanh Trà BĐS Nhà Phố.</p></div>
+ </div>
 </footer>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const sheetUrl   = "data/products.json";
+const sheetUrl = "data/products.json";
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
-const scriptURL  = "https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec";
-
-let allProducts  = [];
-let adminMode    = false;
+const scriptURL = "https://script.google.com/macros/s/AKfycbwI0X-Y-qBexLzFasgHux4Wk1S2Oid4E3D-pco928hG/exec";
+let allProducts = [];
+let adminMode = false;
 let adminPassword = "";
-
-// ===== ADMIN =====
 function toggleAdminMode() {
-  if (!adminMode) {
-    const pass = prompt("Nhập mật khẩu quản trị:");
-    if (pass !== null) {
-      adminPassword = pass; adminMode = true;
-      document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock-open me-1"></i> Admin ON';
-      document.getElementById('adminToggle').className = 'nav-link btn btn-success text-white px-3';
-
-      let postBtn = document.getElementById('adminPostBtn');
-      if (!postBtn) {
-        postBtn = document.createElement('li');
-        postBtn.id = 'adminPostBtn';
-        postBtn.className = 'nav-item ms-lg-2 mt-2 mt-lg-0';
-        postBtn.innerHTML = '<a class="nav-link btn btn-danger text-white px-3" href="dang-tin.html" style="border-radius:5px; background-color:var(--primary-color); border:none;"><i class="fas fa-plus-circle me-1"></i> Đăng Tin</a>';
-        document.getElementById('adminToggle').closest('li').insertAdjacentElement('afterend', postBtn);
-      }
-      loadProducts();
-    }
-  } else {
-    adminMode = false; adminPassword = "";
-    document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock me-1"></i> Admin';
-    document.getElementById('adminToggle').className = 'nav-link btn btn-outline-secondary px-3';
-
-    const postBtn = document.getElementById('adminPostBtn');
-    if (postBtn) postBtn.remove();
-    loadProducts();
-  }
+ if (!adminMode) {
+ const pass = prompt("Nhập mật khẩu quản trị:");
+ if (pass !== null) {
+ adminPassword = pass; adminMode = true;
+ document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock-open me-1"></i> Admin ON';
+ document.getElementById('adminToggle').className = 'nav-link btn btn-success text-white px-3';
+ let postBtn = document.getElementById('adminPostBtn');
+ if (!postBtn) {
+ postBtn = document.createElement('li');
+ postBtn.id = 'adminPostBtn';
+ postBtn.className = 'nav-item ms-lg-2 mt-2 mt-lg-0';
+ postBtn.innerHTML = '<a class="nav-link btn btn-danger text-white px-3" href="dang-tin.html" style="border-radius:5px; background-color:var(--primary-color); border:none;"><i class="fas fa-plus-circle me-1"></i> Đăng Tin</a>';
+ document.getElementById('adminToggle').closest('li').insertAdjacentElement('afterend', postBtn);
+ }
+ renderProducts(allProducts);
+ }
+ } else {
+ adminMode = false; adminPassword = "";
+ document.getElementById('adminToggle').innerHTML = '<i class="fas fa-lock me-1"></i> Admin';
+ document.getElementById('adminToggle').className = 'nav-link btn btn-outline-secondary px-3';
+ const postBtn = document.getElementById('adminPostBtn');
+ if (postBtn) postBtn.remove();
+ renderProducts(allProducts);
+ }
 }
-
 function showCustomConfirm(message, onConfirm) {
-  const modal = document.createElement('div');
-  modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;";
-  modal.innerHTML = `<div style="background:white;padding:24px;border-radius:12px;max-width:400px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;">
-    <h5 style="font-weight:700;margin-bottom:12px;color:#222;">Xác nhận xóa tin</h5>
-    <p style="color:#555;font-size:0.95rem;margin-bottom:24px;line-height:1.5;">${message}</p>
-    <div class="d-flex gap-2">
-      <button id="modalCancel" class="btn btn-outline-secondary w-100">Hủy bỏ</button>
-      <button id="modalConfirm" class="btn btn-danger w-100">Đồng ý xóa</button>
-    </div></div>`;
-  document.body.appendChild(modal);
-  modal.querySelector('#modalCancel').onclick = () => modal.remove();
-  modal.querySelector('#modalConfirm').onclick = () => { modal.remove(); onConfirm(); };
+ const modal = document.createElement('div');
+ modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;";
+ modal.innerHTML = `<div style="background:white;padding:24px;border-radius:12px;max-width:400px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;">
+ <h5 style="font-weight:700;margin-bottom:12px;color:#222;">Xác nhận xóa tin</h5>
+ <p style="color:#555;font-size:0.95rem;margin-bottom:24px;line-height:1.5;">${message}</p>
+ <div class="d-flex gap-2">
+ <button id="modalCancel" class="btn btn-outline-secondary w-100">Hủy bỏ</button>
+ <button id="modalConfirm" class="btn btn-danger w-100">Đồng ý xóa</button>
+ </div></div>`;
+ document.body.appendChild(modal);
+ modal.querySelector('#modalCancel').onclick = () => modal.remove();
+ modal.querySelector('#modalConfirm').onclick = () => { modal.remove(); onConfirm(); };
 }
-
 function showCustomAlert(title, message, type = 'success') {
-  const modal = document.createElement('div');
-  modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;";
-  const color = type === 'success' ? '#27ae60' : '#e03c31';
-  modal.innerHTML = `<div style="background:white;padding:24px;border-radius:12px;max-width:400px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;">
-    <h5 style="font-weight:700;margin-bottom:12px;color:${color};">${title}</h5>
-    <p style="color:#555;font-size:0.95rem;margin-bottom:20px;line-height:1.5;">${message}</p>
-    <button id="modalClose" class="btn w-100" style="background-color:${color};border-color:${color};color:white;">Đóng</button>
-    </div>`;
-  document.body.appendChild(modal);
-  modal.querySelector('#modalClose').onclick = () => modal.remove();
+ const modal = document.createElement('div');
+ modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;";
+ const color = type === 'success' ? '#27ae60' : '#e03c31';
+ modal.innerHTML = `<div style="background:white;padding:24px;border-radius:12px;max-width:400px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;">
+ <h5 style="font-weight:700;margin-bottom:12px;color:${color};">${title}</h5>
+ <p style="color:#555;font-size:0.95rem;margin-bottom:20px;line-height:1.5;">${message}</p>
+ <button id="modalClose" class="btn w-100" style="background-color:${color};border-color:${color};color:white;">Đóng</button>
+ </div>`;
+ document.body.appendChild(modal);
+ modal.querySelector('#modalClose').onclick = () => modal.remove();
 }
-
 function editProduct(id) { window.location.href = `dang-tin.html?id=${id}&pwd=${encodeURIComponent(adminPassword)}`; }
-
 function deleteProduct(id) {
-  showCustomConfirm("Bạn có chắc chắn muốn xóa tin đăng này không?", async () => {
-    const container = document.getElementById('product-list');
-    container.innerHTML = `<div class="loading-spinner w-100"><div class="spinner-border text-danger mb-3" role="status"></div><p>Đang xóa dữ liệu...</p></div>`;
-    try {
-      const res = await fetch(scriptURL, { method: 'POST', body: JSON.stringify({ action: 'delete', id, password: adminPassword }) });
-      const result = await res.json();
-      showCustomAlert(result.status === 'ok' ? "Thành công" : "Thất bại", result.message, result.status === 'ok' ? 'success' : 'error');
-    } catch (err) { showCustomAlert("Lỗi", "Không thể kết nối máy chủ!", "error"); }
-    loadProducts();
-  });
+ showCustomConfirm("Bạn có chắc chắn muốn xóa tin đăng này không?", async () => {
+ const container = document.getElementById('product-list');
+ container.innerHTML = `<div class="loading-spinner w-100"><div class="spinner-border text-danger mb-3" role="status"></div><p>Đang xóa dữ liệu...</p></div>`;
+ try {
+ const res = await fetch(scriptURL, { method: 'POST', body: JSON.stringify({ action: 'delete', id, password: adminPassword }) });
+ const result = await res.json();
+ showCustomAlert(result.status === 'ok' ? "Thành công" : "Thất bại", result.message, result.status === 'ok' ? 'success' : 'error');
+ } catch (err) { showCustomAlert("Lỗi", "Không thể kết nối máy chủ!", "error"); }
+ loadProducts();
+ });
 }
-
-// ===== TĂNG LƯỢT XEM KHI BẤM XEM CHI TIẾT =====
 async function goToDetail(id) { 
-  try {
-    // Gửi yêu cầu tăng view ngầm lên Server Apps Script trước khi chuyển trang
-    fetch(scriptURL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'view', id: id }),
-      mode: 'no-cors' // Tối ưu tốc độ phản hồi nhanh để chuyển trang ngay lập tức
-    });
-  } catch (e) { console.error("Lỗi đếm view: ", e); }
-  
-  window.location.href = 'chi-tiet.html?id=' + encodeURIComponent(id); 
+ try {
+ fetch(scriptURL, {
+ method: 'POST',
+ body: JSON.stringify({ action: 'view', id: id }),
+ mode: 'no-cors'
+ });
+ } catch (e) { console.error("Lỗi đếm view: ", e); }
+ window.location.href = 'chi-tiet.html?id=' + encodeURIComponent(id); 
 }
-
 function shareToFacebook(tieuDe, gia, diaChi, dienTich) {
-  const pageUrl = encodeURIComponent(window.location.href);
-  const quote = encodeURIComponent('🏠 ' + decodeURIComponent(tieuDe) + '\n📍 Khu vực: ' + decodeURIComponent(diaChi) + '\n📐 Diện tích: ' + decodeURIComponent(dienTich) + ' m²\n💰 Giá: ' + decodeURIComponent(gia) + ' Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!');
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+ const pageUrl = encodeURIComponent(window.location.href);
+ const quote = encodeURIComponent('🏠 ' + decodeURIComponent(tieuDe) + '\n📍 Khu vực: ' + decodeURIComponent(diaChi) + '\n📐 Diện tích: ' + decodeURIComponent(dienTich) + ' m²\n💰 Giá: ' + decodeURIComponent(gia) + ' Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!');
+ window.open('https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
 }
-
-// ===== TẠO CARD =====
 function createCard(product, cardId) {
-  const thoiGian = product.created_at || product.timestamp || '';
-  const duong    = product.duongpho  || '';
-  const phuong   = product.phuongxa  || '';
-  const tinh     = product.tinhthanh || '';
-  const dienTich = product.area      || '';
-  const gia      = product.price     || '';
-  const soTang   = product.sotang    || '';
-  const pNgu     = product.bedroom   || '';
-  const wc       = product.nhavesinh || '';
-  const huong    = product.direction || '';
-  const tieuDe   = product.tieu_de   || 'Bất Động Sản Nhà Phố';
-  const luotXem  = product.views     || 0; // Đọc giá trị lượt xem từ JSON bài viết
-
-  let imgs = [];
-  if (Array.isArray(product.images)) imgs = product.images.filter(u => u && u.trim() !== '');
-  if (imgs.length === 0) imgs.push(defaultImg);
-
-  let badgeHtml = '';
-  if (thoiGian) {
-    const d = new Date(thoiGian);
-    if (!isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 <= 7)
-      badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
-  }
-
-  // Thêm badge hiển thị tổng lượt xem của sản phẩm
-  let viewsHtml = `<span class="badge-view"><i class="fas fa-eye me-1"></i>${luotXem} lượt xem</span>`;
-
-  const hasMulti = imgs.length > 1;
-  const imgId = `img-${cardId}`;
-  const imagesAttr = JSON.stringify(imgs).replace(/'/g, "&apos;");
-  
-  const diaChiHienThi = [duong, phuong, tinh].filter(Boolean).join(', ');
-
-  const navHtml = hasMulti ? `
-    <button class="img-nav prev" onclick="event.stopPropagation();changeImg('${imgId}',-1)">&#8249;</button>
-    <button class="img-nav next" onclick="event.stopPropagation();changeImg('${imgId}',1)">&#8250;</button>
-    <span class="img-counter" id="${imgId}-counter">1 / ${imgs.length}</span>` : '';
-
-  const specs = [
-    { icon: 'fa-map-marker-alt text-danger',  label: diaChiHienThi || 'N/A' },
-    { icon: 'fa-ruler-combined text-primary', label: dienTich ? dienTich + ' m²' : 'N/A' },
-    { icon: 'fa-layer-group text-secondary',  label: soTang ? soTang + ' tầng' : 'N/A' },
-    { icon: 'fa-bed text-success',            label: pNgu ? pNgu + ' PN' : 'N/A' },
-    { icon: 'fa-bath text-info',              label: wc ? wc + ' WC' : 'N/A' },
-    { icon: 'fa-compass text-warning',        label: huong || 'N/A' },
-  ];
-
-  const specsHtml = specs.map(s =>
-    `<div class="spec-item" title="${s.label}"><i class="fas ${s.icon}"></i><span>${s.label}</span></div>`
-  ).join('');
-
-  let adminActionsHtml = '';
-  if (adminMode) {
-    adminActionsHtml = `
-      <div class="admin-actions">
-        <button class="btn btn-warning text-dark fw-bold" onclick="event.stopPropagation();editProduct('${product.id}')"><i class="fas fa-edit me-1"></i>Sửa</button>
-        <button class="btn btn-danger fw-bold" onclick="event.stopPropagation();deleteProduct('${product.id}')"><i class="fas fa-trash-alt me-1"></i>Xóa</button>
-      </div>`;
-  }
-
-  return `
-    <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-price="${gia}" data-tang="${soTang}">
-      <div class="card property-card w-100 d-flex flex-column" style="cursor:pointer;" onclick="goToDetail('${product.id}')">
-
-        <div class="card-img-wrapper" data-images='${imagesAttr}'>
-          <img id="${imgId}" src="${imgs[0]}" data-idx="0" alt="${tieuDe}" onerror="this.src='${defaultImg}'">
-          ${navHtml}
-        </div>
-
-        <div class="card-body d-flex flex-column p-3">
-          <div>
-            ${badgeHtml}
-            ${viewsHtml}
-          </div>
-          <h5 class="card-title fw-bold text-dark mb-1"
-            style="font-size:0.95rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.7em;"
-            title="${tieuDe}">${tieuDe}</h5>
-
-          <div class="specs-grid">${specsHtml}</div>
-
-          <div class="mt-auto pt-2 border-top">
-            <p class="price mb-2">💰 ${gia} Tỷ</p>
-            <div class="card-actions">
-              <a href="https://zalo.me/0854100036" target="_blank"
-                class="btn btn-zalo-card"
-                onclick="event.stopPropagation()">
-                <i class="fas fa-comment-dots me-1"></i>Zalo
-              </a>
-              <button
-                class="btn btn-facebook"
-                onclick="event.stopPropagation();shareToFacebook('${encodeURIComponent(tieuDe)}','${encodeURIComponent(gia)}','${encodeURIComponent(diaChiHienThi)}','${encodeURIComponent(dienTich)}')">
-                <i class="fab fa-facebook-f me-1"></i>Chia sẻ
-              </button>
-            </div>
-            ${adminActionsHtml}
-          </div>
-        </div>
-      </div>
-    </div>`;
+ const thoiGian = product.created_at || product.timestamp || '';
+ const duong = product.duongpho || '';
+ const phuong = product.phuongxa || '';
+ const tinh = product.tinhthanh || '';
+ const dienTich = product.area || '';
+ const gia = product.price || '';
+ const soTang = product.sotang || '';
+ const pNgu = product.bedroom || '';
+ const wc = product.nhavesinh || '';
+ const huong = product.direction || '';
+ const tieuDe = product.tieu_de || 'Bất Động Sản Nhà Phố';
+ const luotXem = product.views || 0;
+ let imgs = [];
+ if (Array.isArray(product.images)) imgs = product.images.filter(u => u && u.trim() !== '');
+ if (imgs.length === 0) imgs.push(defaultImg);
+ let badgeHtml = '';
+ if (thoiGian) {
+ const d = new Date(thoiGian);
+ if (!isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 <= 7)
+ badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
+ }
+ let viewsHtml = `<span class="badge-view"><i class="fas fa-eye me-1"></i>${luotXem} lượt xem</span>`;
+ const hasMulti = imgs.length > 1;
+ const imgId = `img-${cardId}`;
+ const imagesAttr = JSON.stringify(imgs).replace(/'/g, "&apos;");
+ const diaChiHienThi = [duong, phuong, tinh].filter(Boolean).join(', ');
+ const navHtml = hasMulti ? `
+ <button class="img-nav prev" onclick="event.stopPropagation();changeImg('${imgId}',-1)">&#8249;</button>
+ <button class="img-nav next" onclick="event.stopPropagation();changeImg('${imgId}',1)">&#8250;</button>
+ <span class="img-counter" id="${imgId}-counter">1 / ${imgs.length}</span>` : '';
+ const specs = [
+ { icon: 'fa-map-marker-alt text-danger', label: diaChiHienThi || 'N/A' },
+ { icon: 'fa-ruler-combined text-primary', label: dienTich ? dienTich + ' m²' : 'N/A' },
+ { icon: 'fa-layer-group text-secondary', label: soTang ? soTang + ' tầng' : 'N/A' },
+ { icon: 'fa-bed text-success', label: pNgu ? pNgu + ' PN' : 'N/A' },
+ { icon: 'fa-bath text-info', label: wc ? wc + ' WC' : 'N/A' },
+ { icon: 'fa-compass text-warning', label: huong || 'N/A' },
+ ];
+ const specsHtml = specs.map(s =>
+ `<div class="spec-item" title="${s.label}"><i class="fas ${s.icon}"></i><span>${s.label}</span></div>`
+ ).join('');
+ let adminActionsHtml = '';
+ if (adminMode) {
+ adminActionsHtml = `
+ <div class="admin-actions">
+ <button class="btn btn-warning text-dark fw-bold" onclick="event.stopPropagation();editProduct('${product.id}')"><i class="fas fa-edit me-1"></i>Sửa</button>
+ <button class="btn btn-danger fw-bold" onclick="event.stopPropagation();deleteProduct('${product.id}')"><i class="fas fa-trash-alt me-1"></i>Xóa</button>
+ </div>`;
+ }
+ return `
+ <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-price="${gia}" data-tang="${soTang}">
+ <div class="card property-card w-100 d-flex flex-column" style="cursor:pointer;" onclick="goToDetail('${product.id}')">
+ <div class="card-img-wrapper" data-images='${imagesAttr}'>
+ <img id="${imgId}" src="${imgs[0]}" data-idx="0" alt="${tieuDe}" onerror="this.src='${defaultImg}'">
+ ${navHtml}
+ </div>
+ <div class="card-body d-flex flex-column p-3">
+ <div>
+ ${badgeHtml}
+ ${viewsHtml}
+ </div>
+ <h5 class="card-title fw-bold text-dark mb-1"
+ style="font-size:0.95rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.7em;"
+ title="${tieuDe}">${tieuDe}</h5>
+ <div class="specs-grid">${specsHtml}</div>
+ <div class="mt-auto pt-2 border-top">
+ <p class="price mb-2">💰 ${gia} Tỷ</p>
+ <div class="card-actions">
+ <a href="https://zalo.me/0854100036" target="_blank"
+ class="btn btn-zalo-card"
+ onclick="event.stopPropagation()">
+ <i class="fas fa-comment-dots me-1"></i>Zalo
+ </a>
+ <button
+ class="btn btn-facebook"
+ onclick="event.stopPropagation();shareToFacebook('${encodeURIComponent(tieuDe)}','${encodeURIComponent(gia)}','${encodeURIComponent(diaChiHienThi)}','${encodeURIComponent(dienTich)}')">
+ <i class="fab fa-facebook-f me-1"></i>Chia sẻ
+ </button>
+ </div>
+ ${adminActionsHtml}
+ </div>
+ </div>
+ </div>
+ </div>`;
 }
-
-// ===== ĐỔI ẢNH =====
 function changeImg(imgId, dir) {
-  const el = document.getElementById(imgId);
-  if (!el) return;
-  const wrapper = el.closest('.card-img-wrapper');
-  if (!wrapper) return;
-  const imgList = JSON.parse(wrapper.getAttribute('data-images') || '[]');
-  if (imgList.length <= 1) return;
-  const counter = document.getElementById(imgId + '-counter');
-  let cur = parseInt(el.dataset.idx || '0');
-  cur = (cur + dir + imgList.length) % imgList.length;
-  el.src = imgList[cur];
-  el.dataset.idx = cur;
-  if (counter) counter.textContent = (cur + 1) + ' / ' + imgList.length;
+ const el = document.getElementById(imgId);
+ if (!el) return;
+ const wrapper = el.closest('.card-img-wrapper');
+ if (!wrapper) return;
+ const imgList = JSON.parse(wrapper.getAttribute('data-images') || '[]');
+ if (imgList.length <= 1) return;
+ const counter = document.getElementById(imgId + '-counter');
+ let cur = parseInt(el.dataset.idx || '0');
+ cur = (cur + dir + imgList.length) % imgList.length;
+ el.src = imgList[cur];
+ el.dataset.idx = cur;
+ if (counter) counter.textContent = (cur + 1) + ' / ' + imgList.length;
+}
+function renderProducts(productsList) {
+ const container = document.getElementById('product-list');
+ container.innerHTML = '';
+ if (!Array.isArray(productsList) || productsList.length === 0) {
+ container.innerHTML = '<div class="no-data w-100"><i class="fas fa-inbox fa-3x mb-3 d-block"></i>Không tìm thấy sản phẩm nào phù hợp.</div>';
+ document.getElementById('result-count').textContent = `Hiển thị 0 sản phẩm`;
+ return;
+ }
+ let html = '';
+ productsList.forEach((p, i) => { if (p && p.price) html += createCard(p, i); });
+ container.innerHTML = html;
+ document.getElementById('result-count').textContent = `Hiển thị ${productsList.length} sản phẩm`;
 }
 
-// ===== BỘ LỌC =====
+// ===== LOGIC LỌC ĐA TIÊU CHÍ NÂNG CẤP =====
 function applyFilter() {
-  const priceFilter = document.getElementById('filterPrice').value;
-  const tangFilter  = document.getElementById('filterTang').value;
-  const cards = document.querySelectorAll('#product-list > [data-price]');
-  let count = 0;
-  cards.forEach(card => {
-    const gia  = parseFloat((card.dataset.price || '0').replace(/[^0-9.]/g, '')) || 0;
-    const tang = parseInt(card.dataset.tang) || 0;
-    let show = true;
-    if (priceFilter === 'duoi5' && gia >= 5) show = false;
-    if (priceFilter === '5den6' && (gia < 5 || gia > 6)) show = false;
-    if (priceFilter === 'tren6' && gia <= 6) show = false;
-    if (tangFilter === '1' && tang !== 1) show = false;
-    if (tangFilter === '2' && tang !== 2) show = false;
-    if (tangFilter === '3' && tang !== 3) show = false;
-    if (tangFilter === '4+' && tang < 4) show = false;
-    card.style.display = show ? '' : 'none';
-    if (show) count++;
-  });
-  document.getElementById('result-count').textContent = `Hiển thị ${count} sản phẩm`;
+ const quanFilter = document.getElementById('filterQuanHuyen').value.toLowerCase();
+ const phuongFilter = document.getElementById('filterPhuongXa').value.toLowerCase();
+ const tieuChiFilter = document.getElementById('filterTieuChi').value.toLowerCase(); // Hướng nhà
+ const dtTu = parseFloat(document.getElementById('filterDienTichTu').value) || 0;
+ const dtDen = parseFloat(document.getElementById('filterDienTichDen').value) || Infinity;
+ const tangTu = parseInt(document.getElementById('filterTangTu').value) || 0;
+ const tangDen = parseInt(document.getElementById('filterTangDen').value) || Infinity;
+ const duongFilter = document.getElementById('filterDuongPho').value.toLowerCase().trim();
+ const giaTu = parseFloat(document.getElementById('filterGiaTu').value) || 0;
+ const giaDen = parseFloat(document.getElementById('filterGiaDen').value) || Infinity;
+ const keyword = document.getElementById('filterKeyword').value.toLowerCase().trim();
+
+ const filtered = allProducts.filter(product => {
+ if (!product || !product.price) return false;
+ 
+ // Chuẩn hóa dữ liệu từ JSON gốc để so sánh
+ const gia = parseFloat((product.price + '').replace(/[^0-9.]/g, '')) || 0;
+ const tang = parseInt(product.sotang) || 0;
+ const dt = parseFloat(product.area) || 0;
+ const phuong = (product.phuongxa || '').toLowerCase();
+ const quan = (product.quanhuyen || 'tp. thủ đức').toLowerCase();
+ const duong = (product.duongpho || '').toLowerCase();
+ const huong = (product.direction || '').toLowerCase();
+ const tieuDe = (product.tieu_de || '').toLowerCase();
+
+ // 1. Lọc theo vị trí hành chính & hướng
+ if (quanFilter && !quan.includes(quanFilter)) return false;
+ if (phuongFilter && !phuong.includes(phuongFilter)) return false;
+ if (tieuChiFilter && !huong.includes(tieuChiFilter)) return false;
+
+ // 2. Lọc theo khoảng diện tích
+ if (dt < dtTu || dt > dtDen) return false;
+
+ // 3. Lọc theo khoảng số tầng
+ if (tang < tangTu || tang > tangDen) return false;
+
+ // 4. Lọc theo khoảng giá
+ if (gia < giaTu || gia > giaDen) return false;
+
+ // 5. Lọc theo tên đường phố
+ if (duongFilter && !duong.includes(duongFilter)) return false;
+
+ // 6. Lọc nâng cao theo từ khóa tìm kiếm (Tìm trong tiêu đề hoặc tên đường)
+ if (keyword && !(tieuDe.includes(keyword) || duong.includes(keyword))) return false;
+
+ return true;
+ });
+
+ renderProducts(filtered);
 }
 
 function resetFilter() {
-  document.getElementById('filterPrice').value = '';
-  document.getElementById('filterTang').value  = '';
-  applyFilter();
+ document.getElementById('filterQuanHuyen').value = 'TP. Thủ Đức';
+ document.getElementById('filterPhuongXa').value = '';
+ document.getElementById('filterTieuChi').value = '';
+ document.getElementById('filterDienTichTu').value = '';
+ document.getElementById('filterDienTichDen').value = '';
+ document.getElementById('filterTangTu').value = '';
+ document.getElementById('filterTangDen').value = '';
+ document.getElementById('filterDuongPho').value = '';
+ document.getElementById('filterGiaTu').value = '';
+ document.getElementById('filterGiaDen').value = '';
+ document.getElementById('filterKeyword').value = '';
+ renderProducts(allProducts);
 }
 
-// ===== TẢI DỮ LIỆU =====
 async function loadProducts() {
-  const container = document.getElementById('product-list');
-  try {
-    const res = await fetch(sheetUrl, { method: 'GET', cache: 'no-cache' });
-    if (!res.ok) throw new Error('Không tải được dữ liệu.');
-    const rows = await res.json();
-    container.innerHTML = '';
-    if (!Array.isArray(rows) || rows.length === 0) {
-      container.innerHTML = '<div class="no-data w-100"><i class="fas fa-inbox fa-3x mb-3 d-block"></i>Hiện chưa có sản phẩm nào.</div>';
-      return;
-    }
-    let html = '';
-    rows.forEach((p, i) => { if (p && p.price) html += createCard(p, i); });
-    container.innerHTML = html;
-    allProducts = rows;
-    document.getElementById('result-count').textContent = `Hiển thị ${rows.length} sản phẩm`;
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = '<div class="no-data w-100"><i class="fas fa-exclamation-circle fa-3x mb-3 d-block text-danger"></i>Không thể tải dữ liệu sản phẩm.</div>';
-  }
+ const container = document.getElementById('product-list');
+ try {
+ const res = await fetch(sheetUrl, { method: 'GET', cache: 'no-cache' });
+ if (!res.ok) throw new Error('Không tải được dữ liệu.');
+ const rows = await res.json();
+ allProducts = rows;
+ renderProducts(allProducts);
+ } catch (err) {
+ console.error(err);
+ container.innerHTML = '<div class="no-data w-100"><i class="fas fa-exclamation-circle fa-3x mb-3 d-block text-danger"></i>Không thể tải dữ liệu sản phẩm.</div>';
+ }
 }
-
 window.addEventListener('DOMContentLoaded', loadProducts);
 </script>
 </body>
