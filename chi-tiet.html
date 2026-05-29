@@ -226,6 +226,11 @@
     font-size: 0.75rem; padding: 3px 10px; border-radius: 4px;
     display: inline-block; margin-bottom: 10px;
   }
+  .info-card .badge-view {
+    background: #6c757d; color: white;
+    font-size: 0.75rem; padding: 3px 10px; border-radius: 4px;
+    display: inline-block; margin-bottom: 10px; margin-left: 6px;
+  }
   .info-card h1 {
     font-size: 1.35rem;
     font-weight: 700;
@@ -308,7 +313,6 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <header>
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
     <div class="container">
@@ -321,18 +325,13 @@
           <li class="nav-item"><a class="nav-link" href="index.html#hero">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html#products">Sản Phẩm</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html#contact">Liên hệ</a></li>
-          <li class="nav-item">
-            <a class="nav-link btn btn-danger text-white px-3 ms-lg-3 mt-2 mt-lg-0" href="dang-tin.html" style="border-radius:5px; background-color: var(--primary-color); border:none;">
-              <i class="fas fa-plus-circle me-1"></i> Đăng Tin
-            </a>
-          </li>
+          
         </ul>
       </div>
     </div>
   </nav>
 </header>
 
-<!-- BREADCRUMB -->
 <div class="breadcrumb-wrap">
   <div class="container">
     <nav aria-label="breadcrumb">
@@ -345,7 +344,6 @@
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="detail-wrap">
   <div class="container" id="page-content">
     <div class="page-loading" id="loading-state">
@@ -364,7 +362,6 @@
   </div>
 </div>
 
-<!-- LIGHTBOX -->
 <div class="lightbox-overlay" id="lightbox">
   <button class="lightbox-close" onclick="closeLightbox()" title="Đóng">&times;</button>
   <button class="lightbox-prev" onclick="lightboxNav(-1)">&#8249;</button>
@@ -373,7 +370,6 @@
   <span class="lightbox-counter" id="lightbox-counter"></span>
 </div>
 
-<!-- FOOTER -->
 <footer class="footer pt-5 pb-4 mt-5">
   <div class="container">
     <div class="row">
@@ -564,7 +560,7 @@ class GallerySlider {
 function shareDetail(tieuDe, gia, diaChi, dienTich) {
   const pageUrl = encodeURIComponent(window.location.href);
   const quote   = encodeURIComponent(
-    '🏠 ' + tieuDe + '\n📍 ' + diaChi + '\n📐 Diện tích: ' + dienTich + ' m²\n💰 Giá: ' + gia + ' Tỷ\n\n👉 Liên hệ Hotline/Zalo: 0854.100.036'
+    '🏠 ' + tieuDe + '\n📍 ' + diaChi + '\n📐 Diện tích: ' + dienTich + ' m²\n💰 Giá: ' + gia + ' Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!'
   );
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
 }
@@ -584,6 +580,7 @@ function renderDetail(product) {
   const soNha    = product.sonha     || '';
   const moTa     = product.mo_ta     || '';
   const thoiGian = product.created_at || product.timestamp || '';
+  const luotXem  = product.views     || 0; // Đọc số lượt xem của sản phẩm
 
   const diaChi = [soNha, duong, phuong, tinh].filter(Boolean).join(', ');
 
@@ -599,6 +596,9 @@ function renderDetail(product) {
     if (!isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 <= 7)
       badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
   }
+
+  // Thêm badge hiển thị tổng số lượt xem trực quan
+  let viewsHtml = `<span class="badge-view"><i class="fas fa-eye me-1"></i>${luotXem} lượt xem</span>`;
 
   let ngayDang = '';
   if (thoiGian) {
@@ -631,11 +631,9 @@ function renderDetail(product) {
 
   const html = `
     <div class="row g-4">
-      <!-- CỘT TRÁI -->
       <div class="col-lg-8">
         <div class="info-card p-3 mb-3">
 
-          <!-- SLIDER WRAP -->
           <div class="gallery-slider-wrap" id="gallery-slider-wrap">
             ${showArrows ? `<button class="gallery-btn gallery-btn-prev" title="Ảnh trước"><i class="fas fa-chevron-left"></i></button>` : ''}
             ${showArrows ? `<button class="gallery-btn gallery-btn-next" title="Ảnh tiếp"><i class="fas fa-chevron-right"></i></button>` : ''}
@@ -643,10 +641,8 @@ function renderDetail(product) {
             <div class="gallery-track">${slidesHtml}</div>
           </div>
 
-          <!-- DOTS -->
           ${imgs.length > 1 ? `<div class="gallery-dots" id="gallery-dots"></div>` : ''}
 
-          <!-- THUMBNAILS -->
           ${thumbsHtml}
 
           ${imgs.length > 1 ? `<p class="text-muted mt-2 mb-0" style="font-size:0.82rem;"><i class="fas fa-hand-pointer me-1"></i>Vuốt hoặc nhấn mũi tên để xem tất cả ${imgs.length} ảnh</p>` : ''}
@@ -667,17 +663,18 @@ function renderDetail(product) {
             <tr><td><i class="fas fa-bath"></i> Nhà vệ sinh</td><td>${wc || 'N/A'}</td></tr>
             <tr><td><i class="fas fa-compass"></i> Hướng nhà</td><td>${huong || 'N/A'}</td></tr>
             <tr><td><i class="fas fa-map-marker-alt"></i> Địa chỉ đầy đủ</td><td>${diaChi || 'N/A'}</td></tr>
+            <tr><td><i class="fas fa-eye"></i> Số lượt xem</td><td>${luotXem} lượt</td></tr>
             ${ngayDang ? `<tr><td><i class="fas fa-calendar-alt"></i> Ngày đăng</td><td>${ngayDang}</td></tr>` : ''}
             <tr><td><i class="fas fa-tag"></i> Mã tin</td><td style="font-family:monospace;font-size:0.85rem;color:#888;">${product.id || 'N/A'}</td></tr>
           </table>
         </div>
       </div>
 
-      <!-- CỘT PHẢI -->
       <div class="col-lg-4">
         <div class="contact-sidebar">
           <div class="info-card">
             ${badgeHtml}
+            ${viewsHtml}
             <h1>${tieuDe}</h1>
             <div class="address-line">
               <i class="fas fa-map-marker-alt"></i>
