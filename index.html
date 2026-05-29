@@ -531,7 +531,6 @@ function createCard(product, cardId) {
  onclick="event.stopPropagation()">
  <i class="fas fa-comment-dots me-1"></i>Zalo
  </a>
- // Tìm đến nút bấm Chia sẻ Facebook bên trong hàm createCard và thay bằng đoạn này:
 <button
  class="btn btn-facebook"
  onclick="event.stopPropagation();shareToFacebook('${product.id}','${encodeURIComponent(tieuDe)}','${encodeURIComponent(gia)}','${encodeURIComponent(diaChiHienThi)}','${encodeURIComponent(dienTich)}')">
