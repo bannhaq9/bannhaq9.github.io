@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chi Tiết Sản Phẩm | Thanh Tra BĐS</title>
+<title>Chi Tiết Sản Phẩm | Thanh Trà BĐS Nhà Phố</title>
 
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Thanh Tra BĐS">
-<meta id="og-title"       property="og:title"       content="Chi Tiết BĐS - Thanh Tra BĐS">
-<meta id="og-description" property="og:description" content="Xem thông tin chi tiết bất động sản tại Thanh Tra BĐS. Hotline/Zalo: 0854.100.036">
+<meta property="og:site_name" content="Thanh Trà BĐS Nhà Phố">
+<meta id="og-title"       property="og:title"       content="Chi Tiết BĐS - Thanh Trà BĐS Nhà Phố">
+<meta id="og-description" property="og:description" content="Xem thông tin chi tiết bất động sản tại Thanh Trà BĐS Nhà Phố.">
 <meta id="og-image"       property="og:image"       content="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,232 +20,49 @@
 <style>
   :root { --primary-color: #e03c31; --dark-color: #222; }
   body { font-family: 'Be Vietnam Pro', sans-serif; color: #333; background: #f4f6f8; }
-
-  /* NAVBAR */
   .navbar-brand { font-weight: 700; font-size: 1.5rem; color: var(--primary-color) !important; }
   .nav-link { font-weight: 500; }
   .nav-link:hover { color: var(--primary-color) !important; }
-
-  /* BREADCRUMB */
-  .breadcrumb-wrap {
-    background: white;
-    border-bottom: 1px solid #eee;
-    padding: 10px 0;
-    margin-top: 70px;
-  }
+  .breadcrumb-wrap { background: white; border-bottom: 1px solid #eee; padding: 10px 0; margin-top: 70px; }
   .breadcrumb-item a { color: var(--primary-color); text-decoration: none; font-size: 0.9rem; }
   .breadcrumb-item.active { font-size: 0.9rem; color: #666; }
   .breadcrumb-item + .breadcrumb-item::before { color: #aaa; }
-
-  /* MAIN LAYOUT */
   .detail-wrap { padding: 30px 0 60px; }
-
-  /* ===== GALLERY SLIDER ===== */
-  .gallery-slider-wrap {
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #111;
-    user-select: none;
-  }
-
-  /* Track cuộn ngang */
-  .gallery-track {
-    display: flex;
-    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-    cursor: grab;
-  }
-  .gallery-track.dragging {
-    transition: none;
-    cursor: grabbing;
-  }
-  .gallery-slide {
-    flex: 0 0 100%;
-    width: 100%;
-  }
-  .gallery-slide img {
-    width: 100%;
-    aspect-ratio: 4/3;
-    object-fit: cover;
-    display: block;
-    pointer-events: none;
-  }
-
-  /* Nút mũi tên trái/phải */
-  .gallery-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.45);
-    color: white;
-    border: none;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: background 0.2s, transform 0.15s;
-    backdrop-filter: blur(4px);
-  }
-  .gallery-btn:hover {
-    background: var(--primary-color);
-    transform: translateY(-50%) scale(1.1);
-  }
+  .gallery-slider-wrap { position: relative; border-radius: 10px; overflow: hidden; background: #111; user-select: none; }
+  .gallery-track { display: flex; transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; cursor: grab; }
+  .gallery-track.dragging { transition: none; cursor: grabbing; }
+  .gallery-slide { flex: 0 0 100%; width: 100%; }
+  .gallery-slide img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; pointer-events: none; }
+  .gallery-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.45); color: white; border: none; width: 42px; height: 42px; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: background 0.2s, transform 0.15s; backdrop-filter: blur(4px); }
+  .gallery-btn:hover { background: var(--primary-color); transform: translateY(-50%) scale(1.1); }
   .gallery-btn-prev { left: 10px; }
   .gallery-btn-next { right: 10px; }
-
-  /* Chỉ số ảnh góc trên phải */
-  .gallery-counter-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(0,0,0,0.55);
-    color: white;
-    font-size: 0.8rem;
-    padding: 3px 10px;
-    border-radius: 20px;
-    backdrop-filter: blur(4px);
-    z-index: 10;
-    font-weight: 500;
-  }
-
-  /* Dots chỉ báo */
-  .gallery-dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: 10px 0 4px;
-  }
-  .gallery-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #ccc;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
-    border: none;
-    padding: 0;
-  }
-  .gallery-dot.active {
-    background: var(--primary-color);
-    transform: scale(1.3);
-  }
-
-  /* Thumbnail strip */
-  .gallery-thumb-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #ddd transparent;
-  }
+  .gallery-counter-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.55); color: white; font-size: 0.8rem; padding: 3px 10px; border-radius: 20px; backdrop-filter: blur(4px); z-index: 10; font-weight: 500; }
+  .gallery-dots { display: flex; justify-content: center; gap: 6px; padding: 10px 0 4px; }
+  .gallery-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; cursor: pointer; transition: background 0.2s, transform 0.2s; border: none; padding: 0; }
+  .gallery-dot.active { background: var(--primary-color); transform: scale(1.3); }
+  .gallery-thumb-row { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #ddd transparent; }
   .gallery-thumb-row::-webkit-scrollbar { height: 4px; }
   .gallery-thumb-row::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
-
-  .gallery-thumb {
-    flex: 0 0 72px;
-    width: 72px;
-    height: 54px;
-    object-fit: cover;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: border-color 0.2s, opacity 0.2s, transform 0.15s;
-    opacity: 0.65;
-  }
-  .gallery-thumb.active,
-  .gallery-thumb:hover {
-    border-color: var(--primary-color);
-    opacity: 1;
-    transform: scale(1.06);
-  }
-
-  /* LIGHTBOX */
-  .lightbox-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.92);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-  }
+  .gallery-thumb { flex: 0 0 72px; width: 72px; height: 54px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s, opacity 0.2s, transform 0.15s; opacity: 0.65; }
+  .gallery-thumb.active, .gallery-thumb:hover { border-color: var(--primary-color); opacity: 1; transform: scale(1.06); }
+  .lightbox-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; }
   .lightbox-overlay.open { display: flex; }
-  .lightbox-overlay img {
-    max-width: 90vw;
-    max-height: 88vh;
-    object-fit: contain;
-    border-radius: 6px;
-  }
-  .lightbox-close {
-    position: absolute; top: 18px; right: 22px;
-    color: white; font-size: 2rem; cursor: pointer;
-    background: none; border: none; line-height: 1;
-    opacity: 0.8; transition: opacity 0.2s;
-  }
+  .lightbox-overlay img { max-width: 90vw; max-height: 88vh; object-fit: contain; border-radius: 6px; }
+  .lightbox-close { position: absolute; top: 18px; right: 22px; color: white; font-size: 2rem; cursor: pointer; background: none; border: none; line-height: 1; opacity: 0.8; transition: opacity 0.2s; }
   .lightbox-close:hover { opacity: 1; }
-  .lightbox-prev, .lightbox-next {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,0.15); color: white; border: none;
-    width: 48px; height: 48px; border-radius: 50%;
-    font-size: 1.4rem; cursor: pointer; display: flex;
-    align-items: center; justify-content: center;
-    transition: background 0.2s;
-  }
+  .lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
   .lightbox-prev:hover, .lightbox-next:hover { background: var(--primary-color); }
   .lightbox-prev { left: 16px; }
   .lightbox-next { right: 16px; }
-  .lightbox-counter {
-    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
-    color: rgba(255,255,255,0.7); font-size: 0.9rem;
-  }
-
-  /* INFO CARD */
-  .info-card {
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #eee;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .info-card .price-tag {
-    color: var(--primary-color);
-    font-size: 1.8rem;
-    font-weight: 700;
-  }
-  .info-card .badge-new {
-    background: var(--primary-color); color: white;
-    font-size: 0.75rem; padding: 3px 10px; border-radius: 4px;
-    display: inline-block; margin-bottom: 10px;
-  }
-  .info-card .badge-view {
-    background: #6c757d; color: white;
-    font-size: 0.75rem; padding: 3px 10px; border-radius: 4px;
-    display: inline-block; margin-bottom: 10px; margin-left: 6px;
-  }
-  .info-card h1 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--dark-color);
-    line-height: 1.45;
-    margin-bottom: 12px;
-  }
-  .info-card .address-line {
-    color: #666; font-size: 0.92rem;
-    display: flex; align-items: flex-start; gap: 7px;
-    margin-bottom: 14px;
-  }
+  .lightbox-counter { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.9rem; }
+  .info-card { background: white; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 2px 12px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 20px; }
+  .info-card .price-tag { color: var(--primary-color); font-size: 1.8rem; font-weight: 700; }
+  .info-card .badge-new { background: var(--primary-color); color: white; font-size: 0.75rem; padding: 3px 10px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
+  .info-card .badge-view { background: #6c757d; color: white; font-size: 0.75rem; padding: 3px 10px; border-radius: 4px; display: inline-block; margin-bottom: 10px; margin-left: 6px; }
+  .info-card h1 { font-size: 1.35rem; font-weight: 700; color: var(--dark-color); line-height: 1.45; margin-bottom: 12px; }
+  .info-card .address-line { color: #666; font-size: 0.92rem; display: flex; align-items: flex-start; gap: 7px; margin-bottom: 14px; }
   .info-card .address-line i { color: var(--primary-color); margin-top: 3px; flex-shrink: 0; }
-
-  /* SPECS TABLE */
   .spec-table { width: 100%; border-collapse: collapse; }
   .spec-table tr { border-bottom: 1px solid #f0f0f0; }
   .spec-table tr:last-child { border-bottom: none; }
@@ -253,56 +70,26 @@
   .spec-table td:first-child { color: #888; width: 44%; }
   .spec-table td:last-child { font-weight: 600; color: #222; }
   .spec-table td i { width: 22px; color: var(--primary-color); }
-
-  /* MÔ TẢ */
-  .mota-box {
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #eee;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    padding: 24px;
-    margin-bottom: 20px;
-  }
+  .mota-box { background: white; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 2px 12px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 20px; }
   .mota-box h5 { font-weight: 700; margin-bottom: 14px; color: var(--dark-color); border-left: 4px solid var(--primary-color); padding-left: 10px; }
   .mota-box p { color: #555; line-height: 1.8; font-size: 0.95rem; white-space: pre-line; margin: 0; }
-
-  /* STICKY CONTACT SIDEBAR */
   .contact-sidebar { position: sticky; top: 86px; }
-  .contact-card {
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #eee;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    padding: 24px;
-    margin-bottom: 16px;
-  }
-  .contact-card .agent-avatar {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--primary-color);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 1.4rem; font-weight: 700;
-    margin-right: 14px; flex-shrink: 0;
-  }
+  .contact-card { background: white; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 2px 12px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 16px; }
+  .contact-card .agent-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; font-weight: 700; margin-right: 14px; flex-shrink: 0; }
   .contact-card .agent-name { font-weight: 700; font-size: 1rem; color: #222; margin-bottom: 2px; }
   .contact-card .agent-role { font-size: 0.83rem; color: #888; }
-
   .btn-zalo { background-color: #0068ff; border-color: #0068ff; color: white !important; font-weight: 600; transition: all 0.3s ease; }
   .btn-zalo:hover { background-color: #0055cc; border-color: #0055cc; transform: translateY(-1px); }
   .btn-call { background-color: #27ae60; border-color: #27ae60; color: white !important; font-weight: 600; transition: all 0.3s ease; }
   .btn-call:hover { background-color: #219150; border-color: #219150; transform: translateY(-1px); }
   .btn-facebook-share { background-color: #1877f2; border-color: #1877f2; color: white !important; font-weight: 600; transition: all 0.3s ease; }
   .btn-facebook-share:hover { background-color: #1558b0; border-color: #1558b0; transform: translateY(-1px); }
-
-  /* LOADING & ERROR */
   .page-loading { min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; }
-
-  /* FOOTER */
   .footer { background-color: var(--dark-color); color: #ccc; }
   .footer h5 { color: white; font-weight: 600; }
   .footer a { color: #ccc; text-decoration: none; transition: color 0.3s; }
   .footer a:hover { color: var(--primary-color); }
   .footer .social-icons a { font-size: 1.5rem; margin-right: 15px; }
-
   @media (max-width: 767px) {
     .contact-sidebar { position: static; }
     .info-card h1 { font-size: 1.15rem; }
@@ -316,7 +103,7 @@
 <header>
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="index.html">THANH TRA BĐS</a>
+      <a class="navbar-brand" href="index.html">THANH TRÀ BĐS</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -325,7 +112,6 @@
           <li class="nav-item"><a class="nav-link" href="index.html#hero">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html#products">Sản Phẩm</a></li>
           <li class="nav-item"><a class="nav-link" href="index.html#contact">Liên hệ</a></li>
-          
         </ul>
       </div>
     </div>
@@ -374,15 +160,14 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-4 col-md-6 mb-4">
-        <h5>THANH TRA BĐS</h5>
-        <p class="mt-3">Nền tảng tư vấn, môi giới bất động sản nhà phố chuyên nghiệp, uy tín hàng đầu tại Quận 9 - TP. Hồ Chí Minh.</p>
+        <h5>THANH TRÀ BĐS NHÀ PHỐ</h5>
+        <p class="mt-3">Nền tảng tư vấn, môi giới bất động sản nhà phố chuyên nghiệp, uy tín hàng đầu tại TP. Thủ Đức - TP. Hồ Chí Minh.</p>
       </div>
       <div class="col-lg-4 col-md-6 mb-4">
         <h5>THÔNG TIN LIÊN HỆ</h5>
         <ul class="list-unstyled mt-3">
           <li class="mb-2"><i class="fas fa-map-marker-alt me-2" style="color:var(--primary-color);"></i>Văn phòng: Lò Lu, Trường Thạnh, TP.Thủ Đức</li>
-          <li class="mb-2"><i class="fas fa-phone me-2" style="color:var(--primary-color);"></i><a href="tel:0854100036">0854100036</a></li>
-          <li class="mb-2"><i class="fas fa-envelope me-2" style="color:var(--primary-color);"></i><a href="mailto:thanhtra1996st@gmail.com">thanhtra1996st@gmail.com</a></li>
+          <li class="mb-2"><i class="fas fa-phone me-2" style="color:var(--primary-color);"></i>0854100036</li>
         </ul>
       </div>
       <div class="col-lg-4 col-md-12 mb-4">
@@ -396,20 +181,23 @@
     </div>
     <hr style="border-color:#555;">
     <div class="text-center pt-2">
-      <p>© 2026 Bản quyền thuộc về Thanh Tra BĐS.</p>
+      <p>© 2026 Bản quyền thuộc về Thanh Trà BĐS Nhà Phố.</p>
     </div>
   </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
 const sheetUrl   = "data/products.json";
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
 
-// ===== LIGHTBOX =====
 let lightboxImgs = [];
 let lightboxIdx  = 0;
+
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
 
 function openLightbox(idx) {
   lightboxImgs = window.galleryImgs || [];
@@ -440,7 +228,6 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape')     closeLightbox();
 });
 
-// ===== GALLERY SLIDER CLASS =====
 class GallerySlider {
   constructor(wrap, imgs) {
     this.imgs = imgs;
@@ -451,7 +238,6 @@ class GallerySlider {
     this.thumbRow = wrap.parentElement.querySelector('.gallery-thumb-row');
     this.dots = [];
 
-    // Build dots
     const dotsWrap = wrap.parentElement.querySelector('.gallery-dots');
     if (dotsWrap && imgs.length > 1) {
       imgs.forEach((_, i) => {
@@ -463,27 +249,21 @@ class GallerySlider {
       });
     }
 
-    // Nút mũi tên
     wrap.querySelector('.gallery-btn-prev').addEventListener('click', () => this.goTo(this.current - 1));
     wrap.querySelector('.gallery-btn-next').addEventListener('click', () => this.goTo(this.current + 1));
 
-    // Thumbnails
     if (this.thumbRow) {
       this.thumbRow.querySelectorAll('.gallery-thumb').forEach((th, i) => {
         th.addEventListener('click', () => this.goTo(i));
       });
     }
 
-    // Click ảnh → mở lightbox
     wrap.querySelectorAll('.gallery-slide img').forEach((img, i) => {
       img.addEventListener('click', () => openLightbox(i));
     });
 
-    // Drag/swipe chuột
     this._initDrag();
-    // Touch swipe
     this._initTouch();
-
     this._update();
   }
 
@@ -495,18 +275,11 @@ class GallerySlider {
 
   _update() {
     this.track.style.transform = `translateX(-${this.current * 100}%)`;
-
-    // Counter badge
     if (this.counter) this.counter.textContent = (this.current + 1) + ' / ' + this.imgs.length;
-
-    // Dots
     this.dots.forEach((d, i) => d.classList.toggle('active', i === this.current));
-
-    // Thumbnails
     if (this.thumbRow) {
       const thumbs = this.thumbRow.querySelectorAll('.gallery-thumb');
       thumbs.forEach((th, i) => th.classList.toggle('active', i === this.current));
-      // Cuộn thumbnail strip về vị trí active
       const activeTh = thumbs[this.current];
       if (activeTh) {
         const row = this.thumbRow;
@@ -556,7 +329,6 @@ class GallerySlider {
   }
 }
 
-// ===== CHIA SẺ FACEBOOK =====
 function shareDetail(tieuDe, gia, diaChi, dienTich) {
   const pageUrl = encodeURIComponent(window.location.href);
   const quote   = encodeURIComponent(
@@ -565,7 +337,6 @@ function shareDetail(tieuDe, gia, diaChi, dienTich) {
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + pageUrl + '&quote=' + quote, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
 }
 
-// ===== RENDER TRANG CHI TIẾT =====
 function renderDetail(product) {
   const tieuDe   = product.tieu_de   || 'Bất Động Sản Nhà Phố';
   const duong    = product.duongpho  || '';
@@ -580,10 +351,9 @@ function renderDetail(product) {
   const soNha    = product.sonha     || '';
   const moTa     = product.mo_ta     || '';
   const thoiGian = product.created_at || product.timestamp || '';
-  const luotXem  = product.views     || 0; // Đọc số lượt xem của sản phẩm
+  const luotXem  = product.views     || 0;
 
   const diaChi = [soNha, duong, phuong, tinh].filter(Boolean).join(', ');
-
   let imgs = [];
   if (Array.isArray(product.images)) imgs = product.images.filter(u => u && u.trim() !== '');
   if (imgs.length === 0) imgs.push(defaultImg);
@@ -597,7 +367,6 @@ function renderDetail(product) {
       badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
   }
 
-  // Thêm badge hiển thị tổng số lượt xem trực quan
   let viewsHtml = `<span class="badge-view"><i class="fas fa-eye me-1"></i>${luotXem} lượt xem</span>`;
 
   let ngayDang = '';
@@ -606,14 +375,12 @@ function renderDetail(product) {
     if (!isNaN(d.getTime())) ngayDang = d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
   }
 
-  // Build slides HTML
   const slidesHtml = imgs.map((url, i) =>
     `<div class="gallery-slide">
        <img src="${url}" alt="Ảnh ${i+1}" title="Nhấp để xem ảnh lớn" onerror="this.src='${defaultImg}'">
      </div>`
   ).join('');
 
-  // Build thumbnails HTML (chỉ hiện khi > 1 ảnh)
   const thumbsHtml = imgs.length > 1 ? `
     <div class="gallery-thumb-row">
       ${imgs.map((url, i) =>
@@ -621,10 +388,10 @@ function renderDetail(product) {
       ).join('')}
     </div>` : '';
 
-  document.title = tieuDe + ' | Thanh Tra BĐS';
+  document.title = tieuDe + ' | Thanh Trà BĐS';
   document.getElementById('breadcrumb-title').textContent = tieuDe;
-  document.getElementById('og-title').setAttribute('content', tieuDe + ' - Thanh Tra BĐS');
-  document.getElementById('og-description').setAttribute('content', `📍 ${diaChi} | 📐 ${dienTich} m² | 💰 ${gia} Tỷ | Hotline: 0854.100.036`);
+  document.getElementById('og-title').setAttribute('content', tieuDe + ' - Thanh Trà BĐS');
+  document.getElementById('og-description').setAttribute('content', `📍 ${diaChi} | 📐 ${dienTich} m² | 💰 ${gia} Tỷ`);
   if (imgs[0]) document.getElementById('og-image').setAttribute('content', imgs[0]);
 
   const showArrows = imgs.length > 1;
@@ -633,27 +400,21 @@ function renderDetail(product) {
     <div class="row g-4">
       <div class="col-lg-8">
         <div class="info-card p-3 mb-3">
-
           <div class="gallery-slider-wrap" id="gallery-slider-wrap">
             ${showArrows ? `<button class="gallery-btn gallery-btn-prev" title="Ảnh trước"><i class="fas fa-chevron-left"></i></button>` : ''}
             ${showArrows ? `<button class="gallery-btn gallery-btn-next" title="Ảnh tiếp"><i class="fas fa-chevron-right"></i></button>` : ''}
             ${imgs.length > 1 ? `<span class="gallery-counter-badge">1 / ${imgs.length}</span>` : ''}
             <div class="gallery-track">${slidesHtml}</div>
           </div>
-
           ${imgs.length > 1 ? `<div class="gallery-dots" id="gallery-dots"></div>` : ''}
-
           ${thumbsHtml}
-
           ${imgs.length > 1 ? `<p class="text-muted mt-2 mb-0" style="font-size:0.82rem;"><i class="fas fa-hand-pointer me-1"></i>Vuốt hoặc nhấn mũi tên để xem tất cả ${imgs.length} ảnh</p>` : ''}
         </div>
-
         ${moTa ? `
         <div class="mota-box">
           <h5><i class="fas fa-align-left me-2" style="color:var(--primary-color);"></i>Mô tả chi tiết</h5>
           <p>${moTa.replace(/\n/g, '<br>')}</p>
         </div>` : ''}
-
         <div class="mota-box">
           <h5><i class="fas fa-clipboard-list me-2" style="color:var(--primary-color);"></i>Thông số kỹ thuật</h5>
           <table class="spec-table">
@@ -669,7 +430,6 @@ function renderDetail(product) {
           </table>
         </div>
       </div>
-
       <div class="col-lg-4">
         <div class="contact-sidebar">
           <div class="info-card">
@@ -687,12 +447,11 @@ function renderDetail(product) {
               ${pNgu     ? `<span><i class="fas fa-bed me-1 text-success"></i>${pNgu} PN</span>` : ''}
             </div>
           </div>
-
           <div class="contact-card">
             <div class="d-flex align-items-center mb-16" style="margin-bottom:16px;">
               <div class="agent-avatar">TT</div>
               <div>
-                <div class="agent-name">Thanh Tra BĐS</div>
+                <div class="agent-name">Thanh Trà BĐS Nhà Phố</div>
                 <div class="agent-role">Chuyên viên tư vấn</div>
               </div>
             </div>
@@ -705,7 +464,6 @@ function renderDetail(product) {
               </button>
             </div>
           </div>
-
           <a href="index.html#products" class="btn btn-outline-secondary w-100 py-2">
             <i class="fas fa-arrow-left me-2"></i>Xem thêm sản phẩm khác
           </a>
@@ -713,19 +471,17 @@ function renderDetail(product) {
       </div>
     </div>
   `;
-
   document.getElementById('detail-content').innerHTML = html;
   document.getElementById('detail-content').classList.remove('d-none');
   document.getElementById('loading-state').classList.add('d-none');
 
-  // Khởi tạo slider sau khi HTML đã render vào DOM
   if (imgs.length > 0) {
     const sliderWrap = document.getElementById('gallery-slider-wrap');
     if (sliderWrap) new GallerySlider(sliderWrap, imgs);
   }
 }
 
-// Thay đường dẫn URL Apps Script Web App đã Deploy của bạn vào đây
+// Đường dẫn URL Apps Script Web App của bạn
 const appsScriptApiUrl = "https://script.google.com/macros/s/AKfycbz2X-Y_TFbNQC7O2jXqIknNVymNp5K6zBdxUvzLyRCuvGtfNKiV_RyE04ZDXJcfF8qX/exec"; 
 
 async function loadDetail() {
@@ -736,7 +492,7 @@ async function loadDetail() {
     return;
   }
   try {
-    // 1. Tải dữ liệu từ file JSON cục bộ để hiển thị nhanh cho khách hàng
+    // 1. Tải dữ liệu từ tệp JSON cục bộ để hiển thị ngay cho khách hàng
     const res = await fetch(sheetUrl, { method: 'GET', cache: 'no-cache' });
     if (!res.ok) throw new Error('Không tải được dữ liệu.');
     const rows = await res.json();
@@ -748,13 +504,23 @@ async function loadDetail() {
       return;
     }
     
-    // 2. Gọi ngầm sang Google Sheet để tăng số lượt xem lên 1
-    fetch(`${appsScriptApiUrl}?action=incrementView&id=${id}`, { method: 'GET', mode: 'no-cors' })
-      .catch(err => console.log("Ghi nhận lượt xem ngầm thất bại:", err));
-    
-    // Do dùng no-cors không đọc được kết quả trả về ngay lập tức để tránh block, 
-    // chúng ta cộng ảo luôn +1 vào giao diện hiển thị cho đẹp mắt
-    product.views = (Number(product.views) || 0) + 1;
+    // Kiểm tra xem trình duyệt này đã xem sản phẩm này trong phiên làm việc hiện tại hay chưa
+    const storageKey = `viewed_prod_${id}`;
+    if (!sessionStorage.getItem(storageKey)) {
+      // 2. Gửi lệnh POST đồng bộ sang Google Apps Script để tăng lượt xem trên file GitHub
+      fetch(appsScriptApiUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'view', id: id })
+      }).catch(err => console.log("Ghi nhận lượt xem thất bại:", err));
+
+      // Cộng ảo trực tiếp trên giao diện hiển thị cho khách hàng cảm thấy mượt mà
+      product.views = (Number(product.views) || 0) + 1;
+      sessionStorage.setItem(storageKey, 'true');
+    } else {
+      product.views = Number(product.views) || 0;
+    }
 
     renderDetail(product);
   } catch (err) {
