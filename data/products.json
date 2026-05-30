@@ -1,5 +1,28 @@
 [
   {
+    "id": "prod_1780138231556",
+    "sonha": "",
+    "duongpho": "Đường số 5",
+    "phuongxa": "Phường An Khánh",
+    "tinhthanh": "TP. Thủ Đức",
+    "area": "36",
+    "price": "12",
+    "sotang": "3",
+    "bedroom": "3",
+    "nhavesinh": "3",
+    "direction": "Không Xác Định",
+    "tieu_de": "MTKD ĐƯỜNG SỐ 5 - NHÀ PHỐ ĐẲNG CẤP THẢO ĐIỀN, PHƯỜNG AN KHÁNH, THỦ ĐỨC",
+    "mo_ta": "📍 THÔNG SỐ & GIÁ BÁN\n- Vị trí: Đường số 5, Phường An Khánh, TP. Thủ Đức; Diện tích: 36m²; Kết cấu: 3 phòng ngủ, 3 WC; Đường ô tô vào nhà.\n- Giá mới ưu đãi: 12 tỷ.\n📍 TIỆN ÍCH & VỊ TRÍ CHI TIẾT\n- Tiện ích: Nhà 1 trệt 2 lầu gồm 3 phòng ngủ, 1 phòng thờ, 3 WC, không gian thoáng đãng.\n- Giao thông kết nối: Khu vực yên tĩnh, gần trung tâm TP, thuận tiện di chuyển.\n- Địa hình: Khu đất vàng Thảo Điền, không bị ảnh hưởng bởi ngập lụt.\n📍 PHÁP LÝ & KÊU GỌI HÀNH ĐỘNG\n- Pháp lý chuẩn, sổ hồng riêng sẵn sàng giao dịch.\n- Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà.",
+    "images": [
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1780138227469_0.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1780138228503_1.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1780138229517_2.jpeg",
+      "https://raw.githubusercontent.com/bannhaq9/bannhaq9.github.io/main/images/products/img_1780138230457_3.jpeg"
+    ],
+    "views": 0,
+    "created_at": "2026-05-30T10:50:31.556Z"
+  },
+  {
     "id": "prod_1780022859043",
     "sonha": "",
     "duongpho": "Nguyễn Duy Trinh",
