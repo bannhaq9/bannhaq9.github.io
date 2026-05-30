@@ -308,16 +308,18 @@ class GallerySlider {
 }
 function shareToFacebook(id, tieuDe, gia, diaChi, dienTich, moTaRaw) {
   const title = decodeURIComponent(tieuDe).toUpperCase();
-  const price = decodeURIComponent(gia);
-  const address = decodeURIComponent(diaChi);
-  const area = decodeURIComponent(dienTich);
+  // Giải mã và xử lý ký tự xuống dòng từ trường mo_ta của AI
   let fullDescription = decodeURIComponent(moTaRaw);
   fullDescription = fullDescription.replace(/\\n/g, '\n').trim();
-  const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area}m²\n💰 Giá ưu đãi: ${price} Tỷ\n\n📝 CHI TIẾT BÀI ĐĂNG:\n${fullDescription}`;
+
+  // Tạo nội dung sao chép: Chỉ giữ tiêu đề nhà phố và toàn bộ bài mô tả chi tiết từ AI
+  const textToCopy = `🏠 ${title}\n\n${fullDescription}`;
+  
   const originUrl = window.location.origin + window.location.pathname;
   const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
   const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
   const encodedProductUrl = encodeURIComponent(productUrl);
+
   navigator.clipboard.writeText(textToCopy).then(() => {
     alert("Đã tự động sao chép TOÀN BỘ bài viết và mô tả chuẩn SEO!\n\nBạn hãy chọn Fanpage cần đăng, rồi bấm Ctrl + V (hoặc Dán) vào khung bài viết để hiển thị thông tin đầy đủ và đẹp mắt nhất.");
     window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
