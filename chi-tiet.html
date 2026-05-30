@@ -476,7 +476,7 @@ function renderDetail(product) {
               <a href="tel:0854100036" class="btn btn-call py-2"><i class="fas fa-phone-alt me-2"></i>Gọi ngay: 0854.100.036</a>
               <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-zalo py-2"><i class="fa-solid fa-comment-dots me-2"></i>Nhắn Zalo ngay</a>
               <button class="btn btn-facebook-share py-2"
-                onclick="shareDetail('${encodeURIComponent(tieuDe)}', '${encodeURIComponent(gia)}', '${encodeURIComponent(diaChi)}', '${encodeURIComponent(dienTich)}', '${product.id}')">
+                onclick="event.stopPropagation();shareToFacebook('${product.id}','${encodeURIComponent(tieuDe)}','${encodeURIComponent(gia)}','${encodeURIComponent(diaChiHienThi)}','${encodeURIComponent(dienTich)}','${encodeURIComponent(product.mo_ta || '')}')">
                 <i class="fab fa-facebook-f me-2"></i>Chia sẻ lên Facebook
               </button>
             </div>
