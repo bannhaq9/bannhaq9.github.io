@@ -437,22 +437,29 @@ async function goToDetail(id) {
  } catch (e) { console.error("Lỗi đếm view: ", e); }
  window.location.href = 'chi-tiet.html?id=' + encodeURIComponent(id); 
 }
-function shareToFacebook(id, tieuDe, gia, diaChi, dienTich) {
- const title = decodeURIComponent(tieuDe);
- const price = decodeURIComponent(gia);
- const address = decodeURIComponent(diaChi);
- const area = decodeURIComponent(dienTich);
- const textToCopy = `🏠 ${title}\n📍 Khu vực: ${address}\n📐 Diện tích: ${area}\n💰 Giá: ${price} Tỷ\n\n👉 Khách hàng có nhu cầu vui lòng Inbox Fanpage để nhận thông tin chi tiết!`;
+function shareToFacebook(id, tieuDe, gia, diaChi, dienTich, moTaRaw) {
+ const title = decodeURIComponent(tieuDe).toUpperCase();
+ const price = decodeURIComponent(gia);
+ const address = decodeURIComponent(diaChi);
+ const area = decodeURIComponent(dienTich);
+ // Giải mã và xử lý ký tự xuống dòng từ trường mo_ta của AI
+ let fullDescription = decodeURIComponent(moTaRaw);
+ fullDescription = fullDescription.replace(/\\n/g, '\n').trim();
+
+ // Hợp nhất toàn bộ thông tin thành một bài viết hoàn chỉnh, liền mạch, không dòng trống
+ const textToCopy = `🏠 ${title}\n📍 Vị trí: ${address}\n📐 Diện tích: ${area}m²\n💰 Giá ưu đãi: ${price} Tỷ\n\n📝 CHI TIẾT BÀI ĐĂNG:\n${fullDescription}`;
+ 
  const originUrl = window.location.origin + window.location.pathname;
- const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
- const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
- const encodedProductUrl = encodeURIComponent(productUrl);
- navigator.clipboard.writeText(textToCopy).then(() => {
- alert("Đã tự động sao chép thông tin nhà phố! Bạn chỉ cần Dán (Paste) vào bài viết Facebook.");
- window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
- }).catch(err => {
- window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
- });
+ const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
+ const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
+ const encodedProductUrl = encodeURIComponent(productUrl);
+
+ navigator.clipboard.writeText(textToCopy).then(() => {
+ alert("Đã tự động sao chép TOÀN BỘ bài viết và mô tả chuẩn SEO!\n\nBạn hãy chọn Fanpage cần đăng, rồi bấm Ctrl + V (hoặc Dán) vào khung bài viết để hiển thị thông tin đầy đủ và đẹp mắt nhất.");
+ window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+ }).catch(err => {
+ window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
+ });
 }
 function createCard(product, cardId) {
  const thoiGian = product.created_at || product.timestamp || '';
