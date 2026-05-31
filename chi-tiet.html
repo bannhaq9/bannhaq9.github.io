@@ -179,14 +179,103 @@
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const appsScriptApiUrl = "https://script.google.com/macros/s/AKfycbzkYmas3yCQVHaxmejEe24CLvLlPNWAioqp0Lrq-caBcpJl9Km3gYB-wGnlPllwsB8t/exec"; 
+const appsScriptApiUrl = "https://script.google.com/macros/s/AKfycbzkYmas3yCQVHaxmejEe24CLvLlPNWAioqp0Lrq-caBcpJl9Km3gYB-wGnlPllwsB8t/exec";
 const defaultImg = "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg";
-let lightboxImgs = [];
-let lightboxIdx  = 0;
-function getQueryParam(param) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(param);
+
+// State toàn cục
+let currentProduct = null;
+let lightboxImgs   = [];
+let lightboxIdx    = 0;
+
+// ------------------------------------------------------------
+// Utility: fetch có retry + timeout
+// ------------------------------------------------------------
+async function fetchWithRetry(url, opts = {}, { retries = 3, timeout = 10000 } = {}) {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(url, { ...opts, signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) return res;
+      throw new Error(`HTTP ${res.status}`);
+    } catch (err) {
+      clearTimeout(timer);
+      if (attempt === retries - 1) throw err;
+      await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
+    }
+  }
 }
+
+// ------------------------------------------------------------
+// Utility: Toast notification (thay thế alert)
+// ------------------------------------------------------------
+function showToast(msg, type = 'info') {
+  const colors = { info: '#333', success: '#27ae60', error: '#e03c31' };
+  const existing = document.getElementById('tt-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'tt-toast';
+  t.textContent = msg;
+  t.style.cssText = `
+    position:fixed;bottom:24px;left:50%;
+    transform:translateX(-50%) translateY(0);
+    background:${colors[type]||colors.info};
+    color:#fff;padding:11px 22px;
+    border-radius:8px;z-index:99999;
+    font-size:14px;font-family:'Be Vietnam Pro',sans-serif;
+    box-shadow:0 4px 16px rgba(0,0,0,0.18);
+    max-width:90vw;text-align:center;
+    transition:opacity 0.4s;
+  `;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+// ------------------------------------------------------------
+// shareToFacebook: gọi Apps Script proxy
+// ------------------------------------------------------------
+async function shareToFacebook() {
+  if (!currentProduct) return;
+  const btn = document.getElementById('btn-share-fb');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fab fa-facebook-f me-2"></i>Đang chia sẻ...'; }
+
+  const { id, tieu_de, mo_ta, price, area, duongpho, phuongxa, tinhthanh } = currentProduct;
+  const diaChi = [duongpho, phuongxa, tinhthanh].filter(Boolean).join(', ');
+  const message = [
+    `🏠 ${(tieu_de || '').toUpperCase()}`,
+    ``,
+    mo_ta ? mo_ta.replace(/\\n/g, '\n').trim() : '',
+    ``,
+    `📍 ${diaChi}`,
+    price ? `💰 Giá: ${price} Tỷ` : '',
+    area  ? `📐 Diện tích: ${area} m²` : '',
+  ].filter(l => l !== undefined).join('\n').trim();
+
+  try {
+    await fetch(appsScriptApiUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'shareToFanpage', id, message })
+    });
+    showToast('Đã chia sẻ lên Fanpage thành công! 🎉', 'success');
+  } catch (err) {
+    console.error('Share thất bại:', err);
+    try {
+      await navigator.clipboard.writeText(message);
+      showToast('Không share tự động được. Đã copy bài viết — dán vào Fanpage nhé!', 'info');
+    } catch (_) {
+      showToast('Chia sẻ thất bại. Vui lòng thử lại.', 'error');
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fab fa-facebook-f me-2"></i>Chia sẻ lên Facebook'; }
+  }
+}
+
+// ------------------------------------------------------------
+// Lightbox
+// ------------------------------------------------------------
 function openLightbox(idx) {
   lightboxImgs = window.galleryImgs || [];
   lightboxIdx  = idx;
@@ -215,12 +304,14 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowLeft')  lightboxNav(-1);
   if (e.key === 'Escape')     closeLightbox();
 });
+
+// ------------------------------------------------------------
+// GallerySlider
+// ------------------------------------------------------------
 class GallerySlider {
   constructor(wrap, imgs) {
-    this.imgs = imgs;
-    this.current = 0;
-    this.wrap = wrap;
-    this.track = wrap.querySelector('.gallery-track');
+    this.imgs = imgs; this.current = 0; this.wrap = wrap;
+    this.track   = wrap.querySelector('.gallery-track');
     this.counter = wrap.querySelector('.gallery-counter-badge');
     this.thumbRow = wrap.parentElement.querySelector('.gallery-thumb-row');
     this.dots = [];
@@ -234,8 +325,8 @@ class GallerySlider {
         this.dots.push(d);
       });
     }
-    wrap.querySelector('.gallery-btn-prev').addEventListener('click', () => this.goTo(this.current - 1));
-    wrap.querySelector('.gallery-btn-next').addEventListener('click', () => this.goTo(this.current + 1));
+    wrap.querySelector('.gallery-btn-prev')?.addEventListener('click', () => this.goTo(this.current - 1));
+    wrap.querySelector('.gallery-btn-next')?.addEventListener('click', () => this.goTo(this.current + 1));
     if (this.thumbRow) {
       this.thumbRow.querySelectorAll('.gallery-thumb').forEach((th, i) => {
         th.addEventListener('click', () => this.goTo(i));
@@ -244,15 +335,9 @@ class GallerySlider {
     wrap.querySelectorAll('.gallery-slide img').forEach((img, i) => {
       img.addEventListener('click', () => openLightbox(i));
     });
-    this._initDrag();
-    this._initTouch();
-    this._update();
+    this._initDrag(); this._initTouch(); this._update();
   }
-  goTo(idx) {
-    const n = this.imgs.length;
-    this.current = ((idx % n) + n) % n;
-    this._update();
-  }
+  goTo(idx) { const n = this.imgs.length; this.current = ((idx % n) + n) % n; this._update(); }
   _update() {
     this.track.style.transform = `translateX(-${this.current * 100}%)`;
     if (this.counter) this.counter.textContent = (this.current + 1) + ' / ' + this.imgs.length;
@@ -263,71 +348,44 @@ class GallerySlider {
       const activeTh = thumbs[this.current];
       if (activeTh) {
         const row = this.thumbRow;
-        const scrollLeft = activeTh.offsetLeft - row.offsetWidth / 2 + activeTh.offsetWidth / 2;
-        row.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+        row.scrollTo({ left: activeTh.offsetLeft - row.offsetWidth / 2 + activeTh.offsetWidth / 2, behavior: 'smooth' });
       }
     }
   }
   _initDrag() {
     let startX = 0, isDragging = false, moved = 0;
-    this.track.addEventListener('mousedown', (e) => {
-      startX = e.clientX; isDragging = true; moved = 0;
-      this.track.classList.add('dragging');
-    });
+    this.track.addEventListener('mousedown', (e) => { startX = e.clientX; isDragging = true; moved = 0; this.track.classList.add('dragging'); });
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       moved = e.clientX - startX;
-      const offset = -this.current * 100;
-      this.track.style.transform = `translateX(calc(${offset}% + ${moved}px))`;
+      this.track.style.transform = `translateX(calc(${-this.current * 100}% + ${moved}px))`;
     });
     document.addEventListener('mouseup', () => {
       if (!isDragging) return;
-      isDragging = false;
-      this.track.classList.remove('dragging');
-      if (Math.abs(moved) > 60) this.goTo(this.current + (moved < 0 ? 1 : -1));
-      else this._update();
+      isDragging = false; this.track.classList.remove('dragging');
+      if (Math.abs(moved) > 60) this.goTo(this.current + (moved < 0 ? 1 : -1)); else this._update();
     });
   }
   _initTouch() {
     let startX = 0, moved = 0;
-    this.wrap.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX; moved = 0;
-    }, { passive: true });
+    this.wrap.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; moved = 0; }, { passive: true });
     this.wrap.addEventListener('touchmove', (e) => {
       moved = e.touches[0].clientX - startX;
-      const offset = -this.current * 100;
       this.track.style.transition = 'none';
-      this.track.style.transform = `translateX(calc(${offset}% + ${moved}px))`;
+      this.track.style.transform = `translateX(calc(${-this.current * 100}% + ${moved}px))`;
     }, { passive: true });
     this.wrap.addEventListener('touchend', () => {
       this.track.style.transition = '';
-      if (Math.abs(moved) > 50) this.goTo(this.current + (moved < 0 ? 1 : -1));
-      else this._update();
+      if (Math.abs(moved) > 50) this.goTo(this.current + (moved < 0 ? 1 : -1)); else this._update();
     });
   }
 }
-function shareToFacebook(id, tieuDe, gia, diaChi, dienTich, moTaRaw) {
-  const title = decodeURIComponent(tieuDe).toUpperCase();
-  // Giải mã và xử lý ký tự xuống dòng từ trường mo_ta của AI
-  let fullDescription = decodeURIComponent(moTaRaw);
-  fullDescription = fullDescription.replace(/\\n/g, '\n').trim();
 
-  // Tạo nội dung sao chép: Chỉ giữ tiêu đề nhà phố và toàn bộ bài mô tả chi tiết từ AI
-  const textToCopy = `🏠 ${title}\n\n${fullDescription}`;
-  
-  const originUrl = window.location.origin + window.location.pathname;
-  const baseUrl = originUrl.substring(0, originUrl.lastIndexOf('/'));
-  const productUrl = `${baseUrl}/chi-tiet.html?id=${id}`;
-  const encodedProductUrl = encodeURIComponent(productUrl);
-
-  navigator.clipboard.writeText(textToCopy).then(() => {
-    alert("Đã tự động sao chép TOÀN BỘ bài viết và mô tả chuẩn SEO!\n\nBạn hãy chọn Fanpage cần đăng, rồi bấm Ctrl + V (hoặc Dán) vào khung bài viết để hiển thị thông tin đầy đủ và đẹp mắt nhất.");
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
-  }).catch(err => {
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedProductUrl, '_blank', 'width=620,height=520,scrollbars=yes,resizable=yes');
-  });
-}
+// ------------------------------------------------------------
+// renderDetail
+// ------------------------------------------------------------
 function renderDetail(product) {
+  currentProduct = product;
   const tieuDe   = product.tieu_de   || 'Bất Động Sản Nhà Phố';
   const duong    = product.duongpho  || '';
   const phuong   = product.phuongxa  || '';
@@ -338,42 +396,47 @@ function renderDetail(product) {
   const pNgu     = product.bedroom   || '';
   const wc       = product.nhavesinh || '';
   const huong    = product.direction || '';
-  const moTa     = product.mo_ta      || '';
+  const moTa     = product.mo_ta     || '';
   const thoiGian = product.created_at || product.timestamp || '';
   const luotXem  = product.views     || 0;
   const diaChiHienThi = [duong, phuong, tinh].filter(Boolean).join(', ');
-  let imgs = [];
-  if (Array.isArray(product.images)) imgs = product.images.filter(u => u && u.trim() !== '');
+
+  let imgs = Array.isArray(product.images) ? product.images.filter(u => u?.trim()) : [];
   if (imgs.length === 0) imgs.push(defaultImg);
   window.galleryImgs = imgs;
+
   let badgeHtml = '';
   if (thoiGian) {
     const d = new Date(thoiGian);
     if (!isNaN(d.getTime()) && (Date.now() - d.getTime()) / 86400000 <= 7)
       badgeHtml = '<span class="badge-new">🔥 Mới đăng</span>';
   }
-  let viewsHtml = `<span class="badge-view"><i class="fas fa-eye me-1"></i>${luotXem} lượt xem</span>`;
+  const viewsHtml = `<span class="badge-view"><i class="fas fa-eye me-1"></i>${luotXem} lượt xem</span>`;
   let ngayDang = '';
   if (thoiGian) {
     const d = new Date(thoiGian);
     if (!isNaN(d.getTime())) ngayDang = d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
   }
+
   const slidesHtml = imgs.map((url, i) =>
     `<div class="gallery-slide">
        <img src="${url}" alt="Ảnh ${i+1}" title="Nhấp để xem ảnh lớn" onerror="this.src='${defaultImg}'">
      </div>`
   ).join('');
+
   const thumbsHtml = imgs.length > 1 ? `
     <div class="gallery-thumb-row">
       ${imgs.map((url, i) =>
         `<img src="${url}" class="gallery-thumb ${i===0?'active':''}" alt="Ảnh ${i+1}" onerror="this.src='${defaultImg}'">`
       ).join('')}
     </div>` : '';
+
   document.title = tieuDe + ' | Thanh Trà BĐS';
   document.getElementById('breadcrumb-title').textContent = tieuDe;
   document.getElementById('og-title').setAttribute('content', tieuDe + ' - Thanh Trà BĐS');
   document.getElementById('og-description').setAttribute('content', `📍 ${diaChiHienThi} | 📐 ${dienTich} m² | 💰 ${gia} Tỷ`);
   if (imgs[0]) document.getElementById('og-image').setAttribute('content', imgs[0]);
+
   const showArrows = imgs.length > 1;
   const html = `
     <div class="row g-4">
@@ -397,7 +460,7 @@ function renderDetail(product) {
         <div class="mota-box">
           <h5><i class="fas fa-clipboard-list me-2" style="color:var(--primary-color);"></i>Thông số kỹ thuật</h5>
           <table class="spec-table">
-            <tr><td><i class="fas fa-ruler-combined"></i> Diện tích</td><td>${dienTich ?  dienTich + ' m²' : 'N/A'}</td></tr>
+            <tr><td><i class="fas fa-ruler-combined"></i> Diện tích</td><td>${dienTich ? dienTich + ' m²' : 'N/A'}</td></tr>
             <tr><td><i class="fas fa-layer-group"></i> Số tầng</td><td>${soTang || 'N/A'}</td></tr>
             <tr><td><i class="fas fa-bed"></i> Phòng ngủ</td><td>${pNgu || 'N/A'}</td></tr>
             <tr><td><i class="fas fa-bath"></i> Nhà vệ sinh</td><td>${wc || 'N/A'}</td></tr>
@@ -423,7 +486,7 @@ function renderDetail(product) {
             <div class="d-flex gap-3 text-muted" style="font-size:0.88rem;">
               ${dienTich ? `<span><i class="fas fa-ruler-combined me-1 text-primary"></i>${dienTich} m²</span>` : ''}
               ${soTang   ? `<span><i class="fas fa-layer-group me-1 text-secondary"></i>${soTang} tầng</span>` : ''}
-              ${pNgu      ? `<span><i class="fas fa-bed me-1 text-success"></i>${pNgu} PN</span>` : ''}
+              ${pNgu     ? `<span><i class="fas fa-bed me-1 text-success"></i>${pNgu} PN</span>` : ''}
             </div>
           </div>
           <div class="contact-card">
@@ -437,7 +500,7 @@ function renderDetail(product) {
             <div class="d-grid gap-2">
               <a href="tel:0854100036" class="btn btn-call py-2"><i class="fas fa-phone-alt me-2"></i>Gọi ngay: 0854.100.036</a>
               <a href="https://zalo.me/0854100036" target="_blank" class="btn btn-zalo py-2"><i class="fa-solid fa-comment-dots me-2"></i>Nhắn Zalo ngay</a>
-              <button class="btn btn-facebook-share py-2" onclick="event.stopPropagation();shareToFacebook('${product.id}','${encodeURIComponent(tieuDe)}','${encodeURIComponent(gia)}','${encodeURIComponent(diaChiHienThi)}','${encodeURIComponent(dienTich)}','${encodeURIComponent(product.mo_ta || '')}')">
+              <button id="btn-share-fb" class="btn btn-facebook-share py-2" onclick="shareToFacebook()">
                 <i class="fab fa-facebook-f me-2"></i>Chia sẻ lên Facebook
               </button>
             </div>
@@ -449,51 +512,62 @@ function renderDetail(product) {
       </div>
     </div>
   `;
+
   document.getElementById('detail-content').innerHTML = html;
   document.getElementById('detail-content').classList.remove('d-none');
   document.getElementById('loading-state').classList.add('d-none');
-  if (imgs.length > 0) {
-    const sliderWrap = document.getElementById('gallery-slider-wrap');
-    if (sliderWrap) new GallerySlider(sliderWrap, imgs);
-  }
+  const sliderWrap = document.getElementById('gallery-slider-wrap');
+  if (sliderWrap) new GallerySlider(sliderWrap, imgs);
 }
+
+// ------------------------------------------------------------
+// loadDetail: fetch toàn bộ + cache sessionStorage
+// ------------------------------------------------------------
 async function loadDetail() {
-  const id = getQueryParam('id');
-  if (!id) {
-    document.getElementById('loading-state').classList.add('d-none');
-    document.getElementById('error-state').classList.remove('d-none');
-    return;
-  }
+  const id = new URLSearchParams(window.location.search).get('id');
+  if (!id) { showState('error'); return; }
+
+  // Kiểm tra cache
+  const cacheKey = `prod_cache_${id}`;
   try {
-    const res = await fetch(appsScriptApiUrl, { method: 'GET', cache: 'no-cache' });
-    if (!res.ok) throw new Error('Không tải được dữ liệu.');
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) { renderDetail(JSON.parse(cached)); return; }
+  } catch (_) { sessionStorage.removeItem(cacheKey); }
+
+  try {
+    const res = await fetchWithRetry(appsScriptApiUrl, { cache: 'no-cache' });
     const rows = await res.json();
     const product = rows.find(p => String(p.id) === String(id));
-    if (!product) {
-      document.getElementById('loading-state').classList.add('d-none');
-      document.getElementById('error-state').classList.remove('d-none');
-      return;
-    }
-    const storageKey = `viewed_prod_${id}`;
-    if (!sessionStorage.getItem(storageKey)) {
+
+    if (!product) { showState('error'); return; }
+
+    // Ghi nhận lượt xem
+    const viewKey = `viewed_prod_${id}`;
+    if (!sessionStorage.getItem(viewKey)) {
       fetch(appsScriptApiUrl, {
-        method: 'POST',
-        mode: 'no-cors',
+        method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'view', id: id })
-      }).catch(err => console.log("Ghi nhận lượt xem thất bại:", err));
+        body: JSON.stringify({ action: 'view', id })
+      }).catch(() => {});
       product.views = (Number(product.views) || 0) + 1;
-      sessionStorage.setItem(storageKey, 'true');
+      sessionStorage.setItem(viewKey, 'true');
     } else {
       product.views = Number(product.views) || 0;
     }
+
+    sessionStorage.setItem(cacheKey, JSON.stringify(product));
     renderDetail(product);
   } catch (err) {
     console.error(err);
-    document.getElementById('loading-state').classList.add('d-none');
-    document.getElementById('error-state').classList.remove('d-none');
+    showState('error');
   }
 }
+
+function showState(state) {
+  document.getElementById('loading-state').classList.add('d-none');
+  if (state === 'error') document.getElementById('error-state').classList.remove('d-none');
+}
+
 window.addEventListener('DOMContentLoaded', loadDetail);
 </script>
 </body>
