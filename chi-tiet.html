@@ -521,7 +521,7 @@ function renderDetail(product) {
 }
 
 // ------------------------------------------------------------
-// loadDetail: fetch toàn bộ + cache sessionStorage
+// loadDetail: đọc từ data/products.json + cache sessionStorage
 // ------------------------------------------------------------
 async function loadDetail() {
   const id = new URLSearchParams(window.location.search).get('id');
@@ -535,13 +535,14 @@ async function loadDetail() {
   } catch (_) { sessionStorage.removeItem(cacheKey); }
 
   try {
-    const res = await fetchWithRetry(appsScriptApiUrl, { cache: 'no-cache' });
+    // Đọc từ products.json (dữ liệu thật nằm ở đây)
+    const res = await fetchWithRetry('data/products.json', { cache: 'no-cache' });
     const rows = await res.json();
     const product = rows.find(p => String(p.id) === String(id));
 
     if (!product) { showState('error'); return; }
 
-    // Ghi nhận lượt xem
+    // Ghi nhận lượt xem qua Apps Script (fire-and-forget)
     const viewKey = `viewed_prod_${id}`;
     if (!sessionStorage.getItem(viewKey)) {
       fetch(appsScriptApiUrl, {
