@@ -26,12 +26,12 @@ export default function Header() {
           <Sparkles className="w-3.5 h-3.5 animate-pulse text-amber-400" /> THANH TRÀ BĐS - LIVE DATA FEED
         </div>
 
-        <h1 className="text-2xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-amber-200 to-white tracking-widest uppercase italic">
+        <h1 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-amber-200 to-white tracking-widest uppercase italic">
           UY TÍN - TẬN TÂM - CHUYÊN NGHIỆP
         </h1>
 
         <p className="text-slate-300 text-xs md:text-sm max-w-2xl mx-auto font-medium">
-          Chuyên viên tư vấn &amp; môi giới bất động sản nhà phố hàng đầu tại khu vực TP. Thủ Đức (Quận 2, Quận 9, Thủ Đức). Pháp lý chuẩn chỉ, thông tin chính xác 100%.
+          Chuyên viên tư vấn &amp; môi giới bất động sản nhà phố tại khu vực TP. Thủ Đức (Quận 2, Quận 9, Thủ Đức). Pháp lý chuẩn chỉ, thông tin chính xác 100%.
         </p>
 
         {/* Dynamic call to action row */}
