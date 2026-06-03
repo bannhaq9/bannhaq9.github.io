@@ -113,7 +113,7 @@ export default function App() {
         {
           id: `log_init`,
           type: "view",
-          detail: "Chào mừng quý khách đến với Thanh Trà BĐS Nhà Phố Thủ Đức!",
+          detail: "Chào mừng quý khách đến với Thanh Trà BĐS Nhà Phố!",
           timestamp: new Date().toISOString()
         }
       ];
