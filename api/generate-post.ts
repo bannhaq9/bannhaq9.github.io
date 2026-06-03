@@ -29,8 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 1. Cấu trúc bài viết (nằm trong trường facebookPost):
 * Tiêu đề: Phải viết hoa toàn bộ, bắt đầu bằng icon (🔥), tóm tắt điểm nhấn mạnh nhất.
 * Mục 1 - THÔNG SỐ & GIÁ BÁN: Mỗi thông tin trên một dòng riêng, liệt kê: Vị trí, Diện tích, Kết cấu, Hướng, Giá bán.
-* Mục 2 - HIỆN TRẠNG & TIỀM NĂNG BỨT PHÁ: Mỗi điểm mạnh trên một dòng riêng bắt đầu bằng dấu (-).
-* Kết bài: 'Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.'
+* Mục 2 - HIỆN TRẠNG & TIỀM NĂNG: Mỗi điểm mạnh trên một dòng riêng bắt đầu bằng dấu (-).
+*  'Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.'
 
 2. Nguyên tắc trình bày:
 * Giữa Tiêu đề, Mục 1, Mục 2 và Kết bài: cách nhau 1 dòng trống.
