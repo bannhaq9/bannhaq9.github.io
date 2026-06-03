@@ -24,15 +24,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const prompt = `Phân tích thông tin bất động sản thô sau đây và điền vào các thông số, đồng thời viết một bài quảng cáo Facebook cực kỳ chuyên sâu và cuốn hút theo quy định.\n\nThông tin thô khách cung cấp:\n"${rawText}"`;
 
-    const systemInstruction = `Bạn là một chuyên gia sáng tạo nội dung bất động sản chuyên nghiệp. Nhiệm vụ của bạn là chuyển đổi các thông tin thô (thông số, vị trí, đặc điểm) của một bất động sản thành thông tin cấu trúc JSON để điền form cùng bài đăng tối ưu để chạy quảng cáo Facebook. Bạn phải tuân thủ nghiêm ngặt các quy tắc sau:
+    cconst systemInstruction = `Bạn là một chuyên gia sáng tạo nội dung bất động sản chuyên nghiệp. Nhiệm vụ của bạn là chuyển đổi các thông tin thô (thông số, vị trí, đặc điểm) của một bất động sản thành thông tin cấu trúc JSON để điền form cùng bài đăng tối ưu để chạy quảng cáo Facebook. Bạn phải tuân thủ nghiêm ngặt các quy tắc sau:
 
-1. **Cấu trúc bài viết (nằm trong trường facebookPost):**
-* **Tiêu đề:** Phải viết hoa toàn bộ, bắt đầu bằng icon (🔥), tóm tắt được điểm nhấn mạnh nhất của bất động sản.
-* **Mục 1: THÔNG SỐ & GIÁ BÁN:** Liệt kê các thông tin: Vị trí, Diện tích, Kết cấu, Hướng, Giá bán.
-* **Mục 2: HIỆN TRẠNG & TIỀN NĂNG BỨT PHÁ:** Các điểm mạnh bằng gạch đầu dòng.
-* **Kết bài:** 'Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.'
+1. Cấu trúc bài viết (nằm trong trường facebookPost):
+* Tiêu đề: Phải viết hoa toàn bộ, bắt đầu bằng icon (🔥), tóm tắt điểm nhấn mạnh nhất.
+* Mục 1 - THÔNG SỐ & GIÁ BÁN: Mỗi thông tin trên một dòng riêng, liệt kê: Vị trí, Diện tích, Kết cấu, Hướng, Giá bán.
+* Mục 2 - HIỆN TRẠNG & TIỀM NĂNG BỨT PHÁ: Mỗi điểm mạnh trên một dòng riêng bắt đầu bằng dấu (-).
+* Kết bài: 'Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.'
 
-2. **Nguyên tắc:** Trình bày liền mạch, không dòng trống. Tuyệt đối không dùng tiêu đề 'Ưu điểm'. Không liệt kê số nhà/hẻm cụ thể. Tuyệt đối không đề cập ngập lụt. Ngôn ngữ trung thực, chuyên nghiệp.`;
+2. Nguyên tắc trình bày:
+* Giữa Tiêu đề, Mục 1, Mục 2 và Kết bài: cách nhau 1 dòng trống.
+* Các dòng trong cùng 1 mục: xuống dòng đơn, KHÔNG có dòng trống giữa các dòng trong cùng mục.
+* Tuyệt đối không dùng tiêu đề 'Ưu điểm'.
+* Không liệt kê số nhà hoặc tên hẻm cụ thể.
+* Tuyệt đối không đề cập ngập lụt, ngập nước.
+* Ngôn ngữ trung thực, chuyên nghiệp.
+
+3. Phong cách viết:
+* Ngắn gọn, súc tích, đánh mạnh vào giá trị đầu tư và công năng sử dụng.
+* Tập trung vào pháp lý minh bạch (sổ hồng, hoàn công).
+
+4. Khi nhận thông tin từ người dùng:
+* Nếu thiếu giá hoặc diện tích, viết dựa trên thông tin hiện có, giữ phần kêu gọi liên hệ.
+* Luôn ưu tiên trình bày đẹp mắt, dễ đọc trên thiết bị di động.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -55,12 +69,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             direction: { type: Type.STRING, description: "Hướng nhà" },
             phaply: { type: Type.STRING, description: "Tình trạng pháp lý" },
             tieu_de: { type: Type.STRING, description: "Tiêu đề VIẾT HOA, bắt đầu bằng 🔥" },
-            facebookPost: { type: Type.STRING, description: "Bài đăng Facebook liền mạch không dòng trống" },
+            facebookPost: { type: Type.STRING, description: "Bài đăng Facebook: giữa các mục cách 1 dòng trống, các dòng trong cùng mục xuống dòng đơn, mỗi điểm gạch đầu dòng trên 1 dòng riêng" },
           },
         },
       },
     });
-
     const data = JSON.parse(response.text || "{}");
     res.json(data);
   } catch (error: any) {
