@@ -415,7 +415,7 @@ export default function App() {
             <p className="leading-relaxed">
               Kênh kết nối thông tin giao dịch, mua bán, ký gửi nhà phố uy tín hàng đầu tại TP. Thủ Đức. Cam kết thông số thật - giá trị thật.
             </p>
-            <p className="font-semibold text-[10px] text-brand-primary">THANH TRÀ BĐS</p>
+            <p className="font-semibold text-[10px] text-brand-primary">THANHTRABĐS</p>
           </div>
           <div className="space-y-3">
             <h4 className="font-extrabold text-[#f8fafc] text-sm uppercase tracking-wide">Thông tin liên lạc văn phòng</h4>
