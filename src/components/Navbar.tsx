@@ -54,7 +54,7 @@ export default function Navbar({ activeTab, setActiveTab, adminMode, onToggleAdm
             </div>
             <div className="flex flex-col">
               <span className="text-base md:text-lg font-black tracking-tighter text-slate-900 uppercase leading-none">
-                THANHTRA<span className="text-brand-primary">BDS</span>.VN
+                THANHTRA<span className="text-brand-primary">BDS</span>
               </span>
               <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5 leading-none">
                 NHÀ PHỐ THỦ ĐỨC
