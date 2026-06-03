@@ -25,6 +25,7 @@ export default function Chatbot({ properties, onAddLead, onSelectProperty }: Cha
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [leadState, setLeadState] = useState<{ step: "none" | "name" | "phone"; tempName?: string; tempPhone?: string; propertyOfInt?: string }>({
     step: "none"
   });
@@ -66,26 +67,21 @@ export default function Chatbot({ properties, onAddLead, onSelectProperty }: Cha
     setMessages((prev) => [...prev, userMsg]);
     setInputValue("");
 
-    // Simulate thinking then respond
-    setTimeout(() => {
-      generateResponse(text);
-    }, 700);
+    // Call async response generator
+    generateResponse(text);
   };
 
-  const generateResponse = (input: string) => {
+  const generateResponse = async (input: string) => {
     const rawInput = input.toLowerCase().trim();
-    let replyText = "";
-    let suggestions: string[] = [];
-    let matchedPropId: string | undefined = undefined;
 
-    // Lead Capture flow
+    // Lead Capture flow (Fast, local state flow)
     if (leadState.step === "name") {
       setLeadState(prev => ({ ...prev, step: "phone", tempName: input }));
       setMessages((prev) => [
         ...prev,
         {
           sender: "bot",
-          text: `Cảm ơn anh/chị ${input} ạ! Quý khách vui lòng cho Trà xin số điện thoại (Zalo) để gửi sổ đỏ tài sản và tư vấn chuyên sâu hơn nhé.`,
+          text: `Cập nhật thông tin: Trà đã nhận tên anh/chị ${input} ạ! Quý khách vui lòng cho Trà xin số điện thoại (Zalo) để gửi sổ đỏ tài sản và tư vấn chuyên sâu hơn nhé.`,
           timestamp: new Date()
         }
       ]);
@@ -109,7 +105,7 @@ export default function Chatbot({ properties, onAddLead, onSelectProperty }: Cha
         return;
       }
 
-      // We got all lead info! Create lead
+      // Create Customer Lead
       const newLead: CustomerLead = {
         id: `lead_${Date.now()}`,
         name: leadState.tempName || "Khách vãng lai",
@@ -136,70 +132,115 @@ export default function Chatbot({ properties, onAddLead, onSelectProperty }: Cha
       return;
     }
 
-    // Direct Keywords
-    if (rawInput.includes("dưới 5 tỷ") || rawInput.includes("dưới 5 tỉ") || rawInput.includes("5 ty") || rawInput.includes("5 tỉ")) {
-      const cheapProps = properties.filter(p => p.price <= 5);
-      if (cheapProps.length > 0) {
-        replyText = `Dạ, hiện Trà đang có ${cheapProps.length} căn giá cực tốt dưới 5 tỷ đồng tại Thủ Đức. Quý khách bấm vào để xem ngay detail nhé:`;
-        cheapProps.forEach(p => {
-          replyText += `\n🏠 ${p.tieu_de} (${p.price} Tỷ - DT: ${p.area}m²)`;
-        });
-        suggestions = cheapProps.map(p => `Chi tiết: ${p.id}`);
-      } else {
-        replyText = "Hiện giỏ hàng dưới 5 tỷ đang tạm hết, Trà sẽ cập nhật thêm sớm. Anh/Chị có muốn gửi thông tin tìm nhà theo yêu cầu không?";
-        suggestions = ["Yêu cầu tư vấn tìm nhà", "Xem nhà trên 5 tỷ"];
-      }
-    } else if (rawInput.startsWith("chi tiết:") || rawInput.includes("prod_")) {
-      const prodId = rawInput.replace("chi tiết:", "").trim();
-      const matched = properties.find(p => p.id === prodId || p.id.toLowerCase() === prodId);
-      if (matched) {
-        replyText = `Dạ, dưới đây là thông tin chi tiết căn nhà quý khách vừa hỏi:\n📌 ${matched.tieu_de}\n💰 Giá bán: ${matched.price} Tỷ\n📐 Diện tích: ${matched.area}m² | Kết cấu: ${matched.sotang} tầng\n📍 Vị trí: Đường ${matched.duongpho}, P. ${matched.phuongxa}, TP. Thủ Đức.\n\nSổ hồng chính chủ sẵn sàng sang tên. Quý khách muốn đăng ký tư vấn trực tiếp chứ ạ?`;
-        suggestions = ["Tôi muốn đi xem nhà", "Đăng ký tư vấn", "Gửi sổ đỏ qua Zalo"];
-        matchedPropId = matched.id;
-        setLeadState(prev => ({ ...prev, propertyOfInt: matched.tieu_de }));
-      } else {
-        replyText = "Dạ, Trà không tìm thấy mã sản phẩm này. Quý khách vui lòng thử chọn danh sách đề xuất bên dưới:";
-        suggestions = ["Tìm nhà dưới 5 tỷ", "Xem nhà mới nhất"];
-      }
-    } else if (rawInput.includes("long trường") || rawInput.includes("lò lu") || rawInput.includes("trường thạnh")) {
-      const matchProps = properties.filter(p => p.phuongxa.toLowerCase().includes("long trường") || p.phuongxa.toLowerCase().includes("trường thạnh") || p.duongpho.toLowerCase().includes("lò lu"));
-      if (matchProps.length > 0) {
-        replyText = `Khu vực Long Trường & Trường Thạnh đang rất sốt nhờ dự án Vành Đai 3 đi qua. Trà có ${matchProps.length} căn cực đẹp ở đây:\n`;
-        matchProps.forEach(p => {
-          replyText += `\n🏠 Đường ${p.duongpho} - ${p.price} Tỷ - DT: ${p.area}m²`;
-        });
-        suggestions = matchProps.map(p => `Chi tiết: ${p.id}`);
-      } else {
-        replyText = "Khu vực này hiện Trà vừa bán hết, quý khách có muốn Trà cập nhật giỏ hàng ngộp mới về không ạ?";
-        suggestions = ["Có, muốn cập nhật", "Tìm khu vực khác"];
-      }
-    } else if (rawInput.includes("ký gửi") || rawInput.includes("ký gui") || rawInput.includes("bán nhà")) {
-      replyText = "Dạ, Thanh Trà BĐS hỗ trợ ra hàng miễn phí cực nhanh cho quý chủ nhà tại TP. Thủ Đức. Anh/Chị vui lòng để lại Tên và Số điện thoại, Trà sẽ liên hệ tiếp nhận hồ sơ ngay ạ!";
-      suggestions = ["Đăng ký ký gửi bán nhà", "Hủy bỏ"];
-      setLeadState({ step: "name", propertyOfInt: "Ký gửi mua bán nhà đất" });
-    } else if (rawInput.includes("tư vấn") || rawInput.includes("xem nhà") || rawInput.includes("sổ đỏ") || rawInput.includes("quan tâm")) {
-      replyText = "Dạ tuyệt vời ạ! Quý khách vui lòng cho Trà xin Họ Tên đầy đủ để xưng hô được chu đáo nhất nhé.";
-      suggestions = ["Nhập họ tên", "Nhắn qua Hotline 0854.100.036"];
-      setLeadState({ step: "name" });
-    } else if (rawInput.includes("xin chào") || rawInput.includes("hello") || rawInput.includes("hi") || rawInput.includes("chào")) {
-      replyText = "Dạ em chào anh/chị! Trà có thể hỗ trợ gì cho mình về nhà đất Thủ Đức hôm nay ạ?";
-      suggestions = ["Tìm nhà dưới 5 tỷ", "Nhà trên 5 tỷ", "Ký gửi bán nhà"];
-    } else {
-      replyText = "Dạ, nội dung quý khách hỏi nằm ngoài phạm vi tìm kiếm nhanh hỗ trợ tự động. Tuy nhiên, Trà là trợ lý thông minh có thể chuyển lời tới bộ phận sale của Thanh Trà BĐS hỗ trợ anh/chị ngay nhé! \n\nĐể hỗ trợ lập tức, quý khách cho Trà xin Họ Tên đầy đủ được không ạ?";
-      suggestions = ["Ký gửi bán nhà", "Gọi số: 0854.100.036"];
-      setLeadState({ step: "name", propertyOfInt: "Yêu cầu tư vấn đặc biệt: " + input });
-    }
+    // Call server Gemini Chatbot endpoint
+    setIsTyping(true);
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "bot",
-        text: replyText,
-        timestamp: new Date(),
-        suggestions,
-        propertyId: matchedPropId
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: input,
+          propertiesContext: properties
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Không có phản hồi hợp lệ từ chatbot server");
       }
-    ]);
+
+      const resData = await response.json();
+      
+      let suggestions: string[] = ["Tìm nhà dưới 5 tỷ", "Sổ hồng riêng", "Nhắn tin Zalo trực tiếp"];
+      const lowerReply = resData.reply.toLowerCase();
+      if (lowerReply.includes("số điện thoại") || lowerReply.includes("hotline") || lowerReply.includes("đăng ký") || lowerReply.includes("liên hệ")) {
+        suggestions = ["Đăng ký tư vấn", "Gọi hotline: 0854.100.036"];
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: resData.reply,
+          timestamp: new Date(),
+          suggestions
+        }
+      ]);
+
+    } catch (error) {
+      console.warn("Backend chatbot failed, running offline keywords engine fallback:", error);
+      
+      let replyText = "";
+      let suggestions: string[] = [];
+      let matchedPropId: string | undefined = undefined;
+
+      // Direct Keywords Fallback
+      if (rawInput.includes("dưới 5 tỷ") || rawInput.includes("dưới 5 tỉ") || rawInput.includes("5 ty") || rawInput.includes("5 tỉ")) {
+        const cheapProps = properties.filter(p => p.price <= 5);
+        if (cheapProps.length > 0) {
+          replyText = `Dạ, hiện Trà đang có ${cheapProps.length} căn giá cực tốt dưới 5 tỷ đồng tại Thủ Đức. Quý khách bấm vào để xem ngay detail nhé:`;
+          cheapProps.forEach(p => {
+            replyText += `\n🏠 ${p.tieu_de} (${p.price} Tỷ - DT: ${p.area}m²)`;
+          });
+          suggestions = cheapProps.map(p => `Chi tiết: ${p.id}`);
+        } else {
+          replyText = "Hiện giỏ hàng dưới 5 tỷ đang tạm hết, Trà sẽ cập nhật thêm sớm. Anh/Chị có muốn gửi thông tin tìm nhà theo yêu cầu không?";
+          suggestions = ["Yêu cầu tư vấn tìm nhà", "Xem nhà trên 5 tỷ"];
+        }
+      } else if (rawInput.startsWith("chi tiết:") || rawInput.includes("prod_")) {
+        const prodId = rawInput.replace("chi tiết:", "").trim();
+        const matched = properties.find(p => p.id === prodId || p.id.toLowerCase() === prodId);
+        if (matched) {
+          replyText = `Dạ, dưới đây là thông tin chi tiết căn nhà quý khách vừa hỏi:\n📌 ${matched.tieu_de}\n💰 Giá bán: ${matched.price} Tỷ\n📐 Diện tích: ${matched.area}m² | Kết cấu: ${matched.sotang} tầng\n📍 Vị trí: Đường ${matched.duongpho}, P. ${matched.phuongxa}, TP. Thủ Đức.\n\nSổ hồng chính chủ sẵn sàng sang tên. Quý khách muốn đăng ký tư vấn trực tiếp chứ ạ?`;
+          suggestions = ["Tôi muốn đi xem nhà", "Đăng ký tư vấn", "Gửi sổ đỏ qua Zalo"];
+          matchedPropId = matched.id;
+          setLeadState(prev => ({ ...prev, propertyOfInt: matched.tieu_de }));
+        } else {
+          replyText = "Dạ, Trà không tìm thấy mã sản phẩm này. Quý khách vui lòng thử chọn danh sách đề xuất bên dưới:";
+          suggestions = ["Tìm nhà dưới 5 tỷ", "Xem nhà mới nhất"];
+        }
+      } else if (rawInput.includes("long trường") || rawInput.includes("lò lu") || rawInput.includes("trường thạnh")) {
+        const matchProps = properties.filter(p => p.phuongxa.toLowerCase().includes("long trường") || p.phuongxa.toLowerCase().includes("trường thạnh") || p.duongpho.toLowerCase().includes("lò lu"));
+        if (matchProps.length > 0) {
+          replyText = `Khu vực Long Trường & Trường Thạnh đang rất sốt nhờ dự án Vành Đai 3 đi qua. Trà có ${matchProps.length} căn cực đẹp ở đây:\n`;
+          matchProps.forEach(p => {
+            replyText += `\n🏠 Đường ${p.duongpho} - ${p.price} Tỷ - DT: ${p.area}m²`;
+          });
+          suggestions = matchProps.map(p => `Chi tiết: ${p.id}`);
+        } else {
+          replyText = "Khu vực này hiện Trà vừa bán hết, quý khách có muốn Trà cập nhật giỏ hàng ngộp mới về không ạ?";
+          suggestions = ["Có, muốn cập nhật", "Tìm khu vực khác"];
+        }
+      } else if (rawInput.includes("ký gửi") || rawInput.includes("ký gui") || rawInput.includes("bán nhà")) {
+        replyText = "Dạ, Thanh Trà BĐS hỗ trợ ra hàng miễn phí cực nhanh cho quý chủ nhà tại TP. Thủ Đức. Anh/Chị vui lòng để lại Tên và Số điện thoại, Trà sẽ liên hệ tiếp nhận hồ sơ ngay ạ!";
+        suggestions = ["Đăng ký ký gửi bán nhà", "Hủy bỏ"];
+        setLeadState({ step: "name", propertyOfInt: "Ký gửi mua bán nhà đất" });
+      } else if (rawInput.includes("tư vấn") || rawInput.includes("xem nhà") || rawInput.includes("sổ đỏ") || rawInput.includes("quan tâm")) {
+        replyText = "Dạ tuyệt vời ạ! Quý khách vui lòng cho Trà xin Họ Tên đầy đủ để xưng hô được chu đáo nhất nhé.";
+        suggestions = ["Nhập họ tên", "Nhắn qua Hotline 0854.100.036"];
+        setLeadState({ step: "name" });
+      } else if (rawInput.includes("xin chào") || rawInput.includes("hello") || rawInput.includes("hi") || rawInput.includes("chào")) {
+        replyText = "Dạ em chào anh/chị! Trà có thể hỗ trợ gì cho mình về nhà đất Thủ Đức hôm nay ạ?";
+        suggestions = ["Tìm nhà dưới 5 tỷ", "Nhà trên 5 tỷ", "Ký gửi bán nhà"];
+      } else {
+        replyText = "Dạ, nội dung quý khách hỏi nằm ngoài phạm vi tìm kiếm nhanh hỗ trợ tự động. Tuy nhiên, Trà là trợ lý thông minh có thể chuyển lời tới bộ phận sale của Thanh Trà BĐS hỗ trợ anh/chị ngay nhé! \n\nĐể hỗ trợ lập tức, quý khách cho Trà xin Họ Tên đầy đủ được không ạ?";
+        suggestions = ["Ký gửi bán nhà", "Gọi số: 0854.100.036"];
+        setLeadState({ step: "name", propertyOfInt: "Yêu cầu tư vấn đặc biệt: " + input });
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: replyText,
+          timestamp: new Date(),
+          suggestions,
+          propertyId: matchedPropId
+        }
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleSuggestionClick = (suggestText: string) => {
@@ -304,6 +345,15 @@ export default function Chatbot({ properties, onAddLead, onSelectProperty }: Cha
                 </span>
               </div>
             ))}
+            {isTyping && (
+              <div className="flex flex-col items-start animate-pulse">
+                <div className="bg-white text-slate-500 rounded-2xl rounded-tl-none border border-slate-100 p-3 text-[13px] shadow-xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-bounce"></span>
+                  <span className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                </div>
+              </div>
+            )}
             <div ref={chatEndRef} />
           </div>
 
