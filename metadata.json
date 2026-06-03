@@ -1,6 +1,0 @@
-{
-  "name": "Thanh Trà BĐS Nhà Phố",
-  "description": "Nền tảng bất động sản nhà phố uy tín hàng đầu tại TP. Thủ Đức với bộ lọc thông minh, chatbot tư vấn 24/7 và hệ thống báo cáo thời gian thực.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
