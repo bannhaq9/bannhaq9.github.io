@@ -133,7 +133,7 @@ export default function Navbar({ activeTab, setActiveTab, adminMode, onToggleAdm
             <form onSubmit={handleVerifyPass} className="space-y-4">
               <div>
                 <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">
-                  Mật khẩu Admin (mặc định: 131996)
+                  Mật khẩu Admin
                 </label>
                 <input
                   type="password"
