@@ -107,7 +107,8 @@ export default function PostForm({
   };
 
   // 🤖 Clean intelligent analyzer parsing keywords and filling out the form automatically!
-  const handleAIAnalyze = () => {
+  // 🤖 Clean intelligent analyzer calling actual Gemini API server proxy to query LLM model!
+  const handleAIAnalyze = async () => {
     const text = formData.rawText.trim();
     if (!text) {
       setAiNote({
@@ -120,8 +121,55 @@ export default function PostForm({
     setIsAnalyzing(true);
     setAiNote({ text: "", type: "" });
 
-    setTimeout(() => {
-      onLogActivity("copy_link", "Sử dụng GitHub AI phân tích tin thô");
+    try {
+      const response = await fetch("/api/generate-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rawText: text })
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể kết nối với dịch vụ Gemini AI");
+      }
+
+      const resData = await response.json();
+      
+      onLogActivity("copy_link", "Sử dụng Gemini AI phân tích & viết bài tự động");
+
+      setFormData((prev) => ({
+        ...prev,
+        sonha: resData.sonha || "",
+        duongpho: resData.duongpho || "",
+        phuongxa: resData.phuongxa || "",
+        area: resData.area ? String(resData.area) : prev.area,
+        price: resData.price ? String(resData.price) : prev.price,
+        sotang: resData.sotang ? String(resData.sotang) : prev.sotang,
+        bedroom: resData.bedroom ? String(resData.bedroom) : prev.bedroom,
+        nhavesinh: resData.nhavesinh ? String(resData.nhavesinh) : prev.nhavesinh,
+        direction: resData.direction || prev.direction,
+        phaply: resData.phaply || prev.phaply,
+        tieu_de: resData.tieu_de || prev.tieu_de,
+        mo_ta: resData.facebookPost || prev.mo_ta
+      }));
+
+      // Fallback property images
+      if (images.length === 0) {
+        setImages([
+          "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800",
+          "https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800"
+        ]);
+      }
+
+      setIsAnalyzing(false);
+      setAiNote({
+        text: "🎉 Trợ lý Gemini AI đã phân tích tin thô, tạo bài đăng Facebook tối ưu và tự động điền các thông số thành công!",
+        type: "success"
+      });
+
+    } catch (err: any) {
+      console.warn("Gemini API error, falling back to local regex extraction:", err);
+      // Fallback to local regex processing if server or API key fails
+      onLogActivity("copy_link", "Sử dụng Hệ thống phân tích tin thô cục bộ (Fallback)");
 
       // 1. Robust Area (dt) extraction
       let dt = "";
@@ -262,9 +310,9 @@ export default function PostForm({
       const finalPrice = prObj || "5.2";
       const finalArea = dt || "75";
 
-      const finalTitle = `BÁN NHÀ PHỐ ĐẸP ĐƯỜNG ${finalStreet.toUpperCase()}, P. ${finalWard.toUpperCase()} - CỰC NGỘP CHỈ ${finalPrice} TỶ`;
+      const finalTitle = `🔥 BÁN NHÀ PHỐ ĐẸP ĐƯỜNG ${finalStreet.toUpperCase()}, P. ${finalWard.toUpperCase()} - CỰC NGỘP CHỈ ${finalPrice} TỶ`;
       
-      const finalDesc = `📍 PHẦN 1: THÔNG SỐ & GIÁ BÁN\n- Vị trí: Đường ${finalStreet}, Phường ${finalWard}, TP. Thủ Đức, TP.HCM.\n- Diện tích: ${finalArea}m², kết cấu xây dựng gồm ${floors} tầng kiên cố, bố trí ${beds} phòng ngủ thoáng mát, hẻm ô tô đỗ cửa cực an ninh.\n- Giá đặc biệt phát lộc: Đúng ${finalPrice} Tỷ đồng (Hỗ trợ thương lượng trực tiếp chủ nhà).\n\n📍 PHẦN 2: TIỆN ÍCH & VỊ TRÍ CHI TIẾT\n- Khu dân cư yên tĩnh, văn minh lịch sự, quy mô đồng bộ cao cấp.\n- Kết nối cực ngắn ra chợ, siêu thị, trường học liên cấp, vành đai 3, khu Công Nghệ Cao.\n- Địa thế đất cao ráo vững chãi, quy hoạch thoát nước hoàn hảo, cam kết 100% KHÔNG BAO GIỜ NGẬP NƯỚC.\n\n📍 PHẦN 3: PHÁP LÝ & TƯ VẤN\n- Pháp lý chuẩn mực: ${phap_ly}, chính chủ cất két, sẵn sàng sang tên công chứng ngay.\n- Liên hệ Thanh Trà BĐS để xem nhà trực tiếp và nhận file sổ đỏ gốc miễn phí.`;
+      const finalDesc = `🔥 BÁN NHÀ PHỐ ĐẸP ĐƯỜNG ${finalStreet.toUpperCase()}, P. ${finalWard.toUpperCase()} - CỰC NGỘP CHỈ ${finalPrice} TỶ\n\n📌 THÔNG SỐ & GIÁ BÁN:\n- Vị trí: Đường ${finalStreet}, Phường ${finalWard}, TP. Thủ Đức, TP.HCM.\n- Diện tích: ${finalArea}m², kết cấu xây dựng gồm ${floors} tầng kiên cố, bố trí ${beds} phòng ngủ thoáng mát.\n- Hướng: ${dir}\n- Giá bán: ${finalPrice} Tỷ đồng.\n\n📌 HIỆN TRẠNG & TIỀN NĂNG BỨT PHÁ:\n- Khu dân cư yên tĩnh, văn minh lịch sự, quy mô đồng bộ cao cấp.\n- Kết nối cực ngắn ra chợ, siêu thị, trường học liên cấp, vành đai 3, khu Công Nghệ Cao.\n- Địa thế đất cao ráo vững chãi, quy hoạch thoát nước hoàn hảo, cam kết 100% không hề bị vấn đề thời tiết ngập ảnh hưởng.\n- Pháp lý chuẩn mực: ${phap_ly}, chính chủ cất két, sẵn sàng sang tên công chứng ngay.\n\nQuý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.`;
 
       setFormData((prev) => ({
         ...prev,
@@ -291,10 +339,10 @@ export default function PostForm({
 
       setIsAnalyzing(false);
       setAiNote({
-        text: "🎉 GitHub AI đã phân tích tin thô & tự động điền các thông số cùng tiêu đề copywriting chuẩn SEO thành công!",
+        text: "🎉 Hệ thống cục bộ đã phân tích tin thô & tự động điền các thông số thành công (Fallback)!",
         type: "success"
       });
-    }, 1200);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
