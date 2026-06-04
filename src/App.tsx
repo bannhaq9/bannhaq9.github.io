@@ -12,16 +12,13 @@ import PropertyDetail from "./components/PropertyDetail";
 import PostForm from "./components/PostForm";
 import Dashboard from "./components/Dashboard";
 import Chatbot from "./components/Chatbot";
-import { 
-  X, Scale, Sparkles, TrendingUp, Check, 
-  MapPin, Ruler, Bed, Layers, Compass, 
-  ShieldCheck, MessageCircle, Eye, RefreshCw 
-} from "lucide-react";
-
-import { 
-  Property, CustomerLead, SystemStats, ActivityLog, 
-  INITIAL_PROPERTIES 
-} from "./types";
+import { X, Scale, Sparkles, TrendingUp, Check, MapPin, Ruler, Bed, Layers, Compass, ShieldCheck, MessageCircle, Eye, RefreshCw } from "lucide-react";
+import { Property, CustomerLead, SystemStats, ActivityLog, INITIAL_PROPERTIES } from "./types";
+import {
+  fetchProperties, saveProperty, deleteProperty, incrementPropertyViews,
+  fetchLeads, saveLead, updateLeadStatus, deleteLead,
+  fetchStats, incrementStat, fetchLogs, pushLog
+} from "./api";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"home" | "dashboard" | "post">("home");
@@ -29,252 +26,187 @@ export default function App() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [editPropertyId, setEditPropertyId] = useState<string | null>(null);
 
-  // Comparison State
   const [compareList, setCompareList] = useState<Property[]>([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
 
   const handleToggleCompare = (property: Property) => {
     setCompareList((prev) => {
       const exists = prev.some((p) => p.id === property.id);
-      if (exists) {
-        return prev.filter((p) => p.id !== property.id);
-      } else {
-        if (prev.length >= 3) {
-          return prev;
-        }
-        return [...prev, property];
-      }
+      if (exists) return prev.filter((p) => p.id !== property.id);
+      if (prev.length >= 3) return prev;
+      return [...prev, property];
     });
   };
 
-  const handleClearCompare = () => {
-    setCompareList([]);
-  };
+  const handleClearCompare = () => setCompareList([]);
 
-  // Core Persisted States inside localStorage
   const [properties, setProperties] = useState<Property[]>([]);
   const [leads, setLeads] = useState<CustomerLead[]>([]);
   const [stats, setStats] = useState<SystemStats>({
-    views: 1240,
-    fbShares: 84,
-    zaloShares: 65,
-    linkCopies: 120,
-    totalLeads: 0
+    views: 0, fbShares: 0, zaloShares: 0, linkCopies: 0, totalLeads: 0
   });
   const [logs, setLogs] = useState<ActivityLog[]>([]);
 
-  // Filtering states
   const [currentFilters, setCurrentFilters] = useState<FilterState>({
-    phuongxa: "",
-    direction: "",
-    dtTu: "",
-    dtDen: "",
-    tangTu: "",
-    tangDen: "",
-    duongpho: "",
-    giaTu: "",
-    giaDen: "",
-    keyword: ""
+    phuongxa: "", direction: "", dtTu: "", dtDen: "",
+    tangTu: "", tangDen: "", duongpho: "", giaTu: "", giaDen: "", keyword: ""
   });
 
-  // Trong useEffect khởi tạo — thay localStorage bằng:
-import { fetchProperties, fetchLeads, fetchStats, fetchLogs } from "./api";
+  // ── Load dữ liệu từ Upstash Redis khi khởi động ──────────────────────────
+  useEffect(() => {
+    fetchProperties().then((props) => {
+      if (props.length > 0) {
+        setProperties(props);
+      } else {
+        setProperties(INITIAL_PROPERTIES);
+        INITIAL_PROPERTIES.forEach((p) => saveProperty(p));
+      }
+    });
 
-useEffect(() => {
-  fetchProperties().then(setProperties);
-  fetchLeads().then(setLeads);
-  fetchStats().then(setStats);
-  fetchLogs().then(setLogs);
-}, []);
+    fetchLeads().then(setLeads);
 
-// Thay handleSaveProperty:
-import { saveProperty } from "./api";
-const handleSaveProperty = async (prop: Property) => {
-  await saveProperty(prop);
-  fetchProperties().then(setProperties); // reload
-};
+    fetchStats().then((s) => {
+      setStats({ ...s, views: (s.views || 0) + 1 });
+      incrementStat("views");
+    });
 
-// Thay handleDeleteProperty:
-import { deleteProperty } from "./api";
-const handleDeleteProperty = async (id: string) => {
-  await deleteProperty(id);
-  setProperties(prev => prev.filter(p => p.id !== id));
-};
+    fetchLogs().then((fetchedLogs) => {
+      if (fetchedLogs.length > 0) {
+        setLogs(fetchedLogs);
+      } else {
+        const initLog: ActivityLog = {
+          id: "log_init",
+          type: "view",
+          detail: "Chào mừng quý khách đến với Thanh Trà BĐS Nhà Phố Thủ Đức!",
+          timestamp: new Date().toISOString(),
+        };
+        setLogs([initLog]);
+        pushLog(initLog);
+      }
+    });
+  }, []);
 
-  // Activity Log Creator Helper
+  // ── Activity Log ──────────────────────────────────────────────────────────
   const logActivity = (type: ActivityLog["type"], detail: string) => {
     const newLog: ActivityLog = {
       id: `log_${Date.now()}`,
       type,
       detail,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    setLogs((prev) => [newLog, ...prev.slice(0, 49)]); // Keep latest 50 logs
+    pushLog(newLog);
+    setLogs((prev) => [newLog, ...prev.slice(0, 49)]);
 
-    // Dynamically adjust statistics based on logs triggered
     setStats((prev) => {
       const updated = { ...prev };
-      if (type === "view") updated.views += 1;
-      else if (type === "share_fb") updated.fbShares += 1;
-      else if (type === "share_zalo") updated.zaloShares += 1;
-      else if (type === "copy_link") updated.linkCopies += 1;
-      else if (type === "new_lead") updated.totalLeads += 1;
+      const fieldMap: Partial<Record<ActivityLog["type"], keyof SystemStats>> = {
+        view: "views", share_fb: "fbShares",
+        share_zalo: "zaloShares", copy_link: "linkCopies", new_lead: "totalLeads",
+      };
+      const field = fieldMap[type];
+      if (field) {
+        (updated[field] as number) += 1;
+        incrementStat(field);
+      }
       return updated;
     });
   };
 
-  // Lead registrations handler
-  const handleAddLead = (newLead: CustomerLead) => {
+  // ── Leads ─────────────────────────────────────────────────────────────────
+  const handleAddLead = async (newLead: CustomerLead) => {
+    await saveLead(newLead);
     setLeads((prev) => [newLead, ...prev]);
     logActivity("new_lead", `Khách hàng mới: ${newLead.name} (${newLead.phone}) đăng ký từ ${newLead.source}`);
   };
 
-  const handleUpdateLeadStatus = (leadId: string, status: CustomerLead["status"]) => {
-    setLeads((prev) => 
-      prev.map(l => l.id === leadId ? { ...l, status } : l)
-    );
-    const matchedLead = leads.find(l => l.id === leadId);
+  const handleUpdateLeadStatus = async (leadId: string, status: CustomerLead["status"]) => {
+    await updateLeadStatus(leadId, status);
+    setLeads((prev) => prev.map((l) => l.id === leadId ? { ...l, status } : l));
+    const matchedLead = leads.find((l) => l.id === leadId);
     if (matchedLead) {
-      logActivity(
-        "edit_property", 
-        `Cập nhật trạng thái khách hàng ${matchedLead.name} thành "${
-          status === "contacted" ? "Đã liên hệ" : "Giao dịch thành công"
-        }"`
-      );
+      logActivity("edit_property", `Cập nhật trạng thái khách hàng ${matchedLead.name} thành "${status === "contacted" ? "Đã liên hệ" : "Giao dịch thành công"}"`);
     }
   };
 
-  const handleDeleteLead = (leadId: string) => {
-    setLeads((prev) => prev.filter(l => l.id !== leadId));
+  const handleDeleteLead = async (leadId: string) => {
+    await deleteLead(leadId);
+    setLeads((prev) => prev.filter((l) => l.id !== leadId));
     logActivity("delete_property", "Xóa hồ sơ thông tin khách hàng tiềm năng");
   };
 
-  // Save or edit properties list from admin panel
-  const handleSaveProperty = (savedProp: Property) => {
+  // ── Properties ────────────────────────────────────────────────────────────
+  const handleSaveProperty = async (savedProp: Property) => {
+    await saveProperty(savedProp);
     setProperties((prev) => {
-      const existingProp = prev.find(p => p.id === savedProp.id);
+      const existingProp = prev.find((p) => p.id === savedProp.id);
       if (existingProp) {
-        // Compare price change
-        if (existingProp.price !== savedProp.price) {
-          const finalProp = {
-            ...savedProp,
-            oldPrice: existingProp.price,
-            priceChangedAt: new Date().toISOString()
-          };
-          return prev.map(p => p.id === savedProp.id ? finalProp : p);
-        }
-        
-        // If price hasn't changed, persist any historical price stamps
-        const finalProp = {
-          ...savedProp,
-          oldPrice: existingProp.oldPrice,
-          priceChangedAt: existingProp.priceChangedAt
-        };
-        return prev.map(p => p.id === savedProp.id ? finalProp : p);
-      } else {
-        return [savedProp, ...prev];
+        const finalProp = existingProp.price !== savedProp.price
+          ? { ...savedProp, oldPrice: existingProp.price, priceChangedAt: new Date().toISOString() }
+          : { ...savedProp, oldPrice: existingProp.oldPrice, priceChangedAt: existingProp.priceChangedAt };
+        return prev.map((p) => p.id === savedProp.id ? finalProp : p);
       }
+      return [savedProp, ...prev];
     });
     setEditPropertyId(null);
   };
 
-  const handleDeleteProperty = (id: string) => {
-    setProperties((prev) => prev.filter(p => p.id !== id));
+  const handleDeleteProperty = async (id: string) => {
+    await deleteProperty(id);
+    setProperties((prev) => prev.filter((p) => p.id !== id));
     logActivity("delete_property", `Xóa bài đăng rao bán BĐS ID: ${id}`);
   };
 
-  // Safe Property selection detail wrapper
-  const handleSelectProperty = (id: string) => {
+  const handleSelectProperty = async (id: string) => {
     setSelectedPropertyId(id);
-    
-    // Update views counter of selected property state
-    setProperties((prev) => 
-      prev.map(p => {
+    await incrementPropertyViews(id);
+    setProperties((prev) =>
+      prev.map((p) => {
         if (p.id === id) {
-          const updatedViews = p.views + 1;
           logActivity("view", `Xem chi tiết sản phẩm: ${p.tieu_de}`);
-          return { ...p, views: updatedViews };
+          return { ...p, views: p.views + 1 };
         }
         return p;
       })
     );
   };
 
-  // Filter Algorithm Coordination
+  // ── Filter ────────────────────────────────────────────────────────────────
   const filteredProperties = properties.filter((p) => {
-    // 0. Quick filter category check (MỚI ĐĂNG - 3 days, GIẢM GIÁ - 2 days, TĂNG GIÁ - 2 days)
     if (currentFilters.quickFilter && currentFilters.quickFilter !== "all") {
       if (currentFilters.quickFilter === "new") {
         const isNew = p.created_at && (Date.now() - new Date(p.created_at).getTime()) / 86400000 <= 3;
         if (!isNew) return false;
       } else if (currentFilters.quickFilter === "reduced") {
         const hasPriceChange = p.priceChangedAt && p.oldPrice && (Date.now() - new Date(p.priceChangedAt).getTime()) / 86400000 <= 2;
-        const isPriceReduced = hasPriceChange && p.oldPrice ? p.price < p.oldPrice : false;
-        if (!isPriceReduced) return false;
+        if (!(hasPriceChange && p.oldPrice && p.price < p.oldPrice)) return false;
       } else if (currentFilters.quickFilter === "increased") {
         const hasPriceChange = p.priceChangedAt && p.oldPrice && (Date.now() - new Date(p.priceChangedAt).getTime()) / 86400000 <= 2;
-        const isPriceIncreased = hasPriceChange && p.oldPrice ? p.price > p.oldPrice : false;
-        if (!isPriceIncreased) return false;
+        if (!(hasPriceChange && p.oldPrice && p.price > p.oldPrice)) return false;
       }
     }
-
-    // 1. Phường xã matching block
-    if (currentFilters.phuongxa && !p.phuongxa.toLowerCase().includes(currentFilters.phuongxa.toLowerCase())) {
-      return false;
-    }
-
-    // 2. Hướng Direction
-    if (currentFilters.direction && p.direction !== currentFilters.direction) {
-      return false;
-    }
-
-    // 3. Diện tích m2 bounds
+    if (currentFilters.phuongxa && !p.phuongxa.toLowerCase().includes(currentFilters.phuongxa.toLowerCase())) return false;
+    if (currentFilters.direction && p.direction !== currentFilters.direction) return false;
     if (currentFilters.dtTu && p.area < parseFloat(currentFilters.dtTu)) return false;
     if (currentFilters.dtDen && p.area > parseFloat(currentFilters.dtDen)) return false;
-
-    // 4. Số tầng lầu
     if (currentFilters.tangTu && parseInt(p.sotang) < parseInt(currentFilters.tangTu)) return false;
     if (currentFilters.tangDen && parseInt(p.sotang) > parseInt(currentFilters.tangDen)) return false;
-
-    // 5. Tên đường phố
-    if (currentFilters.duongpho && !p.duongpho.toLowerCase().includes(currentFilters.duongpho.toLowerCase())) {
-      return false;
-    }
-
-    // 6. Mức giá Tỷ bounds
+    if (currentFilters.duongpho && !p.duongpho.toLowerCase().includes(currentFilters.duongpho.toLowerCase())) return false;
     if (currentFilters.giaTu && p.price < parseFloat(currentFilters.giaTu)) return false;
     if (currentFilters.giaDen && p.price > parseFloat(currentFilters.giaDen)) return false;
-
-    // 7. General Keyword quick matching
     if (currentFilters.keyword) {
       const kw = currentFilters.keyword.toLowerCase().trim();
-      const matchTitle = p.tieu_de.toLowerCase().includes(kw);
-      const matchDesc = p.mo_ta.toLowerCase().includes(kw);
-      const matchSt = p.duongpho.toLowerCase().includes(kw);
-      const matchWard = p.phuongxa.toLowerCase().includes(kw);
-      
-      if (!matchTitle && !matchDesc && !matchSt && !matchWard) {
-        return false;
-      }
+      if (!p.tieu_de.toLowerCase().includes(kw) && !p.mo_ta.toLowerCase().includes(kw) && !p.duongpho.toLowerCase().includes(kw) && !p.phuongxa.toLowerCase().includes(kw)) return false;
     }
-
     return true;
   });
 
-  const activePropertyDetail = selectedPropertyId 
-    ? properties.find(p => p.id === selectedPropertyId) 
-    : null;
+  const activePropertyDetail = selectedPropertyId ? properties.find((p) => p.id === selectedPropertyId) : null;
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-slate-50 relative id-main-layout pb-12">
-      
-      {/* Dynamic Header navbar navigation component */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={(tab) => {
-          setActiveTab(tab);
-          setEditPropertyId(null);
-        }}
+        setActiveTab={(tab) => { setActiveTab(tab); setEditPropertyId(null); }}
         adminMode={adminMode}
         onToggleAdmin={(enabled) => {
           setAdminMode(enabled);
@@ -282,24 +214,17 @@ const handleDeleteProperty = async (id: string) => {
         }}
       />
 
-      {/* Main tab layouts views container */}
       <div className="flex-1">
         {activeTab === "home" && (
           <div className="space-y-6">
             <Header />
-            <FilterBar 
-              onFilterChange={setCurrentFilters} 
-              resultCount={filteredProperties.length} 
-            />
+            <FilterBar onFilterChange={setCurrentFilters} resultCount={filteredProperties.length} />
             <div className="container mx-auto px-4 py-8 max-w-7xl">
               <PropertyGrid
                 properties={filteredProperties}
                 onSelectProperty={handleSelectProperty}
                 adminMode={adminMode}
-                onEditProperty={(id) => {
-                  setEditPropertyId(id);
-                  setActiveTab("post");
-                }}
+                onEditProperty={(id) => { setEditPropertyId(id); setActiveTab("post"); }}
                 onDeleteProperty={handleDeleteProperty}
                 onLogActivity={logActivity}
                 compareList={compareList}
@@ -319,10 +244,7 @@ const handleDeleteProperty = async (id: string) => {
               onUpdateLeadStatus={handleUpdateLeadStatus}
               onDeleteLead={handleDeleteLead}
               onDeleteProperty={handleDeleteProperty}
-              onEditProperty={(id) => {
-                setEditPropertyId(id);
-                setActiveTab("post");
-              }}
+              onEditProperty={(id) => { setEditPropertyId(id); setActiveTab("post"); }}
               adminMode={adminMode}
             />
           </div>
@@ -334,17 +256,13 @@ const handleDeleteProperty = async (id: string) => {
               onSaveProperty={handleSaveProperty}
               editPropertyId={editPropertyId}
               properties={properties}
-              onCancel={() => {
-                setActiveTab("home");
-                setEditPropertyId(null);
-              }}
+              onCancel={() => { setActiveTab("home"); setEditPropertyId(null); }}
               onLogActivity={logActivity}
             />
           </div>
         )}
       </div>
 
-      {/* Detail slide out modal drawer */}
       {activePropertyDetail && (
         <PropertyDetail
           property={activePropertyDetail}
@@ -357,24 +275,17 @@ const handleDeleteProperty = async (id: string) => {
         />
       )}
 
-      {/* Floating 24/7 Smart Automated Chatbot Widget assistant */}
       <Chatbot
         properties={properties}
         onAddLead={handleAddLead}
-        onSelectProperty={(id) => {
-          handleSelectProperty(id);
-          setActiveTab("home");
-        }}
+        onSelectProperty={(id) => { handleSelectProperty(id); setActiveTab("home"); }}
       />
 
-      {/* High-quality UX Vietnamese presentation Footer section */}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800 mt-20 select-none">
         <div className="container mx-auto px-4 max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-8 text-xs">
           <div className="space-y-3">
             <h4 className="font-extrabold text-[#f8fafc] text-sm uppercase tracking-wide">Thanh Trà BĐS Nhà Phố</h4>
-            <p className="leading-relaxed">
-              Kênh kết nối thông tin giao dịch, mua bán, ký gửi nhà phố uy tín hàng đầu tại TP. Thủ Đức. Cam kết thông số thật - giá trị thật.
-            </p>
+            <p className="leading-relaxed">Kênh kết nối thông tin giao dịch, mua bán, ký gửi nhà phố uy tín hàng đầu tại TP. Thủ Đức. Cam kết thông số thật - giá trị thật.</p>
             <p className="font-semibold text-[10px] text-brand-primary">THANHTRABĐS</p>
           </div>
           <div className="space-y-3">
@@ -387,9 +298,7 @@ const handleDeleteProperty = async (id: string) => {
           </div>
           <div className="space-y-3">
             <h4 className="font-extrabold text-[#f8fafc] text-sm uppercase tracking-wide">Môi giới ký gửi chuyên nghiệp</h4>
-            <p className="leading-relaxed">
-              Bạn có nhu cầu thanh khoản nhanh bất động sản tại TP. Thủ Đức? Hãy liên hệ ngay để đăng tải thông tin quảng bá hoàn toàn miễn phí.
-            </p>
+            <p className="leading-relaxed">Bạn có nhu cầu thanh khoản nhanh bất động sản tại TP. Thủ Đức? Hãy liên hệ ngay để đăng tải thông tin quảng bá hoàn toàn miễn phí.</p>
             <div className="pt-2 flex gap-4">
               <a href="https://zalo.me/0854100036" target="_blank" rel="noopener noreferrer" className="text-white hover:text-brand-primary p-2 bg-white/5 rounded-full transition-colors font-bold">ZALO</a>
               <a href="https://facebook.com/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-brand-primary p-2 bg-white/5 rounded-full transition-colors font-bold">FACEBOOK</a>
@@ -401,7 +310,6 @@ const handleDeleteProperty = async (id: string) => {
         </div>
       </footer>
 
-      {/* Floating Price Comparison Tray */}
       {compareList.length > 0 && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-4xl bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-700/80 rounded-2xl shadow-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 z-50 text-white select-none animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
@@ -409,7 +317,6 @@ const handleDeleteProperty = async (id: string) => {
               <Scale className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
               <span>SO SÁNH GIÁ ({compareList.length}/3)</span>
             </div>
-            
             <div className="flex flex-wrap items-center gap-2 max-w-md md:max-w-xl">
               {compareList.map((item) => {
                 const img = item.images?.[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg';
@@ -417,65 +324,34 @@ const handleDeleteProperty = async (id: string) => {
                   <div key={item.id} className="flex items-center gap-1.5 bg-slate-800/60 border border-slate-755 hover:border-slate-600 rounded-lg pr-2 py-1 pl-1.5 text-[10px] font-bold">
                     <img src={img} alt="Thumb" referrerPolicy="no-referrer" className="w-5 h-5 object-cover rounded-md" />
                     <span className="max-w-[120px] truncate">{item.tieu_de}</span>
-                    <button 
-                      onClick={() => handleToggleCompare(item)}
-                      className="text-slate-400 hover:text-red-400 transition-colors cursor-pointer text-xs font-black p-0.5 ml-1"
-                    >
-                      ×
-                    </button>
+                    <button onClick={() => handleToggleCompare(item)} className="text-slate-400 hover:text-red-400 transition-colors cursor-pointer text-xs font-black p-0.5 ml-1">×</button>
                   </div>
                 );
               })}
             </div>
           </div>
-
           <div className="flex items-center gap-2 w-full md:w-auto justify-end shrink-0 border-t border-slate-800 md:border-0 pt-3 md:pt-0">
-            <button
-              onClick={handleClearCompare}
-              className="px-3 py-2 border border-slate-800 hover:border-slate-600 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
-            >
-              Xóa Hộp
-            </button>
-            <button
-              onClick={() => setIsCompareModalOpen(true)}
-              className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-xl text-[11px] font-black flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-amber-400/10 uppercase tracking-widest text-center"
-            >
-              So sánh chi tiết 📊
-            </button>
+            <button onClick={handleClearCompare} className="px-3 py-2 border border-slate-800 hover:border-slate-600 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer">Xóa Hộp</button>
+            <button onClick={() => setIsCompareModalOpen(true)} className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-xl text-[11px] font-black flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-amber-400/10 uppercase tracking-widest text-center">So sánh chi tiết 📊</button>
           </div>
         </div>
       )}
 
-      {/* Specialty Comparative Deep Analytics Modal overlay */}
       {isCompareModalOpen && compareList.length > 0 && (
         (() => {
-          const minPrice = Math.min(...compareList.map(p => p.price));
-          const maxArea = Math.max(...compareList.map(p => p.area));
-          const minPricePerM2 = Math.min(...compareList.map(p => (p.price * 1000) / p.area));
-
+          const minPrice = Math.min(...compareList.map((p) => p.price));
+          const maxArea = Math.max(...compareList.map((p) => p.area));
+          const minPricePerM2 = Math.min(...compareList.map((p) => (p.price * 1000) / p.area));
           return (
             <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[110] flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
               <div className="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-5xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-                
-                {/* Header title */}
                 <div className="p-5 md:p-6 border-b border-slate-100 bg-gradient-to-r from-slate-900 to-slate-850 text-white flex items-center justify-between select-none">
                   <div>
-                    <h3 className="text-sm md:text-base font-black uppercase tracking-widest flex items-center gap-2 text-amber-400">
-                      📊 BẢNG SO SÁNH & PHÂN TÍCH GIÁ CHUYÊN SÂU
-                    </h3>
-                    <p className="text-[10px] md:text-xs text-slate-300 mt-1">
-                      Công cụ so sánh diện tích, mức giá, đơn giá mỗi m² giúp định giá chính xác và phát hiện tin hời tốt nhất.
-                    </p>
+                    <h3 className="text-sm md:text-base font-black uppercase tracking-widest flex items-center gap-2 text-amber-400">📊 BẢNG SO SÁNH & PHÂN TÍCH GIÁ CHUYÊN SÂU</h3>
+                    <p className="text-[10px] md:text-xs text-slate-300 mt-1">Công cụ so sánh diện tích, mức giá, đơn giá mỗi m² giúp định giá chính xác và phát hiện tin hời tốt nhất.</p>
                   </div>
-                  <button
-                    onClick={() => setIsCompareModalOpen(false)}
-                    className="p-2 text-slate-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <button onClick={() => setIsCompareModalOpen(false)} className="p-2 text-slate-400 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all cursor-pointer"><X className="w-5 h-5" /></button>
                 </div>
-
-                {/* Computational Table comparative columns */}
                 <div className="flex-1 overflow-auto p-4 md:p-6">
                   <div className="min-w-[650px] overflow-x-auto rounded-2xl border border-slate-100 shadow-sm">
                     <table className="w-full text-left border-collapse bg-white">
@@ -485,32 +361,16 @@ const handleDeleteProperty = async (id: string) => {
                           {compareList.map((item, idx) => (
                             <th key={item.id} className="py-4 px-5 text-center relative border-l border-slate-100 w-1/4">
                               <div className="flex flex-col items-center gap-2 select-none">
-                                <span className="absolute -top-1 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[8px] font-black tracking-widest">
-                                  BẤT ĐỘNG SẢN {idx + 1}
-                                </span>
-                                <img
-                                  src={item.images?.[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'}
-                                  alt="Thumb"
-                                  referrerPolicy="no-referrer"
-                                  className="w-20 h-16 object-cover rounded-xl shadow-md border border-slate-100 mt-2.5"
-                                />
-                                <div className="text-xs font-black line-clamp-1 text-slate-900 px-2 leading-tight uppercase font-sans">
-                                  {item.tieu_de}
-                                </div>
-                                <button
-                                  onClick={() => handleToggleCompare(item)}
-                                  className="text-[10px] font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded transition-all cursor-pointer mt-1"
-                                >
-                                  Gỡ bỏ ×
-                                </button>
+                                <span className="absolute -top-1 px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[8px] font-black tracking-widest">BẤT ĐỘNG SẢN {idx + 1}</span>
+                                <img src={item.images?.[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'} alt="Thumb" referrerPolicy="no-referrer" className="w-20 h-16 object-cover rounded-xl shadow-md border border-slate-100 mt-2.5" />
+                                <div className="text-xs font-black line-clamp-1 text-slate-900 px-2 leading-tight uppercase font-sans">{item.tieu_de}</div>
+                                <button onClick={() => handleToggleCompare(item)} className="text-[10px] font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded transition-all cursor-pointer mt-1">Gỡ bỏ ×</button>
                               </div>
                             </th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        
-                        {/* Row: Tổng giá */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">💰 Tổng giá bán</td>
                           {compareList.map((item) => {
@@ -518,17 +378,11 @@ const handleDeleteProperty = async (id: string) => {
                             return (
                               <td key={item.id} className={`py-4 px-5 text-center border-l border-slate-100 ${isCheapest ? 'bg-emerald-50/45' : ''}`}>
                                 <div className="font-extrabold text-slate-900 text-sm italic">{item.price} TỶ</div>
-                                {isCheapest && (
-                                  <span className="inline-flex items-center gap-1 mt-1 bg-emerald-100 border border-emerald-300 text-emerald-800 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm animate-pulse">
-                                    🔥 Giá Tốt Nhất
-                                  </span>
-                                )}
+                                {isCheapest && <span className="inline-flex items-center gap-1 mt-1 bg-emerald-100 border border-emerald-300 text-emerald-800 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm animate-pulse">🔥 Giá Tốt Nhất</span>}
                               </td>
                             );
                           })}
                         </tr>
-
-                        {/* Row: Diện tích */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">📐 Diện tích sử dụng</td>
                           {compareList.map((item) => {
@@ -536,17 +390,11 @@ const handleDeleteProperty = async (id: string) => {
                             return (
                               <td key={item.id} className={`py-4 px-5 text-center border-l border-slate-100 ${isBiggest ? 'bg-blue-50/35' : ''}`}>
                                 <div className="font-bold text-slate-900 text-xs">{item.area} m²</div>
-                                {isBiggest && (
-                                  <span className="inline-flex mt-1 bg-blue-100 text-blue-800 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">
-                                    ✨ Rộng Nhất
-                                  </span>
-                                )}
+                                {isBiggest && <span className="inline-flex mt-1 bg-blue-100 text-blue-800 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">✨ Rộng Nhất</span>}
                               </td>
                             );
                           })}
                         </tr>
-
-                        {/* Row: Đơn giá / m² */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">📈 Đơn giá trung bình / m²</td>
                           {compareList.map((item) => {
@@ -555,126 +403,58 @@ const handleDeleteProperty = async (id: string) => {
                             return (
                               <td key={item.id} className={`py-4 px-5 text-center border-l border-slate-100 font-mono ${isBestVal ? 'bg-amber-50/45' : ''}`}>
                                 <div className="font-extrabold text-amber-600 text-xs italic">{unitPrice.toFixed(1)} triệu/m²</div>
-                                {isBestVal && (
-                                  <span className="inline-flex mt-1 bg-amber-100 border border-amber-200 text-amber-800 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest animate-bounce">
-                                    🏆 Hời Nhất / m²
-                                  </span>
-                                )}
+                                {isBestVal && <span className="inline-flex mt-1 bg-amber-100 border border-amber-200 text-amber-800 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest animate-bounce">🏆 Hời Nhất / m²</span>}
                               </td>
                             );
                           })}
                         </tr>
-
-                        {/* Row: Số tầng */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">🏢 Kết cấu tầng lầu</td>
-                          {compareList.map((item) => (
-                            <td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-semibold">
-                              {item.sotang} Tầng
-                            </td>
-                          ))}
+                          {compareList.map((item) => (<td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-semibold">{item.sotang} Tầng</td>))}
                         </tr>
-
-                        {/* Row: Bedrooms */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">🛌 Số phòng ngủ</td>
-                          {compareList.map((item) => (
-                            <td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-semibold">
-                              {item.bedroom} PN
-                            </td>
-                          ))}
+                          {compareList.map((item) => (<td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-semibold">{item.bedroom} PN</td>))}
                         </tr>
-
-                        {/* Row: Toilet */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">🚿 Nhà vệ sinh (WC)</td>
-                          {compareList.map((item) => (
-                            <td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-semibold">
-                              {item.nhavesinh} WC
-                            </td>
-                          ))}
+                          {compareList.map((item) => (<td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-semibold">{item.nhavesinh} WC</td>))}
                         </tr>
-
-                        {/* Row: Direction */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">🧭 Hướng nhà đất</td>
-                          {compareList.map((item) => (
-                            <td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-black">
-                              {item.direction}
-                            </td>
-                          ))}
+                          {compareList.map((item) => (<td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-slate-800 font-black">{item.direction}</td>))}
                         </tr>
-
-                        {/* Row: Legal */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3 px-5 font-bold text-slate-700 text-xs">🛡️ Tình trạng pháp lý</td>
-                          {compareList.map((item) => (
-                            <td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-emerald-600 font-black">
-                              {item.phaply || "Sổ hồng riêng"}
-                            </td>
-                          ))}
+                          {compareList.map((item) => (<td key={item.id} className="py-3 px-5 text-center border-l border-slate-100 text-xs text-emerald-600 font-black">{item.phaply || "Sổ hồng riêng"}</td>))}
                         </tr>
-
-                        {/* Row: Long-address location */}
                         <tr className="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
                           <td className="py-3.5 px-5 font-bold text-slate-700 text-xs">📍 Vị trí địa lý cụ thể</td>
-                          {compareList.map((item) => (
-                            <td key={item.id} className="py-3.5 px-5 text-center border-l border-slate-100 text-[11px] text-slate-600 leading-relaxed font-semibold">
-                              Đường {item.duongpho}, P. {item.phuongxa}, TP. Thủ Đức
-                            </td>
-                          ))}
+                          {compareList.map((item) => (<td key={item.id} className="py-3.5 px-5 text-center border-l border-slate-100 text-[11px] text-slate-600 leading-relaxed font-semibold">Đường {item.duongpho}, P. {item.phuongxa}, TP. Thủ Đức</td>))}
                         </tr>
-
-                        {/* Row: Interactive Action buttons */}
                         <tr className="hover:bg-slate-50/30 transition-colors">
                           <td className="py-4 px-5 font-bold text-slate-700 text-xs">📞 Liên hệ thương thảo</td>
                           {compareList.map((item) => (
                             <td key={item.id} className="py-4 px-5 text-center border-l border-slate-100">
                               <div className="flex flex-col gap-2 max-w-[170px] mx-auto select-none">
-                                <button
-                                  onClick={() => {
-                                    setIsCompareModalOpen(false);
-                                    handleSelectProperty(item.id);
-                                  }}
-                                  className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1 shadow-md"
-                                >
-                                  <Eye className="w-3 h-3" /> Xem chi tiết
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    logActivity("share_zalo", `Thảo luận nhà so sánh ID: ${item.id}`);
-                                    window.open("https://zalo.me/0854100036", "_blank");
-                                  }}
-                                  className="w-full py-1.5 bg-brand-primary hover:bg-amber-400 text-slate-900 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1"
-                                >
-                                  <MessageCircle className="w-3 h-3" /> Chat Zalo
-                                </button>
+                                <button onClick={() => { setIsCompareModalOpen(false); handleSelectProperty(item.id); }} className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1 shadow-md"><Eye className="w-3 h-3" /> Xem chi tiết</button>
+                                <button onClick={() => { logActivity("share_zalo", `Thảo luận nhà so sánh ID: ${item.id}`); window.open("https://zalo.me/0854100036", "_blank"); }} className="w-full py-1.5 bg-brand-primary hover:bg-amber-400 text-slate-900 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer flex items-center justify-center gap-1"><MessageCircle className="w-3 h-3" /> Chat Zalo</button>
                               </div>
                             </td>
                           ))}
                         </tr>
-
                       </tbody>
                     </table>
                   </div>
                 </div>
-
-                {/* Footer close option */}
                 <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-                  <button
-                    onClick={() => setIsCompareModalOpen(false)}
-                    className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase cursor-pointer"
-                  >
-                    Đóng bảng phân tích
-                  </button>
+                  <button onClick={() => setIsCompareModalOpen(false)} className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase cursor-pointer">Đóng bảng phân tích</button>
                 </div>
-
               </div>
             </div>
           );
         })()
       )}
-
     </div>
   );
 }
