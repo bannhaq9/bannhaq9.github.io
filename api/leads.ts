@@ -2,8 +2,8 @@ import { Redis } from "@upstash/redis";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
 });
 
 const IDX = "tt:leads:index";
@@ -15,7 +15,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  // GET — all leads
   if (req.method === "GET") {
     try {
       const ids = await kv.lrange(IDX, 0, -1) as string[];
@@ -29,7 +28,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // POST — save new lead
   if (req.method === "POST") {
     const lead = req.body;
     if (!lead?.id) return res.status(400).json({ error: "Missing id" });
@@ -44,7 +42,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // PATCH — update status
   if (req.method === "PATCH") {
     const { id } = req.query;
     const { status } = req.body;
@@ -57,7 +54,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // DELETE
   if (req.method === "DELETE") {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: "Missing id" });
