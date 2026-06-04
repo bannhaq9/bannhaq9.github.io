@@ -77,69 +77,29 @@ export default function App() {
     keyword: ""
   });
 
-  // Load storage keys on initial startup mount
-  useEffect(() => {
-    const savedProps = localStorage.getItem("tt_properties");
-    if (savedProps) {
-      setProperties(JSON.parse(savedProps));
-    } else {
-      setProperties(INITIAL_PROPERTIES);
-      localStorage.setItem("tt_properties", JSON.stringify(INITIAL_PROPERTIES));
-    }
+  // Trong useEffect khởi tạo — thay localStorage bằng:
+import { fetchProperties, fetchLeads, fetchStats, fetchLogs } from "./api";
 
-    const savedLeads = localStorage.getItem("tt_leads");
-    if (savedLeads) {
-      setLeads(JSON.parse(savedLeads));
-    } else {
-      setLeads([]);
-    }
+useEffect(() => {
+  fetchProperties().then(setProperties);
+  fetchLeads().then(setLeads);
+  fetchStats().then(setStats);
+  fetchLogs().then(setLogs);
+}, []);
 
-    const savedStats = localStorage.getItem("tt_stats");
-    if (savedStats) {
-      const parsedStats = JSON.parse(savedStats);
-      setStats({
-        ...parsedStats,
-        views: parsedStats.views + 1 // Add 1 page view on initial entry
-      });
-    } else {
-      localStorage.setItem("tt_stats", JSON.stringify(stats));
-    }
+// Thay handleSaveProperty:
+import { saveProperty } from "./api";
+const handleSaveProperty = async (prop: Property) => {
+  await saveProperty(prop);
+  fetchProperties().then(setProperties); // reload
+};
 
-    const savedLogs = localStorage.getItem("tt_logs");
-    if (savedLogs) {
-      setLogs(JSON.parse(savedLogs));
-    } else {
-      const initialLogs: ActivityLog[] = [
-        {
-          id: `log_init`,
-          type: "view",
-          detail: "Chào mừng quý khách đến với Thanh Trà BĐS Nhà Phố Thủ Đức!",
-          timestamp: new Date().toISOString()
-        }
-      ];
-      setLogs(initialLogs);
-      localStorage.setItem("tt_logs", JSON.stringify(initialLogs));
-    }
-  }, []);
-
-  // Save changes automatically into storage
-  useEffect(() => {
-    if (properties.length > 0) {
-      localStorage.setItem("tt_properties", JSON.stringify(properties));
-    }
-  }, [properties]);
-
-  useEffect(() => {
-    localStorage.setItem("tt_leads", JSON.stringify(leads));
-  }, [leads]);
-
-  useEffect(() => {
-    localStorage.setItem("tt_stats", JSON.stringify(stats));
-  }, [stats]);
-
-  useEffect(() => {
-    localStorage.setItem("tt_logs", JSON.stringify(logs));
-  }, [logs]);
+// Thay handleDeleteProperty:
+import { deleteProperty } from "./api";
+const handleDeleteProperty = async (id: string) => {
+  await deleteProperty(id);
+  setProperties(prev => prev.filter(p => p.id !== id));
+};
 
   // Activity Log Creator Helper
   const logActivity = (type: ActivityLog["type"], detail: string) => {
