@@ -54,14 +54,7 @@ export default function App() {
 
   // ── Load dữ liệu từ Upstash Redis khi khởi động ──────────────────────────
   useEffect(() => {
-    fetchProperties().then((props) => {
-      if (props.length > 0) {
-        setProperties(props);
-      } else {
-        setProperties(INITIAL_PROPERTIES);
-        INITIAL_PROPERTIES.forEach((p) => saveProperty(p));
-      }
-    });
+    
 
     fetchLeads().then(setLeads);
 
@@ -155,6 +148,21 @@ export default function App() {
     setProperties((prev) => prev.filter((p) => p.id !== id));
     logActivity("delete_property", `Xóa bài đăng rao bán BĐS ID: ${id}`);
   };
+  // 2. Thêm hàm này sau handleDeleteProperty
+const handleResetAll = async () => {
+  if (!window.confirm("⚠️ Xóa TOÀN BỘ dữ liệu Redis? Không thể hoàn tác!")) return;
+  const res = await fetch("/api/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ secret: "thanhtra2026reset" })
+  });
+  const data = await res.json();
+  if (data.ok) {
+    setProperties([]); setLeads([]); setLogs([]);
+    setStats({ views: 0, fbShares: 0, zaloShares: 0, linkCopies: 0, totalLeads: 0 });
+    alert("✅ Đã xóa toàn bộ! Hãy đăng tin mới với ảnh thật.");
+  }
+};
 
   const handleSelectProperty = async (id: string) => {
     setSelectedPropertyId(id);
@@ -244,6 +252,7 @@ export default function App() {
               onUpdateLeadStatus={handleUpdateLeadStatus}
               onDeleteLead={handleDeleteLead}
               onDeleteProperty={handleDeleteProperty}
+              onResetAll={handleResetAll}
               onEditProperty={(id) => { setEditPropertyId(id); setActiveTab("post"); }}
               adminMode={adminMode}
             />
