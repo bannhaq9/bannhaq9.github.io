@@ -2,8 +2,8 @@ import { Redis } from "@upstash/redis";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
 });
 
 const KEY = "tt:logs";
@@ -14,7 +14,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  // GET
   if (req.method === "GET") {
     try {
       const raw = await kv.lrange(KEY, 0, 49) as string[];
@@ -28,7 +27,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // POST — push new log
   if (req.method === "POST") {
     try {
       const log = req.body;
