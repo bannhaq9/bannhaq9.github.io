@@ -2,8 +2,8 @@ import { Redis } from "@upstash/redis";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
 });
 
 const KEY = "tt:stats";
@@ -16,7 +16,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const defaultStats = { views: 0, fbShares: 0, zaloShares: 0, linkCopies: 0, totalLeads: 0 };
 
-  // GET
   if (req.method === "GET") {
     try {
       const raw = await kv.hgetall(KEY) as Record<string, string> | null;
@@ -30,7 +29,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // POST — increment a field
   if (req.method === "POST") {
     const { field } = req.body;
     if (!field) return res.status(400).json({ error: "Missing field" });
