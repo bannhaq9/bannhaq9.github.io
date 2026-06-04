@@ -54,7 +54,12 @@ export default function App() {
 
   // ── Load dữ liệu từ Upstash Redis khi khởi động ──────────────────────────
   useEffect(() => {
-    
+    fetchProperties().then((props) => {
+      setProperties(props);
+    });
+
+    fetchLeads().then(setLeads);
+    // ... phần còn lại giữ nguyên
 
     fetchLeads().then(setLeads);
 
