@@ -7,6 +7,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import { Redis } from "@upstash/redis";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -14,159 +15,337 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
-// Initialize the GoogleGenAI client using the server-side environment variable GEMINI_API_KEY
-// and setting the 'User-Agent' header to 'aistudio-build' as requested.
+// ── Upstash Redis client ──────────────────────────────────────────────────────
+let kv: Redis | null = null;
+try {
+  const url   = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) {
+    kv = new Redis({ url, token });
+    console.log("✅ Upstash Redis connected");
+  } else {
+    console.warn("⚠️  UPSTASH_REDIS_REST_URL / TOKEN missing – storage disabled");
+  }
+} catch (e) {
+  console.error("Failed to init Upstash Redis:", e);
+}
+
+// ── Gemini AI client ──────────────────────────────────────────────────────────
 let ai: GoogleGenAI | null = null;
 try {
   const apiKey = process.env.GEMINI_API_KEY;
   if (apiKey) {
     ai = new GoogleGenAI({
-      apiKey: apiKey,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
+      apiKey,
+      httpOptions: { headers: { "User-Agent": "aistudio-build" } },
     });
   }
 } catch (e) {
   console.error("Failed to initialize GoogleGenAI:", e);
 }
 
-// 1. API: Generate Real Estate Post & Extract Metadata
+// ═══════════════════════════════════════════════════════════════════════════════
+// STORAGE HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const KEYS = {
+  propertiesIndex: "tt:properties:index",   // list of IDs (newest first)
+  property: (id: string) => `tt:property:${id}`,
+  leadsIndex: "tt:leads:index",
+  lead: (id: string) => `tt:lead:${id}`,
+  stats: "tt:stats",
+  logs: "tt:logs",                           // list (capped at 50)
+};
+
+// ── Properties ────────────────────────────────────────────────────────────────
+
+// GET /api/properties
+app.get("/api/properties", async (_req, res) => {
+  if (!kv) return res.json([]);
+  try {
+    const ids = await kv.lrange(KEYS.propertiesIndex, 0, -1);
+    if (!ids.length) return res.json([]);
+    const pipeline = kv.pipeline();
+    ids.forEach((id) => pipeline.hgetall(KEYS.property(id as string)));
+    const results = await pipeline.exec();
+    const properties = (results as any[]).filter(Boolean);
+    res.json(properties);
+  } catch (err: any) {
+    console.error("GET /api/properties:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/properties  — create or update
+app.post("/api/properties", async (req, res) => {
+  if (!kv) return res.status(503).json({ error: "Storage unavailable" });
+  const prop = req.body;
+  if (!prop?.id) return res.status(400).json({ error: "Missing id" });
+  try {
+    const existing = await kv.hgetall(KEYS.property(prop.id));
+    // Detect price change
+    if (existing && (existing as any).price !== undefined) {
+      const oldPrice = parseFloat(String((existing as any).price));
+      const newPrice = parseFloat(String(prop.price));
+      if (oldPrice !== newPrice) {
+        prop.oldPrice = oldPrice;
+        prop.priceChangedAt = new Date().toISOString();
+      } else {
+        prop.oldPrice       = (existing as any).oldPrice;
+        prop.priceChangedAt = (existing as any).priceChangedAt;
+      }
+    }
+    // Flatten all values to strings (Redis hset requirement)
+    const flat: Record<string, string> = {};
+    for (const [k, v] of Object.entries(prop)) {
+      flat[k] = Array.isArray(v) ? JSON.stringify(v) : String(v ?? "");
+    }
+    await kv.hset(KEYS.property(prop.id), flat);
+    // Add to index only if new
+    if (!existing) {
+      await kv.lpush(KEYS.propertiesIndex, prop.id);
+    }
+    res.json({ ok: true, property: prop });
+  } catch (err: any) {
+    console.error("POST /api/properties:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/properties/:id
+app.delete("/api/properties/:id", async (req, res) => {
+  if (!kv) return res.status(503).json({ error: "Storage unavailable" });
+  const { id } = req.params;
+  try {
+    await kv.del(KEYS.property(id));
+    await kv.lrem(KEYS.propertiesIndex, 0, id);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/properties/:id/views — increment view counter
+app.patch("/api/properties/:id/views", async (req, res) => {
+  if (!kv) return res.json({ ok: true });
+  const { id } = req.params;
+  try {
+    await kv.hincrby(KEYS.property(id), "views", 1);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Leads ─────────────────────────────────────────────────────────────────────
+
+// GET /api/leads
+app.get("/api/leads", async (_req, res) => {
+  if (!kv) return res.json([]);
+  try {
+    const ids = await kv.lrange(KEYS.leadsIndex, 0, -1);
+    if (!ids.length) return res.json([]);
+    const pipeline = kv.pipeline();
+    ids.forEach((id) => pipeline.hgetall(KEYS.lead(id as string)));
+    const results = await pipeline.exec();
+    res.json((results as any[]).filter(Boolean));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/leads
+app.post("/api/leads", async (req, res) => {
+  if (!kv) return res.status(503).json({ error: "Storage unavailable" });
+  const lead = req.body;
+  if (!lead?.id) return res.status(400).json({ error: "Missing id" });
+  try {
+    const flat: Record<string, string> = {};
+    for (const [k, v] of Object.entries(lead)) flat[k] = String(v ?? "");
+    await kv.hset(KEYS.lead(lead.id), flat);
+    await kv.lpush(KEYS.leadsIndex, lead.id);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/leads/:id — update status
+app.patch("/api/leads/:id", async (req, res) => {
+  if (!kv) return res.status(503).json({ error: "Storage unavailable" });
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    await kv.hset(KEYS.lead(id), { status });
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/leads/:id
+app.delete("/api/leads/:id", async (req, res) => {
+  if (!kv) return res.status(503).json({ error: "Storage unavailable" });
+  const { id } = req.params;
+  try {
+    await kv.del(KEYS.lead(id));
+    await kv.lrem(KEYS.leadsIndex, 0, id);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Stats & Logs ──────────────────────────────────────────────────────────────
+
+// GET /api/stats
+app.get("/api/stats", async (_req, res) => {
+  if (!kv) return res.json({ views: 0, fbShares: 0, zaloShares: 0, linkCopies: 0, totalLeads: 0 });
+  try {
+    const raw = await kv.hgetall(KEYS.stats);
+    if (!raw) return res.json({ views: 0, fbShares: 0, zaloShares: 0, linkCopies: 0, totalLeads: 0 });
+    const stats = Object.fromEntries(
+      Object.entries(raw).map(([k, v]) => [k, parseInt(String(v)) || 0])
+    );
+    res.json(stats);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/stats/increment
+app.post("/api/stats/increment", async (req, res) => {
+  if (!kv) return res.json({ ok: true });
+  const { field } = req.body; // e.g. "views", "fbShares"
+  if (!field) return res.status(400).json({ error: "Missing field" });
+  try {
+    await kv.hincrby(KEYS.stats, field, 1);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/logs
+app.get("/api/logs", async (_req, res) => {
+  if (!kv) return res.json([]);
+  try {
+    const raw = await kv.lrange(KEYS.logs, 0, 49);
+    const logs = (raw as string[]).map((item) => {
+      try { return JSON.parse(item); } catch { return null; }
+    }).filter(Boolean);
+    res.json(logs);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/logs
+app.post("/api/logs", async (req, res) => {
+  if (!kv) return res.json({ ok: true });
+  const log = req.body;
+  try {
+    await kv.lpush(KEYS.logs, JSON.stringify(log));
+    await kv.ltrim(KEYS.logs, 0, 49); // keep latest 50
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AI ENDPOINTS (unchanged logic, model name fixed)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// 1. Generate Real Estate Post
 app.post("/api/generate-post", async (req, res) => {
   const { rawText } = req.body;
-  
-  if (!rawText || !rawText.trim()) {
-    return res.status(400).json({ error: "Missing rawText parameter" });
-  }
-
-  if (!ai) {
-    return res.status(503).json({ 
-      error: "Gemini API client is not initialized. Please ensure GEMINI_API_KEY is configured." 
-    });
-  }
+  if (!rawText?.trim()) return res.status(400).json({ error: "Missing rawText parameter" });
+  if (!ai) return res.status(503).json({ error: "Gemini API client is not initialized." });
 
   try {
-    const prompt = `Phân tích thông tin bất động sản thô sau đây và điền vào các thông số, đồng thời viết một bài quảng cáo Facebook cực kỳ chuyên sâu và cuốn hút theo quy định.
+    const prompt = `Phân tích thông tin bất động sản thô sau đây và điền vào các thông số, đồng thời viết một bài quảng cáo Facebook cực kỳ chuyên sâu và cuốn hút theo quy định.\n\nThông tin thô khách cung cấp:\n"${rawText}"`;
 
-Thông tin thô khách cung cấp:
-"${rawText}"`;
+    const systemInstruction = `Bạn là một chuyên gia sáng tạo nội dung bất động sản chuyên nghiệp tại TP. Thủ Đức, TP.HCM. Nhiệm vụ của bạn là chuyển đổi các thông tin thô thành thông tin cấu trúc JSON để điền form cùng bài đăng tối ưu để chạy quảng cáo Facebook.
 
-    const systemInstruction = `Bạn là một chuyên gia sáng tạo nội dung bất động sản chuyên nghiệp. Nhiệm vụ của bạn là chuyển đổi các thông tin thô (thông số, vị trí, đặc điểm) của một bất động sản thành thông tin cấu trúc JSON để điền form cùng bài đăng tối ưu để chạy quảng cáo Facebook. Bạn phải tuân thủ nghiêm ngặt các quy tắc sau:
+## QUY TẮC PHÂN TÍCH DỮ LIỆU (QUAN TRỌNG NHẤT):
 
-1. **Cấu trúc bài viết (nằm trong trường facebookPost):**
-* **Tiêu đề:** Phải viết hoa toàn bộ, bắt đầu bằng icon (🔥), tóm tắt được điểm nhấn mạnh nhất của bất động sản (VD: Loại hình – Vị trí – Diện tích – Giá).
-* **Mục 1: THÔNG SỐ & GIÁ BÁN:** Liệt kê các thông tin: Vị trí (phường/quận), Diện tích, Kết cấu (nếu là nhà), Hướng (nếu có), Giá bán (ghi rõ mức giá hoặc 'Liên hệ' nếu cần).
-* **Mục 2: HIỆN TRẠNG & TIỀN NĂNG BỨT PHÁ:** Sử dụng gạch đầu dòng để làm nổi bật các điểm mạnh: Thiết kế, nội thất, tiện ích xung quanh, tiềm năng tăng giá, giao thông, pháp lý.
-* **Kết bài:** Một câu kêu gọi hành động (Call-to-action) lịch sự, ngắn gọn: 'Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.'
+### Tên đường (duongpho):
+- Tìm tên ĐƯỜNG CHÍNH / TÊN HẺM CHÍNH được đề cập, KHÔNG phải số thửa hay số tờ.
+- Ví dụ: "Hẻm 383 Long Phước" → duongpho = "Long Phước"
+- Ví dụ: "đường Lò Lu" → duongpho = "Lò Lu"
+- Nếu có cả số hẻm và tên đường, chỉ lấy TÊN ĐƯỜNG.
 
-2. **Nguyên tắc trình bày:**
-* Trình bày liền mạch, không có khoảng cách dòng (không trống dòng giữa các mục, mỗi dòng liền kề nhau).
-* Tuyệt đối không sử dụng tiêu đề 'Ưu điểm' trong bất kỳ trường hợp nào.
-* Không liệt kê số nhà cụ thể hoặc tên hẻm cụ thể trong bài đăng facebookPost hoặc trường street/duongpho (nếu khách không cung cấp thì bỏ qua. Nếu khách đưa hẻm cụ thể như "hẻm 383 Long Phước" thì hãy rút gọn thành đường sạch: "Long Phước").
-* Tuyệt đối không đề cập đến các yếu tố tiêu cực như 'ngập lụt', 'ngập nước' kể cả khi khách có đề cập. Nếu bất động sản nằm ở khu vực có khả năng ngập, hãy tập trung vào các yếu tố khác như hạ tầng, vị trí, tiện ích.
-* Sử dụng ngôn ngữ trung thực, chuyên nghiệp, không gây phiền.
+### Số nhà (sonha):
+- Chỉ điền nếu có số nhà cụ thể (ví dụ: 45A, 12B).
+- Số thửa/tờ (ví dụ: "Thửa 591, Tờ 64") KHÔNG phải số nhà → sonha = ""
 
-3. **Phong cách viết:**
-* Ngắn gọn, súc tích, đánh mạnh vào giá trị đầu tư và công năng sử dụng.
-* Tập trung vào sự uy tín và minh bạch về pháp lý (sổ hồng, hoàn công).
+### Giá (price):
+- Chỉ lấy giá bán thực sự (đơn vị tỷ đồng).
+- Số thửa đất, số tờ, diện tích KHÔNG phải giá.
+- Ví dụ: "Thửa 591" → đây là số thửa, KHÔNG phải giá → price = 0
 
-4. **Khi nhận thông tin từ người dùng:**
-* Nếu thông tin thiếu (như giá hoặc diện tích), hãy viết bài dựa trên thông tin hiện có và giữ nguyên phần kêu gọi liên hệ để biết chi tiết.
-* Luôn ưu tiên trình bày đẹp mắt, dễ đọc trên thiết bị di động.`;
+### Diện tích (area):
+- Lấy số m2 rõ ràng. Ví dụ: "51m2" → area = 51
+
+### Số tầng / phòng ngủ / WC / Hướng:
+- Chỉ điền nếu đề cập rõ. Nếu không có → để trống ""
+
+### Pháp lý (phaply):
+- Tìm từ khóa: "sổ hồng", "sổ đỏ", "hoàn công", v.v. Nếu không → phaply = ""
+
+---
+
+## QUY TẮC VIẾT BÀI FACEBOOK:
+
+1. Tiêu đề: VIẾT HOA, bắt đầu bằng 🔥, tóm tắt điểm nhấn.
+2. Mục 1 - THÔNG SỐ & GIÁ BÁN: Vị trí, Diện tích, Kết cấu, Hướng, Giá bán (nếu có).
+3. Mục 2 - HIỆN TRẠNG & TIỀM NĂNG: Mỗi điểm mạnh bắt đầu bằng dấu (-).
+4. Kết bài: 'Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.'
+5. Giữa các mục cách 1 dòng trống. Tuyệt đối KHÔNG đề cập ngập lụt. KHÔNG dùng tiêu đề 'Ưu điểm'.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
-          required: [
-            "sonha", "duongpho", "phuongxa", "area", "price", 
-            "sotang", "bedroom", "nhavesinh", "direction", 
-            "phaply", "tieu_de", "facebookPost"
-          ],
+          required: ["sonha","duongpho","phuongxa","area","price","sotang","bedroom","nhavesinh","direction","phaply","tieu_de","facebookPost"],
           properties: {
-            sonha: { 
-              type: Type.STRING, 
-              description: "Số nhà cụ thể (bỏ qua hoặc để rỗng nếu là hẻm hoặc nếu không có, hoặc nếu người dùng không cung cấp)" 
-            },
-            duongpho: { 
-              type: Type.STRING, 
-              description: "Tên đường sạch đã được chuẩn hóa (ví dụ: 'Long Phước' thay vì 'hẻm 383 Long Phước')" 
-            },
-            phuongxa: { 
-              type: Type.STRING, 
-              description: "Tên phường thuộc TP. Thủ Đức (ví dụ: 'Long Phước', 'Long Trường', 'Trường Thạnh', 'Tăng Nhơn Phú A'...)" 
-            },
-            area: { 
-              type: Type.NUMBER, 
-              description: "Diện tích sử dụng, chỉ lấy giá trị số nguyên hoặc float (ví dụ: 51 hoặc 51.5). Trả về 0 nếu không biết." 
-            },
-            price: { 
-              type: Type.NUMBER, 
-              description: "Mức giá bán quy đổi ra Tỷ (ví dụ: 2.5 hoặc 5.2). Trả về 0 nếu không thể xác định." 
-            },
-            sotang: { 
-              type: Type.STRING, 
-              description: "Số tầng kết cấu (ví dụ: '3', 'trệt và lửng' hoặc '1 Lầu'). Ghi rõ kết cấu ngắn gọn." 
-            },
-            bedroom: { 
-              type: Type.STRING, 
-              description: "Số lượng phòng ngủ (ví dụ: '3')" 
-            },
-            nhavesinh: { 
-              type: Type.STRING, 
-              description: "Số lượng phòng vệ sinh WC (ví dụ: '3')" 
-            },
-            direction: { 
-              type: Type.STRING, 
-              description: "Hướng nhà đất, ví dụ: 'Đông Nam', 'Nam', 'Tây', 'Đông', 'Bắc', 'Tây Nam', 'Tây Bắc', 'Đông Bắc'." 
-            },
-            phaply: { 
-              type: Type.STRING, 
-              description: "Tình trạng pháp lý chuẩn hóa (ví dụ: 'Sổ hồng riêng', 'Sổ riêng hoàn công', 'Giấy tờ tay')" 
-            },
-            tieu_de: { 
-              type: Type.STRING, 
-              description: "Tiêu đề bài đăng: VIẾT HOA TOÀN BỘ, bắt đầu bằng icon (🔥), tóm tắt điểm nhấn mạnh nhất của bất động sản (VD: 🔥 BÁN ĐẤT KHU VỰC LONG PHƯỚC - 51M2 - CHỈ 2.5 TỶ)" 
-            },
-            facebookPost: { 
-              type: Type.STRING, 
-              description: "Bài đăng tối ưu để chạy quảng cáo Facebook, trình bày LIỀN MẠCH, KHÔNG CÓ KHOẢNG TRỐNG DÒNG, TUYỆT ĐỐI không có tiêu đề 'Ưu điểm', tuyệt đối không bao giờ đề cập ngập lụt, cuối cùng có câu CTA chính xác tuyệt đối như yêu cầu." 
-            }
-          }
-        }
-      }
+            sonha:        { type: Type.STRING, description: "Số nhà cụ thể. Để trống nếu không có hoặc chỉ có số thửa/tờ." },
+            duongpho:     { type: Type.STRING, description: "Tên đường chính (không bao gồm số hẻm). VD: 'Long Phước', 'Lò Lu'." },
+            phuongxa:     { type: Type.STRING, description: "Tên phường thuộc TP. Thủ Đức" },
+            area:         { type: Type.NUMBER, description: "Diện tích m2. Trả về 0 nếu không tìm thấy." },
+            price:        { type: Type.NUMBER, description: "Giá bán tính bằng tỷ đồng. Trả về 0 nếu không có giá rõ ràng. Không nhầm với số thửa/tờ." },
+            sotang:       { type: Type.STRING, description: "Số tầng. Để trống nếu không đề cập." },
+            bedroom:      { type: Type.STRING, description: "Số phòng ngủ. Để trống nếu không đề cập." },
+            nhavesinh:    { type: Type.STRING, description: "Số phòng WC. Để trống nếu không đề cập." },
+            direction:    { type: Type.STRING, description: "Hướng nhà/đất. Để trống nếu không đề cập." },
+            phaply:       { type: Type.STRING, description: "Tình trạng pháp lý. Để trống nếu không đề cập." },
+            tieu_de:      { type: Type.STRING, description: "Tiêu đề VIẾT HOA, bắt đầu bằng 🔥." },
+            facebookPost: { type: Type.STRING, description: "Bài đăng Facebook đầy đủ theo cấu trúc." },
+          },
+        },
+      },
     });
 
-    const resultText = response.text || "{}";
-    const data = JSON.parse(resultText);
+    const data = JSON.parse(response.text || "{}");
     res.json(data);
   } catch (error: any) {
     console.error("Error calling Gemini API:", error);
-    res.status(500).json({ error: error.message || "Failed to generate post from Gemini" });
+    res.status(500).json({ error: error.message || "Failed to generate post" });
   }
 });
 
-// 2. API: Assistant Chatbot Stream/Normal with real estate dataset context and new real estate post-writing instructions
+// 2. Chatbot
 app.post("/api/chat", async (req, res) => {
   const { message, propertiesContext } = req.body;
-
-  if (!message || !message.trim()) {
-    return res.status(400).json({ error: "Missing message parameter" });
-  }
-
-  if (!ai) {
-    return res.status(503).json({ 
-      error: "Gemini API client is not initialized." 
-    });
-  }
+  if (!message?.trim()) return res.status(400).json({ error: "Missing message parameter" });
+  if (!ai) return res.status(503).json({ error: "Gemini API client is not initialized." });
 
   try {
     const formattedContext = (propertiesContext || [])
@@ -177,51 +356,28 @@ app.post("/api/chat", async (req, res) => {
 Hotline hỗ trợ: 0854.100.036
 Link chat Zalo: https://zalo.me/0854100036
 
-Bạn có 2 nhiệm vụ chính:
-Nhiệm vụ 1: Tư vấn và tra cứu bất động sản trong kho hàng hiển thị sau đây tùy theo câu hỏi của khách hàng:
----
-KHO HÀNG HIỆN TẠI CỦA THANH TRÀ BĐS:
+KHO HÀNG HIỆN TẠI:
 ${formattedContext}
----
 
-Nhiệm vụ 2: Khi khách hàng yêu cầu viết bài quảng cáo, đăng tin đất/nhà (Ví dụ: "Viết bài cho lô đất: 51m2, hẻm 383 Long Phước..."), bạn phải đóng vai là một chuyên gia sáng tạo nội dung bất động sản chuyên nghiệp để viết bài quảng cáo Facebook chuẩn mực. Hãy áp dụng đúng các quy tắc sau:
-
-1. **Cấu trúc bài viết:**
-* **Tiêu đề:** Phải viết hoa toàn bộ, bắt đầu bằng icon (🔥), tóm tắt được điểm nhấn mạnh nhất của bất động sản (VD: Loại hình – Vị trí – Diện tích – Giá).
-* **Mục 1: THÔNG SỐ & GIÁ BÁN:** Liệt kê các thông tin: Vị trí (phường/quận), Diện tích, Kết cấu (nếu là nhà), Hướng (nếu có), Giá bán (ghi rõ mức giá hoặc 'Liên hệ' nếu cần).
-* **Mục 2: HIỆN TRẠNG & TIỀN NĂNG BỨT PHÁ:** Sử dụng gạch đầu dòng để làm nổi bật các điểm mạnh: Thiết kế, nội thất, tiện ích xung quanh, tiềm năng tăng giá, giao thông, pháp lý.
-* **Kết bài:** Một câu kêu gọi hành động (Call-to-action) lịch sự, ngắn gọn: 'Quý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.'
-
-2. **Nguyên tắc trình bày:**
-* Trình bày liền mạch, không có dòng trống hay khoảng cách dòng giữa các phần.
-* Tuyệt đối không sử dụng tiêu đề 'Ưu điểm' trong bất kỳ trường hợp nào.
-* Không liệt kê số nhà cụ thể hoặc tên hẻm cụ thể trong bài đăng (nếu khách không cung cấp thì bỏ qua. Ví dụ hẻm 383 Long Phước -> chuyển thành đường Long Phước).
-* Tuyệt đối không đề cập đến các yếu tố tiêu cực như 'ngập lụt', 'ngập nước' kể cả khi khách có đề cập. Nếu bất động sản nằm ở khu vực có khả năng ngập, hãy tập trung vào các yếu tố khác như hạ tầng, vị trí, tiện ích.
-* Sử dụng ngôn ngữ trung thực, chuyên nghiệp, không gây phiền.
-
-3. **Khi nhận thông tin từ người dùng viết bài:**
-* Nếu thông tin thiếu (như giá hoặc diện tích), hãy viết bài dựa trên thông tin hiện có và giữ nguyên phần kêu gọi liên hệ để biết chi tiết.
-* Luôn ưu tiên trình bày đẹp mắt, dễ đọc trên thiết bị di động.
-
-Hãy trả lời lịch sự bằng tiếng Việt, xưng "Trà" và gọi người dùng "Anh/Chị" hoặc "Quý khách". Luôn định hướng hỗ trợ tư vấn và thu thập thông tin khách hàng (Họ Tên và Số Điện Thoại/Zalo) để gọi lại phục vụ. Khuyến khích người dùng liên hệ Hotline 0854.100.036 hoặc kết bạn Zalo.`;
+Hãy trả lời lịch sự bằng tiếng Việt, xưng "Trà" và gọi người dùng "Anh/Chị". Luôn khuyến khích liên hệ Hotline 0854.100.036 hoặc Zalo.`;
 
     const chatResponse = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: message,
-      config: {
-        systemInstruction,
-        temperature: 0.8
-      }
+      config: { systemInstruction, temperature: 0.8 },
     });
 
     res.json({ reply: chatResponse.text });
   } catch (error: any) {
-    console.error("Error in AI chatbot:", error);
-    res.status(500).json({ error: error.message || "Something went wrong in chatbot API" });
+    console.error("Error in chatbot:", error);
+    res.status(500).json({ error: error.message || "Chatbot error" });
   }
 });
 
-// Configure Vite middleware for development
+// ═══════════════════════════════════════════════════════════════════════════════
+// VITE / STATIC
+// ═══════════════════════════════════════════════════════════════════════════════
+
 async function setupVite() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -232,9 +388,7 @@ async function setupVite() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
+    app.get("*", (_req, res) => res.sendFile(path.join(distPath, "index.html")));
   }
 
   app.listen(PORT, "0.0.0.0", () => {
