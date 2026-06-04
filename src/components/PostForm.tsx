@@ -77,7 +77,7 @@ export default function PostForm({
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Image upload simulator -> convert file to Base64 dataURL
+  // Image upload — convert file to Base64 dataURL
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -106,8 +106,6 @@ export default function PostForm({
     setImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // 🤖 Clean intelligent analyzer parsing keywords and filling out the form automatically!
-  // 🤖 Clean intelligent analyzer calling actual Gemini API server proxy to query LLM model!
   const handleAIAnalyze = async () => {
     const text = formData.rawText.trim();
     if (!text) {
@@ -152,43 +150,28 @@ export default function PostForm({
         mo_ta: resData.facebookPost || prev.mo_ta
       }));
 
-      // Fallback property images
-      if (images.length === 0) {
-        setImages([
-          "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800",
-          "https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800"
-        ]);
-      }
-
       setIsAnalyzing(false);
       setAiNote({
-        text: "🎉 Trợ lý Gemini AI đã phân tích tin thô, tạo bài đăng Facebook tối ưu và tự động điền các thông số thành công!",
+        text: "🎉 Trợ lý Gemini AI đã phân tích tin thô, tạo bài đăng Facebook tối ưu và tự động điền các thông số thành công! Vui lòng upload ảnh thực tế của bất động sản.",
         type: "success"
       });
 
     } catch (err: any) {
       console.warn("Gemini API error, falling back to local regex extraction:", err);
-      // Fallback to local regex processing if server or API key fails
       onLogActivity("copy_link", "Sử dụng Hệ thống phân tích tin thô cục bộ (Fallback)");
 
       // 1. Robust Area (dt) extraction
       let dt = "";
       const areaKeywords = ["diện tích", "dt", "đo", "d.tích", "dientich", "d diện tích", "diện tich"];
-      let areaFound = false;
       const areaM2Match = text.match(/(\d+[,.]?\d*)\s*(m2|m²|mét vuông|met vuong)/i);
       if (areaM2Match) {
-         dt = areaM2Match[1].replace(",", ".");
-         areaFound = true;
+        dt = areaM2Match[1].replace(",", ".");
       } else {
-         for (const kw of areaKeywords) {
-           const regex = new RegExp(`${kw}\\s*[:\\-]?\\s*(\\d+[,.]?\\d*)`, "i");
-           const m = text.match(regex);
-           if (m) {
-             dt = m[1].replace(",", ".");
-             areaFound = true;
-             break;
-           }
-         }
+        for (const kw of areaKeywords) {
+          const regex = new RegExp(`${kw}\\s*[:\\-]?\\s*(\\d+[,.]?\\d*)`, "i");
+          const m = text.match(regex);
+          if (m) { dt = m[1].replace(",", "."); break; }
+        }
       }
 
       // 2. Pricing Match
@@ -196,7 +179,7 @@ export default function PostForm({
       const priceMatch = text.match(/(\d+[,.]?\d*)\s*(tỷ|tỉ|ty|t|billion)/i);
       if (priceMatch) prObj = priceMatch[1].replace(",", ".");
 
-      // 3. Smart street name extraction matching famous streets in Thủ Đức
+      // 3. Street name extraction
       let street = "";
       const famousStreets = [
         "Nguyễn Duy Trinh", "Võ Văn Ngân", "Lò Lu", "Liên Phường", "Đỗ Xuân Hợp", "Hoàng Hữu Nam",
@@ -205,10 +188,7 @@ export default function PostForm({
         "Võ Chí Công", "Song Hành", "Lê Văn Thịnh", "Đồng Văn Cống"
       ];
       for (const st of famousStreets) {
-        if (text.toLowerCase().includes(st.toLowerCase())) {
-          street = st;
-          break;
-        }
+        if (text.toLowerCase().includes(st.toLowerCase())) { street = st; break; }
       }
       if (!street) {
         const streetRegexes = [
@@ -218,30 +198,24 @@ export default function PostForm({
         for (const rx of streetRegexes) {
           const match = text.match(rx);
           if (match && match[1] && match[1].trim().length > 2) {
-            street = match[1].trim();
-            street = street.split(" ")
-              .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-              .join(" ");
+            street = match[1].trim().split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
             break;
           }
         }
       }
 
-      // 4. Smart ward name extraction matching famous wards in Thủ Đức
+      // 4. Ward name extraction
       let ward = "";
       const famousWards = [
         "Long Trường", "Trường Thạnh", "Phú Hữu", "Tăng Nhơn Phú A", "Tăng Nhơn Phú B",
-        "Hiệp Bình Chánh", "Hiệp Bình Phước", "Linh Đông", "Linh Tây", "Linh Chiểu", 
-        "Linh Trung", "Linh Xuân", "Tam Phú", "Tam Bình", "Bình Chiểu", "Trường Thọ", 
-        "Bình Thọ", "Tân Phú", "Long Bình", "Long Thạnh Mỹ", "Long Phước", "Bình Khánh", 
-        "An Phú", "Thảo Điền", "An Khánh", "An Lợi Đông", "Thủ Thiêm", "Thạnh Mỹ Lợi", 
+        "Hiệp Bình Chánh", "Hiệp Bình Phước", "Linh Đông", "Linh Tây", "Linh Chiểu",
+        "Linh Trung", "Linh Xuân", "Tam Phú", "Tam Bình", "Bình Chiểu", "Trường Thọ",
+        "Bình Thọ", "Tân Phú", "Long Bình", "Long Thạnh Mỹ", "Long Phước", "Bình Khánh",
+        "An Phú", "Thảo Điền", "An Khánh", "An Lợi Đông", "Thủ Thiêm", "Thạnh Mỹ Lợi",
         "Cát Lái", "Phước Long A", "Phước Long B", "Phước Bình"
       ];
       for (const w of famousWards) {
-        if (text.toLowerCase().includes(w.toLowerCase())) {
-          ward = w;
-          break;
-        }
+        if (text.toLowerCase().includes(w.toLowerCase())) { ward = w; break; }
       }
       if (!ward) {
         const wardRegexes = [
@@ -253,13 +227,8 @@ export default function PostForm({
           const match = text.match(rx);
           if (match && match[2]) {
             ward = match[2].trim();
-            if (/^\d+$/.test(ward)) {
-              ward = "Phường " + ward;
-            } else {
-              ward = ward.split(" ")
-                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(" ");
-            }
+            if (/^\d+$/.test(ward)) ward = "Phường " + ward;
+            else ward = ward.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
             break;
           }
         }
@@ -304,14 +273,12 @@ export default function PostForm({
         phap_ly = "Giấy tờ tay";
       }
 
-      // Formulate a beautiful, high-converting real estate title and copy!
       const finalStreet = street || "Lò Lu";
       const finalWard = ward || "Trường Thạnh";
       const finalPrice = prObj || "5.2";
       const finalArea = dt || "75";
 
       const finalTitle = `🔥 BÁN NHÀ PHỐ ĐẸP ĐƯỜNG ${finalStreet.toUpperCase()}, P. ${finalWard.toUpperCase()} - CỰC NGỘP CHỈ ${finalPrice} TỶ`;
-      
       const finalDesc = `🔥 BÁN NHÀ PHỐ ĐẸP ĐƯỜNG ${finalStreet.toUpperCase()}, P. ${finalWard.toUpperCase()} - CỰC NGỘP CHỈ ${finalPrice} TỶ\n\n📌 THÔNG SỐ & GIÁ BÁN:\n- Vị trí: Đường ${finalStreet}, Phường ${finalWard}, TP. Thủ Đức, TP.HCM.\n- Diện tích: ${finalArea}m², kết cấu xây dựng gồm ${floors} tầng kiên cố, bố trí ${beds} phòng ngủ thoáng mát.\n- Hướng: ${dir}\n- Giá bán: ${finalPrice} Tỷ đồng.\n\n📌 HIỆN TRẠNG & TIỀN NĂNG BỨT PHÁ:\n- Khu dân cư yên tĩnh, văn minh lịch sự, quy mô đồng bộ cao cấp.\n- Kết nối cực ngắn ra chợ, siêu thị, trường học liên cấp, vành đai 3, khu Công Nghệ Cao.\n- Địa thế đất cao ráo vững chãi, quy hoạch thoát nước hoàn hảo, cam kết 100% không hề bị vấn đề thời tiết ngập ảnh hưởng.\n- Pháp lý chuẩn mực: ${phap_ly}, chính chủ cất két, sẵn sàng sang tên công chứng ngay.\n\nQuý khách hàng quan tâm đến tài sản này vui lòng liên hệ để nhận thêm chi tiết và sắp xếp lịch xem nhà/đất.`;
 
       setFormData((prev) => ({
@@ -329,17 +296,9 @@ export default function PostForm({
         mo_ta: finalDesc
       }));
 
-      // Fallback property images
-      if (images.length === 0) {
-        setImages([
-          "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800",
-          "https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800"
-        ]);
-      }
-
       setIsAnalyzing(false);
       setAiNote({
-        text: "🎉 Hệ thống cục bộ đã phân tích tin thô & tự động điền các thông số thành công (Fallback)!",
+        text: "🎉 Hệ thống cục bộ đã phân tích tin thô & tự động điền các thông số thành công (Fallback)! Vui lòng upload ảnh thực tế của bất động sản.",
         type: "success"
       });
     }
@@ -350,6 +309,11 @@ export default function PostForm({
 
     if (!formData.duongpho || !formData.phuongxa || !formData.tieu_de || !formData.mo_ta) {
       alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
+      return;
+    }
+
+    if (images.length === 0) {
+      alert("⚠️ Vui lòng upload ít nhất 1 ảnh thực tế cho bất động sản này!");
       return;
     }
 
@@ -371,8 +335,8 @@ export default function PostForm({
       phaply: formData.phaply || "Sổ hồng riêng",
       tieu_de: formData.tieu_de,
       mo_ta: formData.mo_ta,
-      images: images.length > 0 ? images : ["https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg"],
-      views: editPropertyId ? (properties.find(p => p.id === editPropertyId)?.views || 100) : 0,
+      images: images,
+      views: editPropertyId ? (properties.find(p => p.id === editPropertyId)?.views || 0) : 0,
       created_at: editPropertyId ? (properties.find(p => p.id === editPropertyId)?.created_at || new Date().toISOString()) : new Date().toISOString()
     };
 
@@ -403,14 +367,13 @@ export default function PostForm({
       <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden p-5 md:p-8 space-y-8">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
-            📋 {editPropertyId ? "✏️ Chỉnh Sửa Tin Bất Động Sản" : "🚀 Đăng Bài Rao Bản Nhà Phố Mới"}
+            📋 {editPropertyId ? "✏️ Chỉnh Sửa Tin Bất Động Sản" : "🚀 Đăng Bài Rao Bán Nhà Phố Mới"}
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             Điền đầy đủ thông tin hoặc sử dụng công cụ AI phân tích thô để tự động hoàn thành copywriting chỉ trong 1 giây.
           </p>
         </div>
 
-        {/* Form fields */}
         <form onSubmit={handleSubmit} className="space-y-6">
           
           {/* Position location details */}
@@ -590,8 +553,8 @@ export default function PostForm({
             </button>
             {aiNote.text && (
               <div className={`p-3 rounded-lg text-xs leading-relaxed flex items-start gap-2 ${
-                aiNote.type === "success" 
-                  ? "bg-emerald-50 text-brand-green border border-brand-green/10" 
+                aiNote.type === "success"
+                  ? "bg-emerald-50 text-brand-green border border-brand-green/10"
                   : "bg-red-50 text-brand-primary border border-brand-primary/10"
               }`}>
                 {aiNote.type === "success" ? <CheckCircle2 className="w-4 h-4 mt-0.5" /> : <AlertCircle className="w-4 h-4 mt-0.5" />}
@@ -633,10 +596,11 @@ export default function PostForm({
             </div>
           </div>
 
-          {/* Image attachments previews */}
+          {/* Image attachments — bắt buộc upload ảnh thật */}
           <div className="space-y-4 pt-2">
             <h4 className="text-xs font-bold text-slate-950 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-50 pb-1">
-              <ImageIcon className="w-4 h-4 text-brand-primary" /> 4. Đính kèm hình ảnh thực tế (Tối đa 10 ảnh)
+              <ImageIcon className="w-4 h-4 text-brand-primary" /> 4. Đính kèm hình ảnh thực tế *
+              <span className="ml-auto text-[10px] font-bold text-brand-primary normal-case">Bắt buộc ít nhất 1 ảnh</span>
             </h4>
 
             <div className="space-y-3">
@@ -652,7 +616,9 @@ export default function PostForm({
                     className="hidden"
                   />
                 </label>
-                <span className="text-[10px] font-bold text-slate-400">Đã chọn: {images.length} / 10 ảnh</span>
+                <span className={`text-[10px] font-bold ${images.length === 0 ? "text-brand-primary" : "text-slate-400"}`}>
+                  {images.length === 0 ? "⚠️ Chưa có ảnh — bắt buộc upload!" : `Đã chọn: ${images.length} / 10 ảnh`}
+                </span>
               </div>
 
               {copiedImageAlert && (
@@ -663,7 +629,7 @@ export default function PostForm({
                 <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3.5 p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
                   {images.map((img, idx) => (
                     <div key={idx} className="relative aspect-square rounded-xl bg-slate-900 border border-slate-200 overflow-hidden group">
-                      <img src={img} alt="Đại lý ảnh nhỏ" className="w-full h-full object-cover" />
+                      <img src={img} alt="Ảnh bất động sản" className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(idx)}
